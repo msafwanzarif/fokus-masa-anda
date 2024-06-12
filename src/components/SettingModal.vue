@@ -1,6 +1,6 @@
 <template>
   <div :id="id" class="modal fade" aria-hidden="true">
-      <div class="modal-dialog modal-fullscreen-md-down modal-lg p-3 px-md-5 modal-dialog-centered">
+      <div class="modal-dialog modal-fullscreen-md-down modal-lg p-3 px-md-5 modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content h-100">
           <div class="modal-header">
             <h5 class="modal-title">{{ title }}</h5>
