@@ -1,6 +1,6 @@
 <template>
-  <!-- <div class="position-absolute" style="z-index: 9999;"><button @click="mode = mode % 3 + 1" class="btn btn-primary">{{
-    timer.simpleStack }} {{stack}}</button></div> -->
+  <div class="position-absolute" style="z-index: 9999;"><button @click="mode = mode % 3 + 1" class="btn btn-primary">{{
+    timer.focus_extra_mode }} {{ timer.rest_extra_mode }}</button></div>
   <div class="container-fluid w-100 h-100" :class="pageState.bg">
     <div class="d-flex flex-column justify-content-between h-100">
       <div class="">
@@ -110,9 +110,11 @@
             </button>
           </div>
           <div class="d-flex align-items-center justify-content-center mt-5">
-            <button @click="mode < 2? showClock = !showClock : null" class="btn d-flex align-items-center justify-content-center"
+            <button @click="mode < 2 ? showClock = !showClock : null"
+              class="btn d-flex align-items-center justify-content-center"
               :class="pageState.timeClass, pageState.countDownClass">
-              <span class="me-2" v-if="showClock || mode > 1">{{ hours }}{{ hours? " : " : "" }}{{ minutes }} : {{ seconds }}</span>
+              <span class="me-2" v-if="showClock || mode > 1">{{ hours }}{{ hours ? " : " : "" }}{{ minutes }} : {{
+    seconds }}</span>
               <svg v-if="mode < 2" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"
                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="icon icon-tabler icons-tabler-outline icon-tabler-clock">
@@ -121,7 +123,7 @@
                 <path d="M12 7v5l3 3" />
               </svg>
             </button>
-            <button v-if="mode == 1"
+            <button @click="stopTimer" v-if="mode == 1"
               class="h-100 btn btn-outline-warning text-white d-flex align-items-center justify-content-center">
               <!-- <span class="d-none d-md-block fs-1"> Pause </span> -->
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
@@ -135,7 +137,12 @@
             <button v-if="mode == 0" @click="startTimer"
               class="h-100 btn btn-outline-warning text-white d-flex align-items-center justify-content-center">
               <!-- <span class="d-none d-md-block fs-1"> Pause </span> -->
-              <svg  xmlns="http://www.w3.org/2000/svg"  width="32"  height="32"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-player-play"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 4v16l13 -8z" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-player-play">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M7 4v16l13 -8z" />
+              </svg>
             </button>
           </div>
         </div>
@@ -165,8 +172,8 @@
           </div>
           <div class="modal-footer d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
-              <button @click="stopTimer" type="button" class="btn btn-outline-danger me-1"><svg xmlns="http://www.w3.org/2000/svg"
-                  width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
+              <button @click="stopTimer" type="button" class="btn btn-outline-danger me-1"><svg
+                  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
                   class="icon icon-tabler icons-tabler-filled icon-tabler-player-stop">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                   <path d="M17 4h-10a3 3 0 0 0 -3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3 -3v-10a3 3 0 0 0 -3 -3z" />
@@ -223,8 +230,8 @@
           </div>
           <div class="modal-footer d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
-              <button @click="stopTimer" type="button" class="btn btn-outline-danger me-1"><svg xmlns="http://www.w3.org/2000/svg"
-                  width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
+              <button @click="stopTimer" type="button" class="btn btn-outline-danger me-1"><svg
+                  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
                   class="icon icon-tabler icons-tabler-filled icon-tabler-player-stop">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                   <path d="M17 4h-10a3 3 0 0 0 -3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3 -3v-10a3 3 0 0 0 -3 -3z" />
@@ -302,19 +309,22 @@
           <button class="btn btn-outline-light fs-5 w-100 d-flex align-items-center justify-content-center" disabled>
             <span class="ms-2">Tempoh Fokus (Minit)</span>
           </button>
-          <input v-model="timer.focus" type="number" class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="5">
+          <input v-model="timer.focus" type="number"
+            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="5">
         </div>
         <div class="d-flex mb-2">
           <button class="btn btn-outline-light fs-5 w-100 d-flex align-items-center justify-content-center" disabled>
             <span class="ms-2">Rehat Pendek (Minit)</span>
           </button>
-          <input v-model="timer.break[1]" type="number" class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="5">
+          <input v-model="timer.break[1]" type="number"
+            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="5">
         </div>
         <div class="d-flex mb-2">
           <button class="btn btn-outline-light fs-5 w-100 d-flex align-items-center justify-content-center" disabled>
             <span class="ms-2">Rehat Panjang (Minit)</span>
           </button>
-          <input v-model="timer.break[2]" type="number" class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="5">
+          <input v-model="timer.break[2]" type="number"
+            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="5">
         </div>
         <button data-bs-target="#timer-rehat-settings" data-bs-toggle="modal" data-bs-dismiss="modal"
           class="btn btn-outline-light w-100 fs-3 mb-2 d-flex align-items-center justify-content-center">
@@ -350,9 +360,11 @@
         <label class="form-label fs-5">Jenis Susunan Rehat</label>
         <div class="w-100 mb-2 ">
           <div class="btn-group w-100" role="group" aria-label="Basic radio toggle button group">
-            <input v-model="timer.simpleStack" type="radio" class="btn-check" name="jenismudah" id="jenismudah" :value="true">
+            <input v-model="timer.simpleStack" type="radio" class="btn-check" name="jenismudah" id="jenismudah"
+              :value="true">
             <label class="btn btn-outline-light fs-4" for="jenismudah">Mudah</label>
-            <input v-model="timer.simpleStack" type="radio" class="btn-check" name="jenismudah" id="jeniscustom" :value="false">
+            <input v-model="timer.simpleStack" type="radio" class="btn-check" name="jenismudah" id="jeniscustom"
+              :value="false">
             <label class="btn btn-outline-light fs-4" for="jeniscustom">Custom</label>
           </div>
         </div>
@@ -360,23 +372,27 @@
           <button class="btn btn-outline-light fs-3 w-100 d-flex align-items-center justify-content-center" disabled>
             <span class="ms-2">Bilangan Rehat</span>
           </button>
-          <input v-model="timer.breakNumber" type="number" class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
+          <input v-model="timer.breakNumber" type="number"
+            class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
         </div>
         <hr>
         <label class="form-label fs-4">Susunan Rehat</label>
         <div class="w-100">
           <div class="list-group">
-            <div v-for="item,index in timer.stack" class="list-group-item">
+            <div v-for="item, index in timer.stack" class="list-group-item">
               <div class="d-flex align-items-center justify-content-between">
-                <span :class="{'fw-bold':item == 2}">{{ index + 1 }}) Rehat {{ item == 1? "Pendek" : "Panjang" }}</span>
+                <span :class="{ 'fw-bold': item == 2 }">{{ index + 1 }}) Rehat {{ item == 1 ? "Pendek" : "Panjang" }}</span>
                 <div class="d-flex align-items-center">
-                  <button v-if="!timer.simpleStack" @click="changeStack(index)" class="btn btn-outline-light me-2"> Tukar </button>
-                  <button v-if="!timer.simpleStack" @click="removeStack(index)" class="btn btn-outline-light"> Buang </button>
+                  <button v-if="!timer.simpleStack" @click="changeStack(index)" class="btn btn-outline-light me-2">
+                    Tukar </button>
+                  <button v-if="!timer.simpleStack" @click="removeStack(index)" class="btn btn-outline-light"> Buang
+                  </button>
                 </div>
               </div>
             </div>
           </div>
-          <button v-if="!timer.simpleStack" @click="pushStack()" class="btn btn-outline-light w-100 mt-3"> Tambah</button>
+          <button v-if="!timer.simpleStack" @click="pushStack()" class="btn btn-outline-light w-100 mt-3">
+            Tambah</button>
         </div>
       </div>
       <button data-bs-target="#timer-settings" data-bs-toggle="modal" data-bs-dismiss="modal"
@@ -387,83 +403,88 @@
       <div class="d-flex flex-column justify-content-start w-100">
         <div class="d-flex mb-2">
           <button class="btn btn-outline-light fs-4 w-100 d-flex align-items-center justify-content-center" disabled>
-            <span class="ms-2">OT Padding (Saat)</span>
+            <span class="ms-2">OT Padding (saat)</span>
           </button>
-          <input type="number" class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
+          <input v-model="timer.extra_pad" type="number"
+            class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
         </div>
         <hr>
         <label class="form-label fs-4 mt-2"> Jika Fokus Overtime :</label>
         <div class="w-100 mb-2">
           <div class="form-check">
-            <input class="form-check-input" type="radio" name="optionsRadios" id="optionsRadios1" value="option1"
-              checked="">
+            <input v-model="timer.focus_extra_mode" class="form-check-input" type="radio" name="focusExtraMode"
+              id="optionsRadios1" :value="1">
             <label class="form-check-label" for="optionsRadios1">
               Kurangkan Fokus seterusnya
             </label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="radio" name="optionsRadios" id="optionsRadios2" value="option2"
-              checked="">
+            <input v-model="timer.focus_extra_mode" class="form-check-input" type="radio" name="focusExtraMode"
+              id="optionsRadios2" :value="2">
             <label class="form-check-label" for="optionsRadios2">
               Tambah masa rehat
             </label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="radio" name="optionsRadios" id="optionsRadios3" value="option3"
-              checked="">
+            <input v-model="timer.focus_extra_mode" class="form-check-input" type="radio" name="focusExtraMode"
+              id="optionsRadios3" :value="0">
             <label class="form-check-label" for="optionsRadios3">
               Biarkan
             </label>
           </div>
         </div>
-        <div class="d-flex mb-2">
+        <div v-if="timer.focus_extra_mode == 2" class="d-flex mb-2">
           <button class="btn btn-outline-light fs-4 w-100 d-flex align-items-center justify-content-center" disabled>
             <span class="ms-2">Nisbah Tukaran</span>
           </button>
-          <input type="number" class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
+          <input v-model="timer.focus_extra_add_rate" type="number"
+            class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
         </div>
-        <div class="d-flex mb-2">
+        <div v-if="timer.focus_extra_mode == 1" class="d-flex mb-2">
           <button class="btn btn-outline-light fs-4 w-100 d-flex align-items-center justify-content-center" disabled>
-            <span class="ms-2">Minimum Fokus</span>
+            <span class="ms-2">Minimum Fokus (minit)</span>
           </button>
-          <input type="number" class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
+          <input v-model="timer.focus_extra_deduct_min" type="number"
+            class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
         </div>
         <hr>
         <label class="form-label fs-4 mt-2"> Jika Rehat Overtime :</label>
         <div class="w-100 mb-2">
           <div class="form-check">
-            <input class="form-check-input" type="radio" name="optionsRadios" id="optionsRadios1" value="option1"
-              checked="">
+            <input v-model="timer.rest_extra_mode" class="form-check-input" type="radio" name="restExtraMode"
+              id="optionsRadios1" :value="1">
             <label class="form-check-label" for="optionsRadios1">
               Kurangkan Rehat seterusnya
             </label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="radio" name="optionsRadios" id="optionsRadios2" value="option2"
-              checked="">
+            <input v-model="timer.rest_extra_mode" class="form-check-input" type="radio" name="restExtraMode"
+              id="optionsRadios2" :value="2">
             <label class="form-check-label" for="optionsRadios2">
               Tambah masa Fokus
             </label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="radio" name="optionsRadios" id="optionsRadios3" value="option3"
-              checked="">
+            <input v-model="timer.rest_extra_mode" class="form-check-input" type="radio" name="restExtraMode"
+              id="optionsRadios3" :value="0">
             <label class="form-check-label" for="optionsRadios3">
               Biarkan
             </label>
           </div>
         </div>
-        <div class="d-flex mb-2">
+        <div v-if="timer.rest_extra_mode == 2" class="d-flex mb-2">
           <button class="btn btn-outline-light fs-4 w-100 d-flex align-items-center justify-content-center" disabled>
             <span class="ms-2">Nisbah Tukaran</span>
           </button>
-          <input type="number" class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
+          <input v-model="timer.rest_extra_add_rate" type="number"
+            class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
         </div>
-        <div class="d-flex mb-2">
+        <div v-if="timer.rest_extra_mode == 1" class="d-flex mb-2">
           <button class="btn btn-outline-light fs-4 w-100 d-flex align-items-center justify-content-center" disabled>
-            <span class="ms-2">Minimum Rehat</span>
+            <span class="ms-2">Minimum Rehat (minit)</span>
           </button>
-          <input type="number" class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
+          <input v-model="timer.rest_extra_deduct_min" type="number"
+            class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
         </div>
       </div>
       <button data-bs-target="#timer-settings" data-bs-toggle="modal" data-bs-dismiss="modal"
@@ -503,27 +524,26 @@ export default {
       // 4 Paused
       // 5 Stopped
       mode: 0,
-      showClock:true,
-      // nextRehat: 2,
-      // state:1,
+      showClock: true,
+      nextReduce: [0, 0],
       stack: [1, 2],
       due: 0,
-      current : 0,
+      current: 0,
       paused_on: 0,
       last_online: 0,
       timer: {
-        focus: 1,
-        break: [0,1,2],
+        focus: 2,
+        break: [0, 1, 2],
         simpleStack: true,
         breakNumber: 3,
         stack: [1, 1, 2],
-        extra_pad: 0,
-        focus_extra_mode: 0,
-        focus_extra_deduct_min: 0,
-        focus_extra_add_rate: 0,
-        rest_extra_mode: 0,
-        rest_extra_deduct_min: 0,
-        rest_extra_add_rate: 0,
+        extra_pad: 5,
+        focus_extra_mode: 1,
+        focus_extra_deduct_min: 1,
+        focus_extra_add_rate: 0.5,
+        rest_extra_mode: 1,
+        rest_extra_deduct_min: 1,
+        rest_extra_add_rate: 5,
       },
       rehatDetail: [
         null,
@@ -568,51 +588,51 @@ export default {
     }
   },
   computed: {
-    breakNumber(){
+    breakNumber() {
       return this.timer.breakNumber
     },
-    simpleStack(){
+    simpleStack() {
       return this.timer.simpleStack
     },
     nextRehat() {
-      if(this.stack[0]) return this.stack[0]
+      if (this.stack[0]) return this.stack[0]
       return 1
     },
-    secondsToDue(){
+    secondsToDue() {
       return this.due - this.current
     },
-    secondsAfterDue(){
+    secondsAfterDue() {
       return this.current - this.due
     },
-    hours(){
-      if(!this.due){
-        if(this.timer.focus < 60) return ""
-        return Math.floor(this.timer.focus / 60).toString().padStart(2,"0")
+    hours() {
+      if (!this.due) {
+        if (this.timer.focus < 60) return ""
+        return Math.floor(this.timer.focus / 60).toString().padStart(2, "0")
       }
       var time = this.secondsToDue
-      if(this.passedDue) time = this.secondsAfterDue
-      if(time < 3600) return "" 
-      return Math.floor(time / 3600).toString().padStart(2,"0")
+      if (this.passedDue) time = this.secondsAfterDue
+      if (time < 3600) return ""
+      return Math.floor(time / 3600).toString().padStart(2, "0")
     },
-    minutes(){
-      if(!this.due) return (this.timer.focus % 60).toString().padStart(2,"0")
+    minutes() {
+      if (!this.due) return (this.timer.focus % 60).toString().padStart(2, "0")
       var time = this.secondsToDue
-      if(this.passedDue) time = this.secondsAfterDue
-      if(time < 60) return "00" 
-      return (Math.floor(time / 60) % 60).toString().padStart(2,"0")
+      if (this.passedDue) time = this.secondsAfterDue
+      if (time < 60) return "00"
+      return (Math.floor(time / 60) % 60).toString().padStart(2, "0")
     },
-    seconds(){
-      if(!this.due) return "00"
+    seconds() {
+      if (!this.due) return "00"
       var time = this.secondsToDue
-      if(this.passedDue) time = this.secondsAfterDue
-      if(time < 0) return "00" 
-      return (time % 60).toString().padStart(2,"0")
+      if (this.passedDue) time = this.secondsAfterDue
+      if (time < 0) return "00"
+      return (time % 60).toString().padStart(2, "0")
     },
-    passedDue(){
+    passedDue() {
       return this.due <= this.current
     },
-    currentTime(){
-      if(this.current) return moment(this.current * 1000).format("hh:mm A")
+    currentTime() {
+      if (this.current) return moment(this.current * 1000).format("hh:mm A")
       return "00 : 00 AM"
     }
   },
@@ -620,19 +640,19 @@ export default {
     mode(newVal, oldVal) {
       this.pageState = this.states[newVal]
     },
-    passedDue(newVal,oldVal){
-      if(newVal) this.promptChange(this.mode)
+    passedDue(newVal, oldVal) {
+      if (newVal) this.promptChange(this.mode)
     },
-    breakNumber(newVal,oldVal){
-      if(newVal > 1 && this.timer.simpleStack) {
+    breakNumber(newVal, oldVal) {
+      if (newVal > 1 && this.timer.simpleStack) {
         let newStack = Array(newVal - 1).fill(1)
         newStack.push(2)
         return this.timer.stack = newStack
       }
       return this.timer.breakNumber = oldVal
     },
-    simpleStack(newVal,oldVal){
-      if(newVal) {
+    simpleStack(newVal, oldVal) {
+      if (newVal) {
         let newStack = Array(this.timer.breakNumber - 1).fill(1)
         newStack.push(2)
         return this.timer.stack = newStack
@@ -640,41 +660,91 @@ export default {
     },
   },
   methods: {
-    changeStack(index){
-      if(!this.simpleStack) return this.timer.stack[index] = this.timer.stack[index] % 2 + 1 
+    saveToLocal() {
+      let data = {
+        mode: this.mode ,
+        showClock: this.showClock,
+        nextReduce: this.nextReduce ,
+        stack: this.stack ,
+        due: this.due ,
+        current: this.current ,
+        paused_on: this.paused_on ,
+        timer: this.timer ,
+      }
+      localStorage.setItem("fokus-data", JSON.stringify(data))
     },
-    removeStack(index){
-      if(!this.simpleStack) return this.timer.stack.splice(index,1)
+    getFromLocal() {
+      let data = localStorage.getItem("fokus-data")
+      if (data) {
+        let { 
+          mode,
+          showClock,
+          nextReduce,
+          stack,
+          due,
+          current,
+          paused_on,
+          timer } = JSON.parse(data)
+        this.mode = mode
+        this.showClock = showClock
+        this.nextReduce = nextReduce
+        this.stack = stack
+        this.due = due
+        this.current = current
+        this.paused_on = paused_on
+        this.timer = timer
+      }
     },
-    pushStack(){
-      if(!this.simpleStack) return this.timer.stack.push(1)
+    changeStack(index) {
+      if (!this.simpleStack) return this.timer.stack[index] = this.timer.stack[index] % 2 + 1
     },
-    stopTimer(){
+    removeStack(index) {
+      if (!this.simpleStack) return this.timer.stack.splice(index, 1)
+    },
+    pushStack() {
+      if (!this.simpleStack) return this.timer.stack.push(1)
+    },
+    stopTimer() {
       let mode = this.mode
       this.mode = 0
       this.due = 0
-      if(mode == 1) {
-        return this.promptBreak()
+      if (mode == 1) {
+        this.promptBreak()
+        return this.saveToLocal()
       }
-      return this.promptFocus()
+      this.promptFocus()
+      return this.saveToLocal()
     },
-    fokusSemula(){
+    fokusSemula() {
       this.promptBreak()
       this.startTimer()
     },
-    startBreak(){
+    startBreak() {
       let currentRehat = this.stack.shift()
       this.promptBreak()
-      this.runTimer(currentRehat + 1,this.timer.break[currentRehat])
-      if(!this.stack.length) return this.stack = [...this.timer.stack]
-      return
+      let toAdd = 0
+      if (this.timer.focus_extra_mode && this.timer.extra_pad < this.secondsAfterDue) {
+        if (this.timer.focus_extra_mode == 1) {
+          this.nextReduce[0] = this.secondsAfterDue
+        }
+        else toAdd = Math.floor(this.secondsAfterDue * this.timer.focus_extra_add_rate)
+      }
+      if (!this.stack.length) this.stack = [...this.timer.stack]
+      return this.runTimer(currentRehat + 1, this.timer.break[currentRehat], toAdd)
     },
-    startFocus(){
+    startFocus() {
       this.promptFocus()
-      return this.startTimer()
+      let toAdd = 0
+      if (this.timer.rest_extra_mode && this.timer.extra_pad < this.secondsAfterDue) {
+        if (this.timer.rest_extra_mode == 1) {
+          this.nextReduce[1] = this.secondsAfterDue
+        }
+        else toAdd = Math.floor(this.secondsAfterDue * this.timer.rest_extra_add_rate)
+      }
+      return this.runTimer(1, this.timer.focus, toAdd)
     },
-    promptChange(mode){
-      if(mode == 1) return this.promptBreak()
+    promptChange(mode) {
+      if (mode == 1) return this.promptBreak()
       return this.promptFocus()
     },
     promptSetting() {
@@ -692,21 +762,37 @@ export default {
       var modal = bootstrap.Modal.getOrCreateInstance(myModalEl)
       modal.toggle()
     },
-    startTimer(){
-      this.runTimer(1,this.timer.focus)
+    startTimer() {
+      this.runTimer(1, this.timer.focus)
     },
-    runTimer(mode,interval){
+    runTimer(mode, interval, toAdd = 0) {
       this.mode = mode
-      this.due = moment().add('minutes',interval).unix()
+      let seconds = interval * 60
+      // let seconds = 10 //Use for testing
+      let reduceMode = this.mode - 1
+      if (reduceMode > 0) reduceMode = 1
+      let reduceBy = this.nextReduce[reduceMode]
+      if (reduceBy) {
+        let minimum = reduceMode ? this.timer.focus_extra_deduct_min * 60 : this.timer.rest_extra_deduct_min * 60
+        seconds = seconds - reduceBy
+        if (seconds < minimum) seconds = minimum
+        this.nextReduce[reduceMode] = 0
+      }
+      let momentToDue = moment().add('seconds', seconds)
+      if (toAdd) momentToDue.add('seconds', toAdd)
+      this.due = momentToDue.unix()
+      return this.saveToLocal()
       // this.due = moment().add('seconds',2).unix()
     },
-    updateTime(){
+    updateTime() {
       this.current = moment().unix()
     }
   },
-  mounted(){
+  mounted() {
+    this.getFromLocal()
     this.pageState = this.states[this.mode]
-    interval = setInterval(this.updateTime,1000)
+    interval = setInterval(this.updateTime, 1000)
+
   }
 }
 </script>
