@@ -1,6 +1,6 @@
 <template>
-  <div class="position-absolute" style="z-index: 9999;"><button @click="mode = mode % 3 + 1" class="btn btn-primary">{{
-    timer.focus_extra_mode }} {{ timer.rest_extra_mode }}</button></div>
+  <!-- <div class="position-absolute" style="z-index: 9999;"><button @click="mode = mode % 3 + 1" class="btn btn-primary">{{
+    timer.focus_extra_mode }} {{ timer.rest_extra_mode }}</button></div> -->
   <div class="container-fluid w-100 h-100" :class="pageState.bg">
     <div class="d-flex flex-column justify-content-between h-100">
       <div class="">
@@ -532,16 +532,16 @@ export default {
       paused_on: 0,
       last_online: 0,
       timer: {
-        focus: 2,
-        break: [0, 1, 2],
+        focus: 25,
+        break: [0, 5, 15],
         simpleStack: true,
         breakNumber: 3,
         stack: [1, 1, 2],
-        extra_pad: 5,
+        extra_pad: 15,
         focus_extra_mode: 1,
-        focus_extra_deduct_min: 1,
+        focus_extra_deduct_min: 5,
         focus_extra_add_rate: 0.5,
-        rest_extra_mode: 1,
+        rest_extra_mode: 2,
         rest_extra_deduct_min: 1,
         rest_extra_add_rate: 5,
       },
