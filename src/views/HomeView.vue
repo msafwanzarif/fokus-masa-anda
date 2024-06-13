@@ -1,6 +1,6 @@
 <template>
-  <div class="position-absolute" style="z-index: 9999;"><button @click="test" class="btn btn-primary">{{
-    wakeLock.isSupported }} {{ wakeLock.isActive }}</button></div>
+  <!-- <div class="position-absolute" style="z-index: 9999;"><button @click="test" class="btn btn-primary">{{
+    wakeLock.isSupported }} {{ wakeLock.isActive }}</button></div> -->
   <div class="container-fluid w-100 h-100" :class="pageState.bg">
     <div class="d-flex flex-column justify-content-between h-100">
       <div class="">
