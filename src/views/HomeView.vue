@@ -1,5 +1,5 @@
 <template>
-  <!-- <div class="position-absolute" style="z-index: 9999;"><button @click="mode = mode % 3 + 1" class="btn btn-primary">{{
+  <!-- <div class="position-absolute" style="z-index: 9999;"><button @click="test" class="btn btn-primary">{{
     timer.focus_extra_mode }} {{ timer.rest_extra_mode }}</button></div> -->
   <div class="container-fluid w-100 h-100" :class="pageState.bg">
     <div class="d-flex flex-column justify-content-between h-100">
@@ -659,6 +659,11 @@ export default {
       }
     },
   },
+  mounted() {
+    // this.getFromLocal()
+    this.pageState = this.states[this.mode]
+    interval = setInterval(this.updateTime, 1000)
+  },
   methods: {
     saveToLocal() {
       let data = {
@@ -744,7 +749,11 @@ export default {
       return this.runTimer(1, this.timer.focus, toAdd)
     },
     promptChange(mode) {
-      if (mode == 1) return this.promptBreak()
+      if (mode == 1){
+        notifyMe("Break Time!", "Let's take a break")
+        return this.promptBreak()
+      }
+      notifyMe("Focus Time!", "Let's go change the world!")
       return this.promptFocus()
     },
     promptSetting() {
@@ -768,7 +777,7 @@ export default {
     runTimer(mode, interval, toAdd = 0) {
       this.mode = mode
       let seconds = interval * 60
-      // let seconds = 10 //Use for testing
+      // let seconds = 3 //Use for testing
       let reduceMode = this.mode - 1
       if (reduceMode > 0) reduceMode = 1
       let reduceBy = this.nextReduce[reduceMode]
@@ -778,21 +787,18 @@ export default {
         if (seconds < minimum) seconds = minimum
         this.nextReduce[reduceMode] = 0
       }
-      let momentToDue = moment().add('seconds', seconds)
-      if (toAdd) momentToDue.add('seconds', toAdd)
+      let momentToDue = moment().add(seconds,'seconds')
+      if (toAdd) momentToDue.add(toAdd,'seconds')
       this.due = momentToDue.unix()
       return this.saveToLocal()
       // this.due = moment().add('seconds',2).unix()
     },
     updateTime() {
       this.current = moment().unix()
+    },
+    test(){
+      notifyMe()
     }
   },
-  mounted() {
-    this.getFromLocal()
-    this.pageState = this.states[this.mode]
-    interval = setInterval(this.updateTime, 1000)
-
-  }
 }
 </script>
