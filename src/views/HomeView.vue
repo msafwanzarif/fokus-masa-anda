@@ -726,9 +726,13 @@ export default {
     interval = setInterval(this.updateTime, 1000)
   },
   methods: {
+    releaseAfter(time = 0){
+      if(!time) time = this.timer.extra_pad * 1000
+      setTimeout(() => {this.wakeLock.release()},time)
+    },
     pauseTimer(){
       this.paused_on = moment().unix()
-      this.wakeLock.release()
+      this.releaseAfter()
       this.promptPause()
     },
     resumeTimer(){
@@ -786,7 +790,7 @@ export default {
       let mode = this.mode
       this.mode = 0
       this.due = 0
-      this.wakeLock.release()
+      this.releaseAfter()
       if(this.paused_on){
         this.paused_on = 0
         this.promptPause()
@@ -828,7 +832,7 @@ export default {
       return this.runTimer(1, this.timer.focus, toAdd)
     },
     promptChange(mode) {
-      this.wakeLock.release()
+      this.releaseAfter()
       if (mode == 1){
         this.promptBreak()
         return notifyMe("Break Time!", "Let's take a break")
