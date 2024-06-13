@@ -1,6 +1,6 @@
 <template>
-  <!-- <div class="position-absolute" style="z-index: 9999;"><button @click="test" class="btn btn-primary">{{
-    timer.focus_extra_mode }} {{ timer.rest_extra_mode }}</button></div> -->
+  <div class="position-absolute" style="z-index: 9999;"><button @click="test" class="btn btn-primary">{{
+    wakeLock.isSupported }} {{ wakeLock.isActive }}</button></div>
   <div class="container-fluid w-100 h-100" :class="pageState.bg">
     <div class="d-flex flex-column justify-content-between h-100">
       <div class="">
@@ -123,7 +123,7 @@
                 <path d="M12 7v5l3 3" />
               </svg>
             </button>
-            <button @click="stopTimer" v-if="mode == 1"
+            <button @click="pauseTimer" v-if="mode == 1"
               class="h-100 btn btn-outline-warning text-white d-flex align-items-center justify-content-center">
               <!-- <span class="d-none d-md-block fs-1"> Pause </span> -->
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
@@ -189,6 +189,40 @@
               </button>
             </div>
             <button type="button" class="btn btn-success" @click="startBreak">Mulakan Rehat</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="pause-prompt" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+      aria-labelledby="staticBackdropLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered ">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div class="c-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path
+                  d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
+                <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+              </svg>
+            </div>
+          </div>
+          <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
+            <h2 class="sub-title text-center mb-3">Paused !</h2>
+            <button class="btn btn-outline-warning w-75 mb-4">Masa yang Tinggal: {{ hours }}{{ hours?" : ":"" }}{{ minutes }} : {{ seconds }}</button>
+          </div>
+          <div class="modal-footer d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+              <button @click="stopTimer" type="button" class="btn btn-outline-danger me-1"><svg
+                  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
+                  class="icon icon-tabler icons-tabler-filled icon-tabler-player-stop">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M17 4h-10a3 3 0 0 0 -3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3 -3v-10a3 3 0 0 0 -3 -3z" />
+                </svg></button>
+            </div>
+            <button @click="resumeTimer" type="button" class="btn btn-success">Sambung</button>
           </div>
         </div>
       </div>
@@ -511,6 +545,7 @@
 <script>
 import SettingModal from '../components/SettingModal.vue'
 import moment from 'moment'
+import { useWakeLock } from '@vueuse/core'
 let interval
 
 export default {
@@ -525,6 +560,7 @@ export default {
       // 5 Stopped
       mode: 0,
       showClock: true,
+      wakeLock: {},
       nextReduce: [0, 0],
       stack: [1, 2],
       due: 0,
@@ -583,6 +619,13 @@ export default {
           buttonClass: "btn-outline-white",
           countDownClass: "border border-white text-white w-100 mx-3",
         },
+        {
+          bg: "",
+          bigText: "Selamat Datang",
+          timeClass: "rest-time",
+          buttonClass: "btn-outline-white",
+          countDownClass: "border border-white text-white w-100 mx-3",
+        },
       ],
       pageState: {}
     }
@@ -609,6 +652,11 @@ export default {
         if (this.timer.focus < 60) return ""
         return Math.floor(this.timer.focus / 60).toString().padStart(2, "0")
       }
+      if(this.paused_on){
+        let time = this.due - this.paused_on
+        if (time < 3600) return ""
+        return Math.floor(time / 3600).toString().padStart(2, "0")
+      }
       var time = this.secondsToDue
       if (this.passedDue) time = this.secondsAfterDue
       if (time < 3600) return ""
@@ -617,19 +665,30 @@ export default {
     minutes() {
       if (!this.due) return (this.timer.focus % 60).toString().padStart(2, "0")
       var time = this.secondsToDue
+      if(this.paused_on){
+        let time = this.due - this.paused_on
+        if (time < 60) return "00"
+        return (Math.floor(time / 60) % 60).toString().padStart(2, "0")
+      }
       if (this.passedDue) time = this.secondsAfterDue
       if (time < 60) return "00"
       return (Math.floor(time / 60) % 60).toString().padStart(2, "0")
     },
     seconds() {
       if (!this.due) return "00"
+      if(this.paused_on){
+        let time = this.due - this.paused_on
+        if (time < 0) return "00"
+        return (time % 60).toString().padStart(2, "0")
+      }
       var time = this.secondsToDue
       if (this.passedDue) time = this.secondsAfterDue
       if (time < 0) return "00"
       return (time % 60).toString().padStart(2, "0")
     },
     passedDue() {
-      return this.due <= this.current
+      if(this.paused_on) return false
+      return this.due && this.due <= this.current
     },
     currentTime() {
       if (this.current) return moment(this.current * 1000).format("hh:mm A")
@@ -661,10 +720,22 @@ export default {
   },
   mounted() {
     this.getFromLocal()
+    this.wakeLock = useWakeLock()
     this.pageState = this.states[this.mode]
+    this.last_online = moment().unix()
     interval = setInterval(this.updateTime, 1000)
   },
   methods: {
+    pauseTimer(){
+      this.paused_on = moment().unix()
+      this.promptPause()
+    },
+    resumeTimer(){
+      let lag = this.current - this.paused_on
+      this.due = this.due + lag
+      this.paused_on = 0
+      this.promptPause()
+    },
     saveToLocal() {
       let data = {
         mode: this.mode ,
@@ -713,6 +784,11 @@ export default {
       let mode = this.mode
       this.mode = 0
       this.due = 0
+      if(this.paused_on){
+        this.paused_on = 0
+        this.promptPause()
+        return this.saveToLocal()
+      }
       if (mode == 1) {
         this.promptBreak()
         return this.saveToLocal()
@@ -749,6 +825,7 @@ export default {
       return this.runTimer(1, this.timer.focus, toAdd)
     },
     promptChange(mode) {
+      this.wakeLock.release()
       if (mode == 1){
         notifyMe("Break Time!", "Let's take a break")
         return this.promptBreak()
@@ -758,6 +835,11 @@ export default {
     },
     promptSetting() {
       var myModalEl = document.querySelector('#main-settings')
+      var modal = bootstrap.Modal.getOrCreateInstance(myModalEl)
+      modal.toggle()
+    },
+    promptPause() {
+      var myModalEl = document.querySelector('#pause-prompt')
       var modal = bootstrap.Modal.getOrCreateInstance(myModalEl)
       modal.toggle()
     },
@@ -777,7 +859,7 @@ export default {
     runTimer(mode, interval, toAdd = 0) {
       this.mode = mode
       let seconds = interval * 60
-      // let seconds = 3 //Use for testing
+      // let seconds = 2 //Use for testing
       let reduceMode = this.mode - 1
       if (reduceMode > 0) reduceMode = 1
       let reduceBy = this.nextReduce[reduceMode]
@@ -790,6 +872,7 @@ export default {
       let momentToDue = moment().add(seconds,'seconds')
       if (toAdd) momentToDue.add(toAdd,'seconds')
       this.due = momentToDue.unix()
+      this.wakeLock.request()
       return this.saveToLocal()
       // this.due = moment().add('seconds',2).unix()
     },
