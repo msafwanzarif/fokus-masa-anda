@@ -728,12 +728,14 @@ export default {
   methods: {
     pauseTimer(){
       this.paused_on = moment().unix()
+      this.wakeLock.release()
       this.promptPause()
     },
     resumeTimer(){
       let lag = this.current - this.paused_on
       this.due = this.due + lag
       this.paused_on = 0
+      this.wakeLock.request()
       this.promptPause()
     },
     saveToLocal() {
@@ -784,6 +786,7 @@ export default {
       let mode = this.mode
       this.mode = 0
       this.due = 0
+      this.wakeLock.release()
       if(this.paused_on){
         this.paused_on = 0
         this.promptPause()
