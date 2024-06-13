@@ -660,7 +660,7 @@ export default {
     },
   },
   mounted() {
-    // this.getFromLocal()
+    this.getFromLocal()
     this.pageState = this.states[this.mode]
     interval = setInterval(this.updateTime, 1000)
   },
