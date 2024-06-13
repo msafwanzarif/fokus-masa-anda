@@ -830,11 +830,11 @@ export default {
     promptChange(mode) {
       this.wakeLock.release()
       if (mode == 1){
-        notifyMe("Break Time!", "Let's take a break")
-        return this.promptBreak()
+        this.promptBreak()
+        return notifyMe("Break Time!", "Let's take a break")
       }
-      notifyMe("Focus Time!", "Let's go change the world!")
-      return this.promptFocus()
+      this.promptFocus()
+      return notifyMe("Focus Time!", "Let's go change the world!")
     },
     promptSetting() {
       var myModalEl = document.querySelector('#main-settings')
