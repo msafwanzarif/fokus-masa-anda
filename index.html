@@ -40,7 +40,11 @@
     }
 
     function callNotify(title, msg, icone) {
-      new Notification(title, { body: msg, icon: icone })
+      let noti = new Notification(title, { body: msg, icon: icone })
+      noti.addEventListener("click",(ev) =>{
+        console.log("Hello")
+        window.focus()
+      })
       // new Audio(song).play()
     }
   </script>

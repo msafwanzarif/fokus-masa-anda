@@ -94,7 +94,7 @@
               <path d="M18 19v2" />
             </svg>
           </div>
-          <div v-if="mode < 2" class="d-flex align-items-center justify-content-center">
+          <!-- <div v-if="mode < 2" class="d-flex align-items-center justify-content-center">
             <h2 class="sub-title me-3">Menulis</h2>
             <button class="btn btn-outline-info">
               <svg xmlns="http://www.w3.org/2000/svg" width="6vmin" height="6vmin" viewBox="0 0 24 24" fill="none"
@@ -108,7 +108,7 @@
                 <path d="M18 20l3 -3l-3 -3" />
               </svg>
             </button>
-          </div>
+          </div> -->
           <div class="d-flex align-items-center justify-content-center mt-5">
             <button @click="mode < 2 ? showClock = !showClock : null"
               class="btn d-flex align-items-center justify-content-center"
@@ -154,7 +154,7 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <div class="c-pointer">
+            <div @click="promptSetting" class="c-pointer">
               <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
@@ -198,7 +198,7 @@
       <div class="modal-dialog modal-dialog-centered ">
         <div class="modal-content">
           <div class="modal-header">
-            <div class="c-pointer">
+            <div @click="promptSetting" class="c-pointer">
               <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
@@ -211,7 +211,8 @@
           </div>
           <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
             <h2 class="sub-title text-center mb-3">Paused !</h2>
-            <button class="btn btn-outline-warning w-75 mb-4">Masa yang Tinggal: {{ hours }}{{ hours?" : ":"" }}{{ minutes }} : {{ seconds }}</button>
+            <button class="btn btn-outline-warning w-75 mb-4">Masa yang Tinggal: {{ hours }}{{ hours ? " : " : "" }}{{
+    minutes }} : {{ seconds }}</button>
           </div>
           <div class="modal-footer d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
@@ -232,7 +233,7 @@
       <div class="modal-dialog modal-dialog-centered ">
         <div class="modal-content bg-primary">
           <div class="modal-header">
-            <div class="c-pointer">
+            <div @click="promptSetting" class="c-pointer">
               <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
@@ -246,7 +247,7 @@
           <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
             <h2 class="sub-title text-center mb-3">Masa untuk Fokus !</h2>
             <button class="btn btn-outline-warning w-75 mb-4">Overtime Rehat: {{ minutes }} : {{ seconds }}</button>
-            <div class="d-flex align-items-center justify-content-center">
+            <!-- <div class="d-flex align-items-center justify-content-center">
               <h2 class="fs-4 me-3">Menulis</h2>
               <button class="btn btn-outline-info">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -260,7 +261,7 @@
                   <path d="M18 20l3 -3l-3 -3" />
                 </svg>
               </button>
-            </div>
+            </div> -->
           </div>
           <div class="modal-footer d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
@@ -288,7 +289,7 @@
           <div class="modal-body d-flex flex-column justify-content-between align-items-center p-3 p-md-5"
             style="height: 75vh;">
             <div class="d-flex flex-column justify-content-start w-100">
-              <button class="btn btn-outline-light w-100 fs-1 mb-3 d-flex align-items-center justify-content-center">
+              <!-- <button class="btn btn-outline-light w-100 fs-1 mb-3 d-flex align-items-center justify-content-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="5vh" height="5vh" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                   class="icon icon-tabler icons-tabler-outline icon-tabler-user-square-rounded">
@@ -298,7 +299,7 @@
                   <path d="M6 20.05v-.05a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v.05" />
                 </svg>
                 <span class="ms-2">Pengguna</span>
-              </button>
+              </button> -->
               <button data-bs-target="#timer-settings" data-bs-toggle="modal" data-bs-dismiss="modal"
                 class="btn btn-outline-light w-100 fs-1 mb-3 d-flex align-items-center justify-content-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="5vh" height="5vh" viewBox="0 0 24 24" fill="none"
@@ -313,7 +314,7 @@
                 </svg>
                 <span class="ms-2">Timer</span>
               </button>
-              <button class="btn btn-outline-light w-100 fs-1 mb-3 d-flex align-items-center justify-content-center">
+              <!-- <button class="btn btn-outline-light w-100 fs-1 mb-3 d-flex align-items-center justify-content-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="5vh" height="5vh" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                   class="icon icon-tabler icons-tabler-outline icon-tabler-target-arrow">
@@ -325,7 +326,7 @@
                   <path d="M15 9l-3 3" />
                 </svg>
                 <span class="ms-2">Target</span>
-              </button>
+              </button> -->
             </div>
             <button class="btn btn-outline-danger w-100 fs-3 mb-3" data-bs-dismiss="modal"
               aria-label="Close">Tutup</button>
@@ -410,12 +411,13 @@
             class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
         </div>
         <hr>
-        <label class="form-label fs-4">Susunan Rehat</label>
+        <label class="form-label fs-4">Susunan Cycle Rehat</label>
         <div class="w-100">
           <div class="list-group">
             <div v-for="item, index in timer.stack" class="list-group-item">
               <div class="d-flex align-items-center justify-content-between">
-                <span :class="{ 'fw-bold': item == 2 }">{{ index + 1 }}) Rehat {{ item == 1 ? "Pendek" : "Panjang" }}</span>
+                <span :class="{ 'fw-bold': item == 2 }">{{ index + 1 }}) Rehat {{ item == 1 ? "Pendek" : "Panjang"
+                  }}</span>
                 <div class="d-flex align-items-center">
                   <button v-if="!timer.simpleStack" @click="changeStack(index)" class="btn btn-outline-light me-2">
                     Tukar </button>
@@ -428,9 +430,22 @@
           <button v-if="!timer.simpleStack" @click="pushStack()" class="btn btn-outline-light w-100 mt-3">
             Tambah</button>
         </div>
+        <template v-if="stackNotSame">
+          <hr>
+          <label class="form-label fs-4">Susunan Sekarang</label>
+          <div class="w-100">
+            <div class="list-group">
+              <div v-for="item, index in stack" class="list-group-item">
+                <span :class="{ 'fw-bold': item == 2 }">{{ index + 1 }}) Rehat {{ item == 1 ? "Pendek" : "Panjang"
+                  }}</span>
+              </div>
+            </div>
+            <button @click="resetStack" class="btn btn-outline-light w-100 mt-3"> Samakan</button>
+          </div>
+        </template>
       </div>
       <button data-bs-target="#timer-settings" data-bs-toggle="modal" data-bs-dismiss="modal"
-        class="btn btn-outline-warning w-100 fs-3 mb-3" aria-label="Close">Kembali
+        class="btn btn-outline-warning w-100 fs-3 mt-5" aria-label="Close">Kembali
       </button>
     </SettingModal>
     <SettingModal id="timer-overtime-settings" title="Tetapan > Timer > Overtime">
@@ -631,6 +646,9 @@ export default {
     }
   },
   computed: {
+    stackNotSame(){
+      return JSON.stringify(this.stack) != JSON.stringify(this.timer.stack)
+    },
     breakNumber() {
       return this.timer.breakNumber
     },
@@ -652,7 +670,7 @@ export default {
         if (this.timer.focus < 60) return ""
         return Math.floor(this.timer.focus / 60).toString().padStart(2, "0")
       }
-      if(this.paused_on){
+      if (this.paused_on) {
         let time = this.due - this.paused_on
         if (time < 3600) return ""
         return Math.floor(time / 3600).toString().padStart(2, "0")
@@ -665,7 +683,7 @@ export default {
     minutes() {
       if (!this.due) return (this.timer.focus % 60).toString().padStart(2, "0")
       var time = this.secondsToDue
-      if(this.paused_on){
+      if (this.paused_on) {
         let time = this.due - this.paused_on
         if (time < 60) return "00"
         return (Math.floor(time / 60) % 60).toString().padStart(2, "0")
@@ -676,7 +694,7 @@ export default {
     },
     seconds() {
       if (!this.due) return "00"
-      if(this.paused_on){
+      if (this.paused_on) {
         let time = this.due - this.paused_on
         if (time < 0) return "00"
         return (time % 60).toString().padStart(2, "0")
@@ -687,7 +705,7 @@ export default {
       return (time % 60).toString().padStart(2, "0")
     },
     passedDue() {
-      if(this.paused_on) return false
+      if (this.paused_on) return false
       return this.due && this.due <= this.current
     },
     currentTime() {
@@ -717,6 +735,11 @@ export default {
         return this.timer.stack = newStack
       }
     },
+    paused_on(newVal, oldVal) {
+      if (newVal) {
+        return this.promptPause()
+      }
+    }
   },
   mounted() {
     this.getFromLocal()
@@ -726,39 +749,43 @@ export default {
     interval = setInterval(this.updateTime, 1000)
   },
   methods: {
-    releaseAfter(time = 0){
-      if(!time) time = this.timer.extra_pad * 1000
-      setTimeout(() => {this.wakeLock.release()},time)
+    resetStack(){
+      this.stack = [...this.timer.stack]
+    }, 
+    releaseAfter(time = 0) {
+      if (!time) time = this.timer.extra_pad * 1000
+      setTimeout(() => { this.wakeLock.release() }, time)
     },
-    pauseTimer(){
+    pauseTimer() {
       this.paused_on = moment().unix()
-      this.releaseAfter()
-      this.promptPause()
+      this.saveToLocal()
+      return this.releaseAfter()
     },
-    resumeTimer(){
+    resumeTimer() {
       let lag = this.current - this.paused_on
       this.due = this.due + lag
       this.paused_on = 0
+      this.saveToLocal()
       this.wakeLock.request()
       this.promptPause()
     },
     saveToLocal() {
       let data = {
-        mode: this.mode ,
+        mode: this.mode,
         showClock: this.showClock,
-        nextReduce: this.nextReduce ,
-        stack: this.stack ,
-        due: this.due ,
-        current: this.current ,
-        paused_on: this.paused_on ,
-        timer: this.timer ,
+        nextReduce: this.nextReduce,
+        stack: this.stack,
+        due: this.due,
+        current: this.current,
+        paused_on: this.paused_on,
+        timer: this.timer,
       }
       localStorage.setItem("fokus-data", JSON.stringify(data))
     },
     getFromLocal() {
       let data = localStorage.getItem("fokus-data")
       if (data) {
-        let { 
+        let {
           mode,
           showClock,
           nextReduce,
@@ -791,7 +818,7 @@ export default {
       this.mode = 0
       this.due = 0
       this.releaseAfter()
-      if(this.paused_on){
+      if (this.paused_on) {
         this.paused_on = 0
         this.promptPause()
         return this.saveToLocal()
@@ -833,7 +860,7 @@ export default {
     },
     promptChange(mode) {
       this.releaseAfter()
-      if (mode == 1){
+      if (mode == 1) {
         this.promptBreak()
         return notifyMe("Break Time!", "Let's take a break")
       }
@@ -865,8 +892,8 @@ export default {
     },
     runTimer(mode, interval, toAdd = 0) {
       this.mode = mode
-      let seconds = interval * 60
-      // let seconds = 2 //Use for testing
+      // let seconds = interval * 60
+      let seconds = 2 //Use for testing
       let reduceMode = this.mode - 1
       if (reduceMode > 0) reduceMode = 1
       let reduceBy = this.nextReduce[reduceMode]
@@ -876,8 +903,8 @@ export default {
         if (seconds < minimum) seconds = minimum
         this.nextReduce[reduceMode] = 0
       }
-      let momentToDue = moment().add(seconds,'seconds')
-      if (toAdd) momentToDue.add(toAdd,'seconds')
+      let momentToDue = moment().add(seconds, 'seconds')
+      if (toAdd) momentToDue.add(toAdd, 'seconds')
       this.due = momentToDue.unix()
       this.wakeLock.request()
       return this.saveToLocal()
@@ -886,7 +913,7 @@ export default {
     updateTime() {
       this.current = moment().unix()
     },
-    test(){
+    test() {
       notifyMe()
     }
   },
