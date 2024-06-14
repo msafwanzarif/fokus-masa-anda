@@ -892,8 +892,8 @@ export default {
     },
     runTimer(mode, interval, toAdd = 0) {
       this.mode = mode
-      // let seconds = interval * 60
-      let seconds = 2 //Use for testing
+      let seconds = interval * 60
+      // let seconds = 2 //Use for testing
       let reduceMode = this.mode - 1
       if (reduceMode > 0) reduceMode = 1
       let reduceBy = this.nextReduce[reduceMode]
