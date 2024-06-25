@@ -560,7 +560,7 @@
 import SettingModal from '../components/SettingModal.vue'
 import moment from 'moment'
 import { useWakeLock } from '@vueuse/core'
-let interval
+var interval
 
 export default {
   components: { SettingModal },
@@ -747,8 +747,11 @@ export default {
     this.wakeLock = useWakeLock()
     console.log("wakeLock Set")
     this.pageState = this.states[this.mode]
+    console.log("pageState Set", this.pageState)
     this.last_online = moment().unix()
+    console.log("last_online Set", this.last_online)
     interval = setInterval(this.updateTime, 1000)
+    console.log("interval Set")
   },
   methods: {
     resetStack(){
