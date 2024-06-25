@@ -1,5 +1,5 @@
 <template>
-  <<div class="position-absolute" style="z-index: 9999;"><button class="btn btn-primary">Debug</button></div>
+  <!-- <div class="position-absolute" style="z-index: 9999;"><button class="btn btn-primary">Debug</button></div> -->
   <div class="container-fluid w-100 h-100" :class="pageState.bg">
     <div class="d-flex flex-column justify-content-between h-100">
       <div class="">
@@ -725,7 +725,6 @@ export default {
         newStack.push(2)
         return this.timer.stack = newStack
       }
-      return this.timer.breakNumber = oldVal
     },
     simpleStack(newVal, oldVal) {
       if (newVal) {
@@ -741,17 +740,17 @@ export default {
     }
   },
   mounted() {
-    console.log("mounted")
+    // console.log("mounted")
     this.getFromLocal()
-    console.log("got from local")
+    // console.log("got from local")
     this.wakeLock = useWakeLock()
-    console.log("wakeLock Set")
+    // console.log("wakeLock Set")
     this.pageState = this.states[this.mode]
-    console.log("pageState Set", this.pageState)
+    // console.log("pageState Set", this.pageState)
     this.last_online = moment().unix()
-    console.log("last_online Set", this.last_online)
+    // console.log("last_online Set", this.last_online)
     interval = setInterval(this.updateTime, 1000)
-    console.log("interval Set", interval)
+    // console.log("interval Set", interval)
   },
   methods: {
     resetStack(){
@@ -788,7 +787,8 @@ export default {
     },
     getFromLocal() {
       let data = localStorage.getItem("fokus-data")
-      console.log("data got",data)
+      // let data = '{"mode":3,"showClock":true,"nextReduce":[36,0],"stack":[1,1],"due":1719028169,"current":1719026369,"paused_on":0,"timer":{"focus":1,"break":[0,5,30],"simpleStack":false,"breakNumber":3,"stack":[2,1,1],"extra_pad":10,"focus_extra_mode":1,"focus_extra_deduct_min":5,"focus_extra_add_rate":0.5,"rest_extra_mode":2,"rest_extra_deduct_min":1,"rest_extra_add_rate":2.5}}'
+      // console.log("data got",data)
       if (data) {
         let {
           mode,
@@ -799,19 +799,21 @@ export default {
           paused_on,
           timer } = JSON.parse(data)
         this.mode = mode
-        console.log("mode set")
+        // console.log("mode set")
         this.showClock = showClock
-        console.log("showClock set")
+        // console.log("showClock set")
         this.nextReduce = nextReduce
-        console.log("nextReduce set")
+        // console.log("nextReduce set")
         this.stack = stack
-        console.log("stack set")
-        // this.due = due
+        // console.log("stack set")
         // console.log("due set")
         this.paused_on = paused_on
-        console.log("paused_on set")
+        this.due = due
+        // console.log("paused_on set")
         this.timer = timer
-        console.log("timer set")
+        let last2Hour = moment().subtract(2,"hours").unix()
+        if(due < last2Hour) this.stopTimer()
+        // console.log("timer set")
       }
     },
     changeStack(index) {
@@ -837,7 +839,7 @@ export default {
         this.promptBreak()
         return this.saveToLocal()
       }
-      this.promptFocus()
+      this.promptFocus(true)
       return this.saveToLocal()
     },
     fokusSemula() {
@@ -892,9 +894,10 @@ export default {
       var modal = bootstrap.Modal.getOrCreateInstance(myModalEl)
       modal.toggle()
     },
-    promptFocus() {
+    promptFocus(close = false) {
       var myModalEl = document.querySelector('#focus-prompt')
       var modal = bootstrap.Modal.getOrCreateInstance(myModalEl)
+      if(close) return modal.hide()
       modal.toggle()
     },
     startTimer() {
@@ -921,7 +924,7 @@ export default {
       // this.due = moment().add('seconds',2).unix()
     },
     updateTime() {
-      console.log("updating time")
+      // console.log("updating time")
       this.current = moment().unix()
     },
     test() {
