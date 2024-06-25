@@ -917,6 +917,7 @@ export default {
       // this.due = moment().add('seconds',2).unix()
     },
     updateTime() {
+      console.log("updating time")
       this.current = moment().unix()
     },
     test() {
