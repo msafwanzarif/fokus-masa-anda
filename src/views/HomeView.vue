@@ -751,7 +751,7 @@ export default {
     this.last_online = moment().unix()
     console.log("last_online Set", this.last_online)
     interval = setInterval(this.updateTime, 1000)
-    console.log("interval Set")
+    console.log("interval Set", interval)
   },
   methods: {
     resetStack(){
