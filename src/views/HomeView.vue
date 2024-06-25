@@ -742,7 +742,7 @@ export default {
   },
   mounted() {
     console.log("mounted")
-    this.getFromLocal()
+    // this.getFromLocal()
     console.log("got from local")
     this.wakeLock = useWakeLock()
     console.log("wakeLock Set")
