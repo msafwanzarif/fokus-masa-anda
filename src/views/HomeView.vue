@@ -743,7 +743,9 @@ export default {
   mounted() {
     console.log("mounted")
     this.getFromLocal()
+    console.log("got from local")
     this.wakeLock = useWakeLock()
+    console.log("wakeLock Set")
     this.pageState = this.states[this.mode]
     this.last_online = moment().unix()
     interval = setInterval(this.updateTime, 1000)
@@ -793,12 +795,19 @@ export default {
           paused_on,
           timer } = JSON.parse(data)
         this.mode = mode
+        console.log("mode set")
         this.showClock = showClock
+        console.log("showClock set")
         this.nextReduce = nextReduce
+        console.log("nextReduce set")
         this.stack = stack
+        console.log("stack set")
         this.due = due
+        console.log("due set")
         this.paused_on = paused_on
+        console.log("paused_on set")
         this.timer = timer
+        console.log("timer set")
       }
     },
     changeStack(index) {
