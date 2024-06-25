@@ -788,6 +788,7 @@ export default {
     },
     getFromLocal() {
       let data = localStorage.getItem("fokus-data")
+      console.log("data got",data)
       if (data) {
         let {
           mode,
