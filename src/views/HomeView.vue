@@ -742,7 +742,7 @@ export default {
   },
   mounted() {
     console.log("mounted")
-    // this.getFromLocal()
+    this.getFromLocal()
     console.log("got from local")
     this.wakeLock = useWakeLock()
     console.log("wakeLock Set")
@@ -805,8 +805,8 @@ export default {
         console.log("nextReduce set")
         this.stack = stack
         console.log("stack set")
-        this.due = due
-        console.log("due set")
+        // this.due = due
+        // console.log("due set")
         this.paused_on = paused_on
         console.log("paused_on set")
         this.timer = timer
