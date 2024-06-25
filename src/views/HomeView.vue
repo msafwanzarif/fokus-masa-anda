@@ -776,7 +776,6 @@ export default {
         nextReduce: this.nextReduce,
         stack: this.stack,
         due: this.due,
-        current: this.current,
         paused_on: this.paused_on,
         timer: this.timer,
       }
@@ -791,7 +790,6 @@ export default {
           nextReduce,
           stack,
           due,
-          current,
           paused_on,
           timer } = JSON.parse(data)
         this.mode = mode
@@ -799,7 +797,6 @@ export default {
         this.nextReduce = nextReduce
         this.stack = stack
         this.due = due
-        this.current = current
         this.paused_on = paused_on
         this.timer = timer
       }
