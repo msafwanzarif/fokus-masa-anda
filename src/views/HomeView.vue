@@ -166,7 +166,7 @@
           </div>
           <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
             <h2 class="sub-title text-center mb-3">{{ rehatDetail[nextRehat].text }}</h2>
-            <button class="btn btn-outline-warning w-75">Overtime: {{ minutes }} : {{ seconds }}</button>
+            <button class="btn btn-outline-warning w-75">Overtime: {{ hours }}{{ hours ? " : " : "" }}{{ minutes }} : {{ seconds }}</button>
             <h3 class="text-center mt-3 fs-4">Tempoh Rehat: {{ timer.break[nextRehat] }} Minit</h3>
           </div>
           <div class="modal-footer d-flex align-items-center justify-content-between">
@@ -245,7 +245,7 @@
           </div>
           <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
             <h2 class="sub-title text-center mb-3">Masa untuk Fokus !</h2>
-            <button class="btn btn-outline-warning w-75 mb-4">Overtime Rehat: {{ minutes }} : {{ seconds }}</button>
+            <button class="btn btn-outline-warning w-75 mb-4">Overtime Rehat: {{ hours }}{{ hours ? " : " : "" }}{{ minutes }} : {{ seconds }}</button>
             <!-- <div class="d-flex align-items-center justify-content-center">
               <h2 class="fs-4 me-3">Menulis</h2>
               <button class="btn btn-outline-info">
@@ -812,7 +812,7 @@ export default {
         // console.log("paused_on set")
         this.timer = timer
         let last2Hour = moment().subtract(2,"hours").unix()
-        if(due < last2Hour) this.stopTimer()
+        if(due && !paused_on && due < last2Hour) this.stopTimer()
         // console.log("timer set")
       }
     },
