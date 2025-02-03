@@ -1,5 +1,5 @@
 <template>
-  <!-- <div class="position-absolute" style="z-index: 9999;"><button class="btn btn-primary">Debug</button></div> -->
+  <!-- <div class="position-absolute" style="z-index: 9999;"><button class="btn btn-primary" @click="fastForward">Debug {{ validTimer }}</button></div> -->
   <div class="container-fluid w-100 h-100" :class="pageState.bg">
     <div class="d-flex flex-column justify-content-between h-100">
       <div class="">
@@ -123,7 +123,7 @@
               </svg>
             </button>
             <button @click="pauseTimer" v-if="mode == 1"
-              class="h-100 btn btn-outline-warning text-white d-flex align-items-center justify-content-center">
+              class="h-100 btn btn-outline-warning text-white d-flex align-items-center justify-content-center me-2">
               <!-- <span class="d-none d-md-block fs-1"> Pause </span> -->
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -143,10 +143,15 @@
                 <path d="M7 4v16l13 -8z" />
               </svg>
             </button>
+            <button v-else @click="fastForward"
+              class="h-100 btn btn-outline-light border border-white text-white d-flex align-items-center justify-content-center">
+              <!-- <span class="d-none d-md-block fs-1"> Pause </span> -->
+              <svg  xmlns="http://www.w3.org/2000/svg"  width="32"  height="32"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-player-track-next"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 5v14l8 -7z" /><path d="M14 5v14l8 -7z" /></svg>
+            </button>
           </div>
         </div>
       </div>
-      <div class=" text-end">2024 | Safwan Zarif</div>
+      <div class=" text-end">2025 | Safwan Zarif</div>
     </div>
     <div id="break-prompt" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
       aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -167,7 +172,7 @@
           <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
             <h2 class="sub-title text-center mb-3">{{ rehatDetail[nextRehat].text }}</h2>
             <button class="btn btn-outline-warning w-75">Overtime: {{ hours }}{{ hours ? " : " : "" }}{{ minutes }} : {{ seconds }}</button>
-            <h3 class="text-center mt-3 fs-4">Tempoh Rehat: {{ timer.break[nextRehat] }} Minit</h3>
+            <h3 class="text-center mt-3 fs-4">Tempoh Rehat:{{ timer.break[nextRehat] > 0?` ${timer.break[nextRehat]} Minit`:"" }}{{ timer.breakSecond[nextRehat] > 0?` ${timer.breakSecond[nextRehat]} Saat`:"" }} </h3>
           </div>
           <div class="modal-footer d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
@@ -339,26 +344,43 @@
     </div>
     <SettingModal id="timer-settings" title="Tetapan > Timer">
       <div class="d-flex flex-column justify-content-start w-100">
-        <div class="d-flex mb-2">
-          <button class="btn btn-outline-light fs-5 w-100 d-flex align-items-center justify-content-center" disabled>
-            <span class="ms-2">Tempoh Fokus (Minit)</span>
+        <div class="d-flex mb-2 fw-bold">
+          <button class="btn btn-outline-light fs-5 w-100 d-flex align-items-center justify-content-center fw-bold" disabled>
+            Tetapan Tempoh
           </button>
-          <input v-model="timer.focus" type="number"
-            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="5">
+          <button class="btn btn-outline-light fs-5 w-25 d-flex align-items-center justify-content-center fw-bold" disabled>
+            Minit
+          </button>
+          <button class="btn btn-outline-light fs-5 w-25 d-flex align-items-center justify-content-center fw-bold" disabled>
+            Saat
+          </button>
         </div>
         <div class="d-flex mb-2">
           <button class="btn btn-outline-light fs-5 w-100 d-flex align-items-center justify-content-center" disabled>
-            <span class="ms-2">Rehat Pendek (Minit)</span>
+            <span class="ms-2">Fokus</span>
+          </button>
+          <input v-model="timer.focusTime" type="number"
+            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="0">
+          <input v-model="timer.focusSecond" type="number" max="59"
+            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="0">
+        </div>
+        <div class="d-flex mb-2">
+          <button class="btn btn-outline-light fs-5 w-100 d-flex align-items-center justify-content-center" disabled>
+            <span class="ms-2">Rehat Pendek</span>
           </button>
           <input v-model="timer.break[1]" type="number"
-            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="5">
+            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="0">
+          <input v-model="timer.breakSecond[1]" type="number" max="59"
+            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="0">
         </div>
         <div class="d-flex mb-2">
           <button class="btn btn-outline-light fs-5 w-100 d-flex align-items-center justify-content-center" disabled>
-            <span class="ms-2">Rehat Panjang (Minit)</span>
+            <span class="ms-2">Rehat Panjang</span>
           </button>
           <input v-model="timer.break[2]" type="number"
-            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="5">
+            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="0">
+          <input v-model="timer.breakSecond[2]" type="number" max="59"
+            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="0">
         </div>
         <button data-bs-target="#timer-rehat-settings" data-bs-toggle="modal" data-bs-dismiss="modal"
           class="btn btn-outline-light w-100 fs-3 mb-2 d-flex align-items-center justify-content-center">
@@ -572,6 +594,7 @@ export default {
       // 3 Long Break
       // 4 Paused
       // 5 Stopped
+      loading:false,
       mode: 0,
       showClock: true,
       wakeLock: {},
@@ -582,8 +605,10 @@ export default {
       paused_on: 0,
       last_online: 0,
       timer: {
-        focus: 25,
+        focusTime: 25,
+        focusSecond:0,
         break: [0, 5, 20],
+        breakSecond:[0, 0, 0],
         simpleStack: true,
         breakNumber: 4,
         stack: [1,1, 1, 2],
@@ -645,6 +670,44 @@ export default {
     }
   },
   computed: {
+    validTimer(){
+      return this.focusInSecond > 0 && this.shortBreakInSecond > 0 && this.longBreakInSecond > 0
+    },
+    focusInSecond() {
+      return this.timer.focusTime * 60 + (this.timer.focusSecond?this.timer.focusSecond:0)
+    },
+    shortBreakInSecond() {
+      try {
+        return this.timer.break[1] * 60 + (this.timer.breakSecond[1]?this.timer.breakSecond[1]:0)
+      } catch (error) {
+        return 0
+      }
+    },
+    longBreakInSecond() {
+      try {
+        return this.timer.break[2] * 60 + (this.timer.breakSecond[2]?this.timer.breakSecond[2]:0)
+      } catch (error) {
+        return 0
+      }
+    },
+    shortBreakMinute() {
+      return this.timer.break[1]
+    },
+    longBreakMinute() {
+      return this.timer.break[2]
+    },
+    focusMinute() {
+      return this.timer.focusTime
+    },
+    focusSecond() {
+      return this.timer.focusSecond
+    },
+    shortBreakSecond() {
+      return this.timer.breakSecond[1]
+    },
+    longBreakSecond() {
+      return this.timer.breakSecond[2]
+    },
     stackNotSame(){
       return JSON.stringify(this.stack) != JSON.stringify(this.timer.stack)
     },
@@ -666,8 +729,8 @@ export default {
     },
     hours() {
       if (!this.due) {
-        if (this.timer.focus < 60) return ""
-        return Math.floor(this.timer.focus / 60).toString().padStart(2, "0")
+        if (this.timer.focusTime < 60) return ""
+        return Math.floor(this.timer.focusTime / 60).toString().padStart(2, "0")
       }
       if (this.paused_on) {
         let time = this.due - this.paused_on
@@ -680,7 +743,7 @@ export default {
       return Math.floor(time / 3600).toString().padStart(2, "0")
     },
     minutes() {
-      if (!this.due) return (this.timer.focus % 60).toString().padStart(2, "0")
+      if (!this.due) return (this.timer.focusTime % 60).toString().padStart(2, "0")
       var time = this.secondsToDue
       if (this.paused_on) {
         let time = this.due - this.paused_on
@@ -692,7 +755,7 @@ export default {
       return (Math.floor(time / 60) % 60).toString().padStart(2, "0")
     },
     seconds() {
-      if (!this.due) return "00"
+      if (!this.due) return this.timer.focusSecond.toString().padStart(2, "0")
       if (this.paused_on) {
         let time = this.due - this.paused_on
         if (time < 0) return "00"
@@ -713,6 +776,46 @@ export default {
     }
   },
   watch: {
+    validTimer(newVal, oldVal){
+      if(!newVal){
+        if(this.focusInSecond <= 0) {
+          if(this.timer.focusTime < 0) this.timer.focusTime = 0
+          if(this.timer.focusTime == 0 && this.timer.focusSecond <= 0) this.timer.focusSecond = 5
+        }
+        if(this.shortBreakInSecond <= 0) {
+          if(this.timer.break[1] < 0) this.timer.break[1] = 0
+          if(this.timer.break[1] == 0 && this.timer.breakSecond[1] <= 0) this.timer.breakSecond[1] = 5
+        }
+        if(this.longBreakInSecond <= 0) {
+          if(this.timer.break[2] < 0) this.timer.break[2] = 0
+          if(this.timer.break[2] == 0 && this.timer.breakSecond[2] <= 0) this.timer.breakSecond[2] = 5
+        }
+      }
+    },
+    focusMinute(newVal, oldVal) {
+      if(this.loading) return
+      if(newVal > 0) this.timer.focusSecond = 0;
+    },
+    shortBreakMinute(newVal, oldVal) {
+      if(this.loading) return
+      if(newVal > 0) this.timer.breakSecond[1] = 0;
+    },
+    longBreakMinute(newVal, oldVal) {
+      if(this.loading) return
+      if(newVal > 0) this.timer.breakSecond[2] = 0;
+    },
+    focusSecond(newVal, oldVal) {
+      if(newVal > 59) this.timer.focusSecond = 59;
+      if(newVal < 0) this.timer.focusSecond = 0;
+    },
+    shortBreakSecond(newVal, oldVal) {
+      if(newVal > 59) this.timer.breakSecond[1] = 59;
+      if(newVal < 0) this.timer.breakSecond[1] = 0;
+    },
+    longBreakSecond(newVal, oldVal) {
+      if(newVal > 59) this.timer.breakSecond[2] = 59;
+      if(newVal < 0) this.timer.breakSecond[2] = 0;
+    },
     mode(newVal, oldVal) {
       this.pageState = this.states[newVal]
     },
@@ -788,8 +891,9 @@ export default {
     getFromLocal() {
       let data = localStorage.getItem("fokus-data")
       // let data = '{"mode":3,"showClock":true,"nextReduce":[36,0],"stack":[1,1],"due":1719028169,"current":1719026369,"paused_on":0,"timer":{"focus":1,"break":[0,5,30],"simpleStack":false,"breakNumber":3,"stack":[2,1,1],"extra_pad":10,"focus_extra_mode":1,"focus_extra_deduct_min":5,"focus_extra_add_rate":0.5,"rest_extra_mode":2,"rest_extra_deduct_min":1,"rest_extra_add_rate":2.5}}'
-      // console.log("data got",data)
+      console.log("data got",data)
       if (data) {
+        this.loading = true
         let {
           mode,
           showClock,
@@ -811,8 +915,15 @@ export default {
         this.due = due
         // console.log("paused_on set")
         this.timer = timer
+        if(timer.focusSecond === undefined){
+          this.timer.focusSecond = 0
+          this.timer.breakSecond = [0,0,0]
+        }
         let last2Hour = moment().subtract(2,"hours").unix()
         if(due && !paused_on && due < last2Hour) this.stopTimer()
+        setTimeout(() => {
+          this.loading = false
+        }, 500);
         // console.log("timer set")
       }
     },
@@ -857,7 +968,7 @@ export default {
         else toAdd = Math.floor(this.secondsAfterDue * this.timer.focus_extra_add_rate)
       }
       if (!this.stack.length) this.stack = [...this.timer.stack]
-      return this.runTimer(currentRehat + 1, this.timer.break[currentRehat], toAdd)
+      return this.runTimer(currentRehat + 1, this.timer.break[currentRehat] * 60 + this.timer.breakSecond[currentRehat], toAdd)
     },
     startFocus() {
       this.promptFocus()
@@ -868,7 +979,7 @@ export default {
         }
         else toAdd = Math.floor(this.secondsAfterDue * this.timer.rest_extra_add_rate)
       }
-      return this.runTimer(1, this.timer.focus, toAdd)
+      return this.runTimer(1, this.focusInSecond, toAdd)
     },
     promptChange(mode) {
       this.releaseAfter()
@@ -901,19 +1012,22 @@ export default {
       modal.toggle()
     },
     startTimer() {
-      this.runTimer(1, this.timer.focus)
+      this.runTimer(1, this.focusInSecond)
     },
     runTimer(mode, interval, toAdd = 0) {
       this.mode = mode
-      let seconds = interval * 60
+      let seconds = interval
       // let seconds = 2 //Use for testing
-      let reduceMode = this.mode - 1
+      let reduceMode = mode - 1
       if (reduceMode > 0) reduceMode = 1
       let reduceBy = this.nextReduce[reduceMode]
+      console.log("reduceBy", reduceBy)
       if (reduceBy) {
-        let minimum = reduceMode ? this.timer.focus_extra_deduct_min * 60 : this.timer.rest_extra_deduct_min * 60
+        let minimum = reduceMode ? this.timer.rest_extra_deduct_min * 60 : this.timer.focus_extra_deduct_min * 60
+        console.log("minimum", minimum)
         seconds = seconds - reduceBy
         if (seconds < minimum) seconds = minimum
+        console.log("seconds", seconds)
         this.nextReduce[reduceMode] = 0
       }
       let momentToDue = moment().add(seconds, 'seconds')
@@ -927,8 +1041,12 @@ export default {
       // console.log("updating time")
       this.current = moment().unix()
     },
+    fastForward() {
+      let momentToDue = moment().add(3, 'seconds')
+      this.due = momentToDue.unix()
+    },
     test() {
-      notifyMe()
+      console.log("test")
     }
   },
 }
