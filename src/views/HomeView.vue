@@ -919,6 +919,9 @@ export default {
           this.timer.focusSecond = 0
           this.timer.breakSecond = [0,0,0]
         }
+        if(timer.focusTime === undefined){
+          this.timer.focusTime = timer.focus?timer.focus:25
+        }
         let last2Hour = moment().subtract(2,"hours").unix()
         if(due && !paused_on && due < last2Hour) this.stopTimer()
         setTimeout(() => {
