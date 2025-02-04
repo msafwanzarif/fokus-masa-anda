@@ -1,5 +1,6 @@
 <template>
-  <!-- <div class="position-absolute" style="z-index: 9999;"><button class="btn btn-primary" @click="fastForward">Debug {{ validTimer }}</button></div> -->
+  <!-- <div class="position-absolute" style="z-index: 9999;"><button class="btn btn-primary" @click="test">Debug {{
+    last_online }}</button></div> -->
   <div class="container-fluid w-100 h-100" :class="pageState.bg">
     <div class="d-flex flex-column justify-content-between h-100">
       <div class="">
@@ -92,6 +93,25 @@
               <path d="M6 19v2" />
               <path d="M18 19v2" />
             </svg>
+            <svg v-else-if="mode == 3" xmlns="http://www.w3.org/2000/svg" width="30vmin" height="30vmin"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-armchair d-none d-md-block">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path
+                d="M5 11a2 2 0 0 1 2 2v2h10v-2a2 2 0 1 1 4 0v4a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-4a2 2 0 0 1 2 -2z" />
+              <path d="M5 11v-5a3 3 0 0 1 3 -3h8a3 3 0 0 1 3 3v5" />
+              <path d="M6 19v2" />
+              <path d="M18 19v2" />
+            </svg>
+            <svg v-else-if="mode == 4" xmlns="http://www.w3.org/2000/svg" width="30vmin" height="30vmin" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-notebook">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-11a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1m3 0v18" />
+              <path d="M13 8l2 0" />
+              <path d="M13 12l2 0" />
+            </svg>
           </div>
           <!-- <div v-if="mode < 2" class="d-flex align-items-center justify-content-center">
             <h2 class="sub-title me-3">Menulis</h2>
@@ -113,7 +133,7 @@
               class="btn d-flex align-items-center justify-content-center"
               :class="pageState.timeClass, pageState.countDownClass">
               <span class="me-2" v-if="showClock || mode > 1">{{ hours }}{{ hours ? " : " : "" }}{{ minutes }} : {{
-    seconds }}</span>
+                seconds }}</span>
               <svg v-if="mode < 2" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"
                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="icon icon-tabler icons-tabler-outline icon-tabler-clock">
@@ -146,12 +166,74 @@
             <button v-else @click="fastForward"
               class="h-100 btn btn-outline-light border border-white text-white d-flex align-items-center justify-content-center">
               <!-- <span class="d-none d-md-block fs-1"> Pause </span> -->
-              <svg  xmlns="http://www.w3.org/2000/svg"  width="32"  height="32"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-player-track-next"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 5v14l8 -7z" /><path d="M14 5v14l8 -7z" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-player-track-next">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M3 5v14l8 -7z" />
+                <path d="M14 5v14l8 -7z" />
+              </svg>
             </button>
           </div>
         </div>
       </div>
       <div class=" text-end">2025 | Safwan Zarif</div>
+    </div>
+    <div id="startPrompt" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+      aria-labelledby="staticBackdropLabel" aria-hidden="true">
+      <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div @click="promptSetting" class="c-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path
+                  d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
+                <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+              </svg>
+            </div>
+          </div>
+          <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
+            <h2 class="sub-title text-center mb-3">Let's do this!</h2>
+            <p class="text-center fs-5">Mulakan dengan Bismillah 😄</p>
+          </div>
+          <div class="modal-footer d-flex align-items-center justify-content-center">
+            <button @click="startFocus" type="button" class="btn btn-success">Let's GO!</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="welcome-prompt" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+      aria-labelledby="staticBackdropLabel" aria-hidden="true">
+      <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div @click="promptSetting" class="c-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path
+                  d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
+                <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+              </svg>
+            </div>
+          </div>
+          <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
+            <h2 class="welcome-title text-center mb-3">{{ welcome.title }}</h2>
+            <p class="text-center fs-5">Hari ini: <b>{{ welcome.dayLine }}</b></p>
+            <div class="py-2 px-5 border border-light rounded-4 mt-2">
+              <h2 class="quote-text fs-5 text-center fst-italic">" {{ welcome.motivationQuote }} "</h2>
+            </div>
+          </div>
+          <div class="modal-footer d-flex align-items-center justify-content-center">
+            <button type="button" class="btn btn-primary" @click="startPlanning">Mulakan Planning Dahulu</button>
+            <button type="button" class="btn btn-success" @click="startFocus" data-bs-dismiss="modal">Terus Fokus!</button>
+          </div>
+        </div>
+      </div>
     </div>
     <div id="break-prompt" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
       aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -171,12 +253,14 @@
           </div>
           <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
             <h2 class="sub-title text-center mb-3">{{ rehatDetail[nextRehat].text }}</h2>
-            <button class="btn btn-outline-warning w-75">Overtime: {{ hours }}{{ hours ? " : " : "" }}{{ minutes }} : {{ seconds }}</button>
-            <h3 class="text-center mt-3 fs-4">Tempoh Rehat:{{ timer.break[nextRehat] > 0?` ${timer.break[nextRehat]} Minit`:"" }}{{ timer.breakSecond[nextRehat] > 0?` ${timer.breakSecond[nextRehat]} Saat`:"" }} </h3>
+            <button class="btn btn-outline-warning w-75">Overtime: {{ hours }}{{ hours ? " : " : "" }}{{ minutes }} : {{
+              seconds }}</button>
+            <h3 class="text-center mt-3 fs-4">Tempoh Rehat:{{ timer.break[nextRehat] > 0 ? ` ${timer.break[nextRehat]}
+              Minit`:"" }}{{ timer.breakSecond[nextRehat] > 0 ? ` ${timer.breakSecond[nextRehat]} Saat` : "" }} </h3>
           </div>
           <div class="modal-footer d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
-              <button @click="stopTimer" type="button" class="btn btn-outline-danger me-1"><svg
+              <button @click="stopTimer()" type="button" class="btn btn-outline-danger me-1"><svg
                   xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
                   class="icon icon-tabler icons-tabler-filled icon-tabler-player-stop">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -216,11 +300,11 @@
           <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
             <h2 class="sub-title text-center mb-3">Paused !</h2>
             <button class="btn btn-outline-warning w-75 mb-4">Masa yang Tinggal: {{ hours }}{{ hours ? " : " : "" }}{{
-    minutes }} : {{ seconds }}</button>
+              minutes }} : {{ seconds }}</button>
           </div>
           <div class="modal-footer d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
-              <button @click="stopTimer" type="button" class="btn btn-outline-danger me-1"><svg
+              <button @click="stopTimer()" type="button" class="btn btn-outline-danger me-1"><svg
                   xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
                   class="icon icon-tabler icons-tabler-filled icon-tabler-player-stop">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -250,7 +334,8 @@
           </div>
           <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
             <h2 class="sub-title text-center mb-3">Masa untuk Fokus !</h2>
-            <button class="btn btn-outline-warning w-75 mb-4">Overtime Rehat: {{ hours }}{{ hours ? " : " : "" }}{{ minutes }} : {{ seconds }}</button>
+            <button class="btn btn-outline-warning w-75 mb-4">Overtime Rehat: {{ hours }}{{ hours ? " : " : "" }}{{
+              minutes }} : {{ seconds }}</button>
             <!-- <div class="d-flex align-items-center justify-content-center">
               <h2 class="fs-4 me-3">Menulis</h2>
               <button class="btn btn-outline-info">
@@ -269,7 +354,7 @@
           </div>
           <div class="modal-footer d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
-              <button @click="stopTimer" type="button" class="btn btn-outline-danger me-1"><svg
+              <button @click="stopTimer()" type="button" class="btn btn-outline-danger me-1"><svg
                   xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
                   class="icon icon-tabler icons-tabler-filled icon-tabler-player-stop">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -332,8 +417,12 @@
                 <span class="ms-2">Target</span>
               </button> -->
             </div>
-            <button class="btn btn-outline-danger w-100 fs-3 mb-3" data-bs-dismiss="modal"
-              aria-label="Close">Tutup</button>
+            <div class="d-flex flex-column justify-content-start w-100">
+              <button @click="runStartOfDay" class="btn btn-outline-primary w-100 fs-3 mb-3" data-bs-dismiss="modal"
+                aria-label="Close">Reset Hari</button>
+              <button class="btn btn-outline-danger w-100 fs-3 mb-3" data-bs-dismiss="modal"
+                aria-label="Close">Tutup</button>
+            </div>
           </div>
           <!-- <div class="modal-footer d-flex align-items-center justify-content-end">
             <button type="button" class="btn btn-outline-warning">Batal</button>
@@ -345,13 +434,16 @@
     <SettingModal id="timer-settings" title="Tetapan > Timer">
       <div class="d-flex flex-column justify-content-start w-100">
         <div class="d-flex mb-2 fw-bold">
-          <button class="btn btn-outline-light fs-5 w-100 d-flex align-items-center justify-content-center fw-bold" disabled>
+          <button class="btn btn-outline-light fs-5 w-100 d-flex align-items-center justify-content-center fw-bold"
+            disabled>
             Tetapan Tempoh
           </button>
-          <button class="btn btn-outline-light fs-5 w-25 d-flex align-items-center justify-content-center fw-bold" disabled>
+          <button class="btn btn-outline-light fs-5 w-25 d-flex align-items-center justify-content-center fw-bold"
+            disabled>
             Minit
           </button>
-          <button class="btn btn-outline-light fs-5 w-25 d-flex align-items-center justify-content-center fw-bold" disabled>
+          <button class="btn btn-outline-light fs-5 w-25 d-flex align-items-center justify-content-center fw-bold"
+            disabled>
             Saat
           </button>
         </div>
@@ -362,6 +454,15 @@
           <input v-model="timer.focusTime" type="number"
             class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="0">
           <input v-model="timer.focusSecond" type="number" max="59"
+            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="0">
+        </div>
+        <div class="d-flex mb-2">
+          <button class="btn btn-outline-light fs-5 w-100 d-flex align-items-center justify-content-center" disabled>
+            <span class="ms-2">Planning</span>
+          </button>
+          <input v-model="timer.planTime" type="number"
+            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="0">
+          <input v-model="timer.planSecond" type="number" max="59"
             class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="0">
         </div>
         <div class="d-flex mb-2">
@@ -569,8 +670,16 @@
   font-size: 20vmin;
 }
 
+.quote-text {
+  line-height: 1.3;
+}
+
 .sub-title {
   font-size: 8vmin;
+}
+
+.welcome-title {
+  font-size: 6vmin;
 }
 
 .rest-time {
@@ -588,30 +697,36 @@ export default {
   components: { SettingModal },
   data() {
     return {
-      // 0 Not Started
+      // 0 Not Started / Stopped
       // 1 Focus
       // 2 Short Break
       // 3 Long Break
-      // 4 Paused
-      // 5 Stopped
-      loading:false,
+      // 4 Planning
+      welcome: {
+        title: "Selamat Datang",
+        dayLine: "Rabu, 5 Feb 2025",
+        motivationQuote: "Setiap perjalanan menuju kejayaan pasti ada onak dan duri. Teruskan usaha dan semangat, dan jangan sesekali menyerah. Kerana penghujungnya ada kemanisan yang menanti.",
+      },
+      loading: false,
       mode: 0,
       showClock: true,
       wakeLock: {},
       nextReduce: [0, 0],
-      stack: [1,1,1, 2],
+      stack: [1, 1, 1, 2],
       due: 0,
       current: 0,
       paused_on: 0,
       last_online: 0,
       timer: {
         focusTime: 25,
-        focusSecond:0,
+        focusSecond: 0,
+        planTime: 15,
+        planSecond: 0,
         break: [0, 5, 20],
-        breakSecond:[0, 0, 0],
+        breakSecond: [0, 0, 0],
         simpleStack: true,
         breakNumber: 4,
-        stack: [1,1, 1, 2],
+        stack: [1, 1, 1, 2],
         extra_pad: 10,
         focus_extra_mode: 0,
         focus_extra_deduct_min: 5,
@@ -660,7 +775,7 @@ export default {
         },
         {
           bg: "",
-          bigText: "Selamat Datang",
+          bigText: "Planning",
           timeClass: "rest-time",
           buttonClass: "btn-outline-white",
           countDownClass: "border border-white text-white w-100 mx-3",
@@ -670,22 +785,22 @@ export default {
     }
   },
   computed: {
-    validTimer(){
+    validTimer() {
       return this.focusInSecond > 0 && this.shortBreakInSecond > 0 && this.longBreakInSecond > 0
     },
     focusInSecond() {
-      return this.timer.focusTime * 60 + (this.timer.focusSecond?this.timer.focusSecond:0)
+      return this.timer.focusTime * 60 + (this.timer.focusSecond ? this.timer.focusSecond : 0)
     },
     shortBreakInSecond() {
       try {
-        return this.timer.break[1] * 60 + (this.timer.breakSecond[1]?this.timer.breakSecond[1]:0)
+        return this.timer.break[1] * 60 + (this.timer.breakSecond[1] ? this.timer.breakSecond[1] : 0)
       } catch (error) {
         return 0
       }
     },
     longBreakInSecond() {
       try {
-        return this.timer.break[2] * 60 + (this.timer.breakSecond[2]?this.timer.breakSecond[2]:0)
+        return this.timer.break[2] * 60 + (this.timer.breakSecond[2] ? this.timer.breakSecond[2] : 0)
       } catch (error) {
         return 0
       }
@@ -708,7 +823,7 @@ export default {
     longBreakSecond() {
       return this.timer.breakSecond[2]
     },
-    stackNotSame(){
+    stackNotSame() {
       return JSON.stringify(this.stack) != JSON.stringify(this.timer.stack)
     },
     breakNumber() {
@@ -776,45 +891,45 @@ export default {
     }
   },
   watch: {
-    validTimer(newVal, oldVal){
-      if(!newVal){
-        if(this.focusInSecond <= 0) {
-          if(this.timer.focusTime < 0) this.timer.focusTime = 0
-          if(this.timer.focusTime == 0 && this.timer.focusSecond <= 0) this.timer.focusSecond = 5
+    validTimer(newVal, oldVal) {
+      if (!newVal) {
+        if (this.focusInSecond <= 0) {
+          if (this.timer.focusTime < 0) this.timer.focusTime = 0
+          if (this.timer.focusTime == 0 && this.timer.focusSecond <= 0) this.timer.focusSecond = 5
         }
-        if(this.shortBreakInSecond <= 0) {
-          if(this.timer.break[1] < 0) this.timer.break[1] = 0
-          if(this.timer.break[1] == 0 && this.timer.breakSecond[1] <= 0) this.timer.breakSecond[1] = 5
+        if (this.shortBreakInSecond <= 0) {
+          if (this.timer.break[1] < 0) this.timer.break[1] = 0
+          if (this.timer.break[1] == 0 && this.timer.breakSecond[1] <= 0) this.timer.breakSecond[1] = 5
         }
-        if(this.longBreakInSecond <= 0) {
-          if(this.timer.break[2] < 0) this.timer.break[2] = 0
-          if(this.timer.break[2] == 0 && this.timer.breakSecond[2] <= 0) this.timer.breakSecond[2] = 5
+        if (this.longBreakInSecond <= 0) {
+          if (this.timer.break[2] < 0) this.timer.break[2] = 0
+          if (this.timer.break[2] == 0 && this.timer.breakSecond[2] <= 0) this.timer.breakSecond[2] = 5
         }
       }
     },
     focusMinute(newVal, oldVal) {
-      if(this.loading) return
-      if(newVal > 0) this.timer.focusSecond = 0;
+      if (this.loading) return
+      if (newVal > 0) this.timer.focusSecond = 0
     },
     shortBreakMinute(newVal, oldVal) {
-      if(this.loading) return
-      if(newVal > 0) this.timer.breakSecond[1] = 0;
+      if (this.loading) return
+      if (newVal > 0) this.timer.breakSecond[1] = 0
     },
     longBreakMinute(newVal, oldVal) {
-      if(this.loading) return
-      if(newVal > 0) this.timer.breakSecond[2] = 0;
+      if (this.loading) return
+      if (newVal > 0) this.timer.breakSecond[2] = 0
     },
     focusSecond(newVal, oldVal) {
-      if(newVal > 59) this.timer.focusSecond = 59;
-      if(newVal < 0) this.timer.focusSecond = 0;
+      if (newVal > 59) this.timer.focusSecond = 59
+      if (newVal < 0) this.timer.focusSecond = 0
     },
     shortBreakSecond(newVal, oldVal) {
-      if(newVal > 59) this.timer.breakSecond[1] = 59;
-      if(newVal < 0) this.timer.breakSecond[1] = 0;
+      if (newVal > 59) this.timer.breakSecond[1] = 59
+      if (newVal < 0) this.timer.breakSecond[1] = 0
     },
     longBreakSecond(newVal, oldVal) {
-      if(newVal > 59) this.timer.breakSecond[2] = 59;
-      if(newVal < 0) this.timer.breakSecond[2] = 0;
+      if (newVal > 59) this.timer.breakSecond[2] = 59
+      if (newVal < 0) this.timer.breakSecond[2] = 0
     },
     mode(newVal, oldVal) {
       this.pageState = this.states[newVal]
@@ -850,15 +965,25 @@ export default {
     // console.log("wakeLock Set")
     this.pageState = this.states[this.mode]
     // console.log("pageState Set", this.pageState)
-    this.last_online = moment().unix()
     // console.log("last_online Set", this.last_online)
     interval = setInterval(this.updateTime, 1000)
+    // this.runStartOfDay()
     // console.log("interval Set", interval)
   },
   methods: {
-    resetStack(){
+    runStartOfDay() {
+      this.welcome.title = "Selamat Datang"
+      if(this.last_online) this.welcome.title = "Welcome Back!"
+      this.resetStack()
+      // this.stopTimer(this.last_online)
+      this.nextReduce = [0, 0]
+      this.welcome.dayLine = moment().format("dddd, D MMMM YYYY")
+      this.welcome.motivationQuote = "Setiap perjalanan menuju kejayaan pasti ada onak dan duri. Teruskan usaha dan semangat, dan jangan sesekali menyerah. Kerana penghujungnya ada kemanisan yang menanti."
+      this.showModal("welcome-prompt")
+    },
+    resetStack() {
       this.stack = [...this.timer.stack]
-    }, 
+    },
     releaseAfter(time = 0) {
       if (!time) time = this.timer.extra_pad * 1000
       setTimeout(() => { this.wakeLock.release() }, time)
@@ -876,7 +1001,9 @@ export default {
       this.wakeLock.request()
       this.promptPause()
     },
-    saveToLocal() {
+    saveToLocal(last_online = undefined) {
+      if (last_online === undefined) last_online = moment().unix()
+      this.last_online = last_online
       let data = {
         mode: this.mode,
         showClock: this.showClock,
@@ -885,13 +1012,14 @@ export default {
         due: this.due,
         paused_on: this.paused_on,
         timer: this.timer,
+        last_online,
       }
       localStorage.setItem("fokus-data", JSON.stringify(data))
     },
     getFromLocal() {
       let data = localStorage.getItem("fokus-data")
       // let data = '{"mode":3,"showClock":true,"nextReduce":[36,0],"stack":[1,1],"due":1719028169,"current":1719026369,"paused_on":0,"timer":{"focus":1,"break":[0,5,30],"simpleStack":false,"breakNumber":3,"stack":[2,1,1],"extra_pad":10,"focus_extra_mode":1,"focus_extra_deduct_min":5,"focus_extra_add_rate":0.5,"rest_extra_mode":2,"rest_extra_deduct_min":1,"rest_extra_add_rate":2.5}}'
-      console.log("data got",data)
+      console.log("data got", data)
       if (data) {
         this.loading = true
         let {
@@ -901,6 +1029,7 @@ export default {
           stack,
           due,
           paused_on,
+          last_online,
           timer } = JSON.parse(data)
         this.mode = mode
         // console.log("mode set")
@@ -915,20 +1044,28 @@ export default {
         this.due = due
         // console.log("paused_on set")
         this.timer = timer
-        if(timer.focusSecond === undefined){
+        this.last_online = last_online
+        if (timer.focusSecond === undefined) {
           this.timer.focusSecond = 0
-          this.timer.breakSecond = [0,0,0]
+          this.timer.breakSecond = [0, 0, 0]
         }
-        if(timer.focusTime === undefined){
-          this.timer.focusTime = timer.focus?timer.focus:25
+        if (timer.planTime === undefined) {
+          this.timer.planTime = 15
+          this.timer.planSecond = 0
         }
-        let last2Hour = moment().subtract(2,"hours").unix()
-        if(due && !paused_on && due < last2Hour) this.stopTimer()
+        if (timer.focusTime === undefined) {
+          this.timer.focusTime = timer.focus ? timer.focus : 25
+        }
+        let last2Hour = moment().subtract(2, "hours").unix()
+        if (due && !paused_on && due < last2Hour) this.stopTimer()
         setTimeout(() => {
           this.loading = false
-        }, 500);
+        }, 500)
         // console.log("timer set")
       }
+      if (!this.last_online) return this.runStartOfDay()
+      let startOfDay = moment().startOf('day').add(6, 'hours').unix()
+      if (this.last_online < startOfDay) return this.runStartOfDay()
     },
     changeStack(index) {
       if (!this.simpleStack) return this.timer.stack[index] = this.timer.stack[index] % 2 + 1
@@ -939,26 +1076,33 @@ export default {
     pushStack() {
       if (!this.simpleStack) return this.timer.stack.push(1)
     },
-    stopTimer() {
+    stopTimer(last_online = undefined) {
       let mode = this.mode
       this.mode = 0
       this.due = 0
       this.releaseAfter()
       if (this.paused_on) {
         this.paused_on = 0
-        this.promptPause()
+        this.hideModal("pause-prompt")
+        if(last_online) return this.saveToLocal(last_online)
         return this.saveToLocal()
       }
       if (mode == 1) {
-        this.promptBreak()
+        this.hideModal("break-prompt")
+        if(last_online) return this.saveToLocal(last_online)
         return this.saveToLocal()
       }
       this.promptFocus(true)
+      if(last_online) return this.saveToLocal(last_online)
       return this.saveToLocal()
     },
     fokusSemula() {
       this.promptBreak()
       this.startTimer()
+    },
+    startPlanning() {
+      this.hideModal("welcome-prompt")
+      return this.runTimer(4, this.timer.planTime * 60 + this.timer.planSecond)
     },
     startBreak() {
       let currentRehat = this.stack.shift()
@@ -974,7 +1118,11 @@ export default {
       return this.runTimer(currentRehat + 1, this.timer.break[currentRehat] * 60 + this.timer.breakSecond[currentRehat], toAdd)
     },
     startFocus() {
-      this.promptFocus()
+      this.hideModal("focus-prompt")
+      if (this.mode == 4) {
+        this.hideModal("startPrompt")
+        return this.runTimer(1, this.focusInSecond)
+      }
       let toAdd = 0
       if (this.timer.rest_extra_mode && this.timer.extra_pad < this.secondsAfterDue) {
         if (this.timer.rest_extra_mode == 1) {
@@ -990,8 +1138,24 @@ export default {
         this.promptBreak()
         return notifyMe("Break Time!", "Let's take a break")
       }
+      if (mode == 4) {
+        return this.showModal("startPrompt")
+      }
       this.promptFocus()
       return notifyMe("Focus Time!", "Let's go change the world!")
+    },
+    getModal(id) {
+      var myModalEl = document.querySelector(`#${id}`)
+      return bootstrap.Modal.getOrCreateInstance(myModalEl)
+    },
+    showModal(id) {
+      this.getModal(id).show()
+    },
+    hideModal(id) {
+      this.getModal(id).hide()
+    },
+    toggleModal(id) {
+      this.getModal(id).toggle()
     },
     promptSetting() {
       var myModalEl = document.querySelector('#main-settings')
@@ -1011,7 +1175,7 @@ export default {
     promptFocus(close = false) {
       var myModalEl = document.querySelector('#focus-prompt')
       var modal = bootstrap.Modal.getOrCreateInstance(myModalEl)
-      if(close) return modal.hide()
+      if (close) return modal.hide()
       modal.toggle()
     },
     startTimer() {
@@ -1049,7 +1213,7 @@ export default {
       this.due = momentToDue.unix()
     },
     test() {
-      console.log("test")
+      this.saveToLocal(1738554918)
     }
   },
 }
