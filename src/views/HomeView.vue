@@ -54,6 +54,14 @@
               <path d="M6 19v2" />
               <path d="M18 19v2" />
             </svg>
+            <svg v-else-if="mode == 4" xmlns="http://www.w3.org/2000/svg" width="45vmin" height="45vmin" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-notebook">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-11a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1m3 0v18" />
+              <path d="M13 8l2 0" />
+              <path d="M13 12l2 0" />
+            </svg>
           </div>
           <div class="d-flex align-items-center justify-content-center mb-2">
             <h1 class="main-title me-md-3">{{ pageState.bigText }}</h1>
@@ -105,7 +113,7 @@
             </svg>
             <svg v-else-if="mode == 4" xmlns="http://www.w3.org/2000/svg" width="30vmin" height="30vmin" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-              class="icon icon-tabler icons-tabler-outline icon-tabler-notebook">
+              class="icon icon-tabler icons-tabler-outline icon-tabler-notebook d-none d-md-block">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-11a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1m3 0v18" />
               <path d="M13 8l2 0" />
@@ -221,7 +229,7 @@
             </div>
             <span class="ms-2" v-if="!last_online"> <-- butang setting di sini</span>
           </div>
-          <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
+          <div class="modal-body d-flex flex-column justify-content-around align-items-center py-3 py-md-5">
             <h2 class="welcome-title text-center mb-3" :class="{'first-time-title':!last_online}">{{ welcome.title }}</h2>
             <p class="text-center fs-6">Hari ini: <b>{{ welcome.dayLine }}</b></p>
             <div v-if="last_online" class="py-2 px-5 border border-light rounded-4 mt-2">
@@ -698,7 +706,7 @@
   font-size: 6vmin;
 }
 .first-time-title{
-  font-size: 8vmin;
+  font-size: 10vmin;
 }
 .rest-time {
   font-size: 11.5vmin;
