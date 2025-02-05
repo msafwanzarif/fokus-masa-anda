@@ -1,6 +1,5 @@
 <template>
-  <!-- <div class="position-absolute" style="z-index: 9999;"><button class="btn btn-primary" @click="test">Debug {{
-    last_online }}</button></div> -->
+  <!-- <div class="position-absolute" style="z-index: 9999;"><button class="btn btn-primary" @click="test">Test 1 {{ mode }}</button><button class="btn btn-primary" @click="test2">Test 2</button></div> -->
   <div class="container-fluid w-100 h-100" :class="pageState.bg">
     <div class="d-flex flex-column justify-content-between h-100">
       <div class="">
@@ -200,14 +199,14 @@
             <p class="text-center fs-5">Mulakan dengan Bismillah 😄</p>
           </div>
           <div class="modal-footer d-flex align-items-center justify-content-center">
-            <button @click="startFocus" type="button" class="btn btn-success">Let's GO!</button>
+            <button @click="startFocus()" type="button" class="btn btn-success">Let's GO!</button>
           </div>
         </div>
       </div>
     </div>
     <div id="welcome-prompt" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
       aria-labelledby="staticBackdropLabel" aria-hidden="true">
-      <div class="modal-dialog modal-md modal-dialog-centered">
+      <div class="modal-dialog modal-dialog-centered" :class="{'modal-md': last_online,'modal-lg':!last_online}">
         <div class="modal-content">
           <div class="modal-header">
             <div @click="promptSetting" class="c-pointer">
@@ -220,17 +219,25 @@
                 <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
               </svg>
             </div>
+            <span class="ms-2" v-if="!last_online"> <-- butang setting di sini</span>
           </div>
           <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
-            <h2 class="welcome-title text-center mb-3">{{ welcome.title }}</h2>
-            <p class="text-center fs-5">Hari ini: <b>{{ welcome.dayLine }}</b></p>
-            <div class="py-2 px-5 border border-light rounded-4 mt-2">
+            <h2 class="welcome-title text-center mb-3" :class="{'first-time-title':!last_online}">{{ welcome.title }}</h2>
+            <p class="text-center fs-6">Hari ini: <b>{{ welcome.dayLine }}</b></p>
+            <div v-if="last_online" class="py-2 px-5 border border-light rounded-4 mt-2">
               <h2 class="quote-text fs-5 text-center fst-italic">" {{ welcome.motivationQuote }} "</h2>
             </div>
+            <div v-else class="mx-4 px-4 py-2 border border-light rounded-2">
+              <p class="fs-6 fs-md-5">Jom <b>fokuskan masa anda</b> dengan memanfaatkan <a href="https://medschoolinsiders.com/pre-med/the-pomodoro-technique/" target="_blank">teknik pomodoro</a>, kaedah yang dapat meningkatkan produktiviti anda! </p>
+              <p class="fs-6 fs-md-5">Anda boleh tekan butang setting di atas untuk <b>tetapkan timer, susunan rehat dan kawalan overtime</b> yang sesuai dengan anda</p>
+              <p class="fs-6 fs-md-5">Pada setiap permulaan hari, anda juga disarankan menggunakan sedikit masa untuk 'Plan' dahulu segala tugasan yang anda ingin buat.</p>
+              <p class="fs-6 fs-md-5"><i>"Semoga Berjaya 😄"</i> - Safwan Zarif di <a href="mailto:">safzardevs@gmail.com</a></p>
+            </div>
+
           </div>
           <div class="modal-footer d-flex align-items-center justify-content-center">
             <button type="button" class="btn btn-primary" @click="startPlanning">Mulakan Planning Dahulu</button>
-            <button type="button" class="btn btn-success" @click="startFocus" data-bs-dismiss="modal">Terus Fokus!</button>
+            <button type="button" class="btn btn-success" @click="startFocus(true)" data-bs-dismiss="modal">Terus Fokus!</button>
           </div>
         </div>
       </div>
@@ -253,8 +260,9 @@
           </div>
           <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
             <h2 class="sub-title text-center mb-3">{{ rehatDetail[nextRehat].text }}</h2>
-            <button class="btn btn-outline-warning w-75">Overtime: {{ hours }}{{ hours ? " : " : "" }}{{ minutes }} : {{
-              seconds }}</button>
+            <button v-if="isOvertime" class="btn btn-outline-warning w-75">Overtime: {{ hoursOvertime }}{{ hoursOvertime ? " : " : "" }}{{ minutesOvertime }} : {{
+              secondsOvertime }}</button>
+            <button v-else class="btn btn-outline-info w-75 d-flex justify-content-center"><span style="min-width: 2.3rem;font-weight: bold;">{{ timer.extra_pad - secondsAfterDue }}</span> <span>saat sebelum overtime</span></button>
             <h3 class="text-center mt-3 fs-4">Tempoh Rehat:{{ timer.break[nextRehat] > 0 ? ` ${timer.break[nextRehat]}
               Minit`:"" }}{{ timer.breakSecond[nextRehat] > 0 ? ` ${timer.breakSecond[nextRehat]} Saat` : "" }} </h3>
           </div>
@@ -334,8 +342,9 @@
           </div>
           <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
             <h2 class="sub-title text-center mb-3">Masa untuk Fokus !</h2>
-            <button class="btn btn-outline-warning w-75 mb-4">Overtime Rehat: {{ hours }}{{ hours ? " : " : "" }}{{
-              minutes }} : {{ seconds }}</button>
+            <button v-if="isOvertime" class="btn btn-outline-warning w-75 mb-4">Overtime Rehat: {{ hoursOvertime }}{{ hoursOvertime ? " : " : "" }}{{ minutesOvertime }} : {{
+              secondsOvertime }}</button>
+            <button v-else class="btn btn-outline-light w-75 mb-4 d-flex justify-content-center"><span style="min-width: 2.3rem;font-weight: bold;">{{ timer.extra_pad - secondsAfterDue }}</span> <span>saat sebelum overtime</span></button>
             <!-- <div class="d-flex align-items-center justify-content-center">
               <h2 class="fs-4 me-3">Menulis</h2>
               <button class="btn btn-outline-info">
@@ -577,9 +586,10 @@
             <span class="ms-2">OT Padding (saat)</span>
           </button>
           <input v-model="timer.extra_pad" type="number"
-            class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
+            class="form-control w-25 h-100 bg-dark text-white fs-4 border border-light" min="1">
         </div>
-        <hr>
+        <span class="fs-6 mb-0">{{`* ${timer.extra_pad} saat pertama selepas tempoh fokus atau rehat tidak akan dikira sebagai overtime`}} </span>
+        <hr class="my-2">
         <label class="form-label fs-4 mt-2"> Jika Fokus Overtime :</label>
         <div class="w-100 mb-2">
           <div class="form-check">
@@ -604,21 +614,24 @@
             </label>
           </div>
         </div>
-        <div v-if="timer.focus_extra_mode == 2" class="d-flex mb-2">
-          <button class="btn btn-outline-light fs-4 w-100 d-flex align-items-center justify-content-center" disabled>
-            <span class="ms-2">Nisbah Tukaran</span>
-          </button>
-          <input v-model="timer.focus_extra_add_rate" type="number"
-            class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
+        <div v-if="timer.focus_extra_mode == 2" class="mb-2">
+          <div class="d-flex">
+            <button class="btn btn-outline-light fs-4 w-100 d-flex align-items-center justify-content-center" disabled>
+              <span class="ms-2">Nisbah Tukaran</span>
+            </button>
+            <input v-model="timer.focus_extra_add_rate" type="number"
+              class="form-control w-25 bg-dark text-white fs-4 border border-light" min="1">
+          </div>
+          <div class="mt-1 ">{{`* untuk setiap 1 saat overtime fokus, ${timer.focus_extra_add_rate} saat akan ditambah pada tempoh rehat`}}</div>
         </div>
         <div v-if="timer.focus_extra_mode == 1" class="d-flex mb-2">
           <button class="btn btn-outline-light fs-4 w-100 d-flex align-items-center justify-content-center" disabled>
             <span class="ms-2">Minimum Fokus (minit)</span>
           </button>
           <input v-model="timer.focus_extra_deduct_min" type="number"
-            class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
+            class="form-control w-25 h-100 bg-dark text-white fs-4 border border-light" min="1">
         </div>
-        <hr>
+        <hr class="my-2">
         <label class="form-label fs-4 mt-2"> Jika Rehat Overtime :</label>
         <div class="w-100 mb-2">
           <div class="form-check">
@@ -643,19 +656,22 @@
             </label>
           </div>
         </div>
-        <div v-if="timer.rest_extra_mode == 2" class="d-flex mb-2">
-          <button class="btn btn-outline-light fs-4 w-100 d-flex align-items-center justify-content-center" disabled>
-            <span class="ms-2">Nisbah Tukaran</span>
-          </button>
-          <input v-model="timer.rest_extra_add_rate" type="number"
-            class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
+        <div v-if="timer.rest_extra_mode == 2" class="mb-2">
+          <div class="d-flex">
+            <button class="btn btn-outline-light fs-4 w-100 d-flex align-items-center justify-content-center" disabled>
+              <span class="ms-2">Nisbah Tukaran</span>
+            </button>
+            <input v-model="timer.rest_extra_add_rate" type="number"
+              class="form-control w-25 bg-dark text-white fs-4 border border-light" min="1">
+          </div>
+          <div class="mt-1">{{`* untuk setiap 1 saat overtime rehat, ${timer.rest_extra_add_rate} saat akan ditambah pada tempoh fokus`}}</div>
         </div>
         <div v-if="timer.rest_extra_mode == 1" class="d-flex mb-2">
           <button class="btn btn-outline-light fs-4 w-100 d-flex align-items-center justify-content-center" disabled>
             <span class="ms-2">Minimum Rehat (minit)</span>
           </button>
           <input v-model="timer.rest_extra_deduct_min" type="number"
-            class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
+            class="form-control w-25 h-100 bg-dark text-white fs-4 border border-light" min="1">
         </div>
       </div>
       <button data-bs-target="#timer-settings" data-bs-toggle="modal" data-bs-dismiss="modal"
@@ -681,7 +697,9 @@
 .welcome-title {
   font-size: 6vmin;
 }
-
+.first-time-title{
+  font-size: 8vmin;
+}
 .rest-time {
   font-size: 11.5vmin;
 }
@@ -785,6 +803,9 @@ export default {
     }
   },
   computed: {
+    isOvertime(){
+      return this.secondsAfterDue > this.timer.extra_pad
+    },
     validTimer() {
       return this.focusInSecond > 0 && this.shortBreakInSecond > 0 && this.longBreakInSecond > 0
     },
@@ -881,6 +902,29 @@ export default {
       if (time < 0) return "00"
       return (time % 60).toString().padStart(2, "0")
     },
+    hoursOvertime() {
+      if(this.secondsPassedOvertime > 0){
+        let time = Math.floor(this.secondsPassedOvertime / 3600)
+        if (time <= 0) return ""
+        return Math.floor(this.secondsPassedOvertime / 3600).toString().padStart(2, "0")
+      }
+      return ""
+    },
+    minutesOvertime() {
+      if(this.secondsPassedOvertime > 0){
+        return (Math.floor(this.secondsPassedOvertime / 60) % 60).toString().padStart(2, "0")
+      } 
+      return "00"
+    },
+    secondsPassedOvertime(){
+      return this.secondsAfterDue - this.timer.extra_pad
+    },
+    secondsOvertime(){
+      if(this.secondsPassedOvertime > 0){
+        return (this.secondsPassedOvertime % 60).toString().padStart(2, "0")
+      } 
+      return "00"
+    },
     passedDue() {
       if (this.paused_on) return false
       return this.due && this.due <= this.current
@@ -958,19 +1002,24 @@ export default {
     }
   },
   mounted() {
-    // console.log("mounted")
+    moment.updateLocale('en', {
+        weekdays: [
+            "Ahad", "Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu"
+        ],
+        months: ["Januari", "Februari", "Mac", "April", "Mei", "Jun", "Julai", "Ogos", "September",
+            "Oktober", "November", "Disember"
+        ]
+    });
     this.getFromLocal()
-    // console.log("got from local")
     this.wakeLock = useWakeLock()
-    // console.log("wakeLock Set")
     this.pageState = this.states[this.mode]
-    // console.log("pageState Set", this.pageState)
-    // console.log("last_online Set", this.last_online)
     interval = setInterval(this.updateTime, 1000)
     // this.runStartOfDay()
-    // console.log("interval Set", interval)
   },
   methods: {
+    alert(message){
+      alert(message)
+    },
     runStartOfDay() {
       this.welcome.title = "Selamat Datang"
       if(this.last_online) this.welcome.title = "Welcome Back!"
@@ -1019,7 +1068,6 @@ export default {
     getFromLocal() {
       let data = localStorage.getItem("fokus-data")
       // let data = '{"mode":3,"showClock":true,"nextReduce":[36,0],"stack":[1,1],"due":1719028169,"current":1719026369,"paused_on":0,"timer":{"focus":1,"break":[0,5,30],"simpleStack":false,"breakNumber":3,"stack":[2,1,1],"extra_pad":10,"focus_extra_mode":1,"focus_extra_deduct_min":5,"focus_extra_add_rate":0.5,"rest_extra_mode":2,"rest_extra_deduct_min":1,"rest_extra_add_rate":2.5}}'
-      console.log("data got", data)
       if (data) {
         this.loading = true
         let {
@@ -1032,17 +1080,11 @@ export default {
           last_online,
           timer } = JSON.parse(data)
         this.mode = mode
-        // console.log("mode set")
         this.showClock = showClock
-        // console.log("showClock set")
         this.nextReduce = nextReduce
-        // console.log("nextReduce set")
         this.stack = stack
-        // console.log("stack set")
-        // console.log("due set")
         this.paused_on = paused_on
         this.due = due
-        // console.log("paused_on set")
         this.timer = timer
         this.last_online = last_online
         if (timer.focusSecond === undefined) {
@@ -1061,7 +1103,6 @@ export default {
         setTimeout(() => {
           this.loading = false
         }, 500)
-        // console.log("timer set")
       }
       if (!this.last_online) return this.runStartOfDay()
       let startOfDay = moment().startOf('day').add(6, 'hours').unix()
@@ -1110,15 +1151,16 @@ export default {
       let toAdd = 0
       if (this.timer.focus_extra_mode && this.timer.extra_pad < this.secondsAfterDue) {
         if (this.timer.focus_extra_mode == 1) {
-          this.nextReduce[0] = this.secondsAfterDue
+          this.nextReduce[0] = this.secondsPassedOvertime
         }
-        else toAdd = Math.floor(this.secondsAfterDue * this.timer.focus_extra_add_rate)
+        else toAdd = Math.floor(this.secondsPassedOvertime * this.timer.focus_extra_add_rate)
       }
       if (!this.stack.length) this.stack = [...this.timer.stack]
       return this.runTimer(currentRehat + 1, this.timer.break[currentRehat] * 60 + this.timer.breakSecond[currentRehat], toAdd)
     },
-    startFocus() {
+    startFocus(startOfDay = false) {
       this.hideModal("focus-prompt")
+      if(startOfDay) return this.runTimer(1, this.focusInSecond)
       if (this.mode == 4) {
         this.hideModal("startPrompt")
         return this.runTimer(1, this.focusInSecond)
@@ -1126,9 +1168,9 @@ export default {
       let toAdd = 0
       if (this.timer.rest_extra_mode && this.timer.extra_pad < this.secondsAfterDue) {
         if (this.timer.rest_extra_mode == 1) {
-          this.nextReduce[1] = this.secondsAfterDue
+          this.nextReduce[1] = this.secondsPassedOvertime
         }
-        else toAdd = Math.floor(this.secondsAfterDue * this.timer.rest_extra_add_rate)
+        else toAdd = Math.floor(this.secondsPassedOvertime * this.timer.rest_extra_add_rate)
       }
       return this.runTimer(1, this.focusInSecond, toAdd)
     },
@@ -1182,19 +1224,17 @@ export default {
       this.runTimer(1, this.focusInSecond)
     },
     runTimer(mode, interval, toAdd = 0) {
+      console.log("running timer m,i,tA", mode, interval,toAdd)
       this.mode = mode
       let seconds = interval
       // let seconds = 2 //Use for testing
       let reduceMode = mode - 1
       if (reduceMode > 0) reduceMode = 1
       let reduceBy = this.nextReduce[reduceMode]
-      console.log("reduceBy", reduceBy)
       if (reduceBy) {
         let minimum = reduceMode ? this.timer.rest_extra_deduct_min * 60 : this.timer.focus_extra_deduct_min * 60
-        console.log("minimum", minimum)
         seconds = seconds - reduceBy
         if (seconds < minimum) seconds = minimum
-        console.log("seconds", seconds)
         this.nextReduce[reduceMode] = 0
       }
       let momentToDue = moment().add(seconds, 'seconds')
@@ -1205,7 +1245,6 @@ export default {
       // this.due = moment().add('seconds',2).unix()
     },
     updateTime() {
-      // console.log("updating time")
       this.current = moment().unix()
     },
     fastForward() {
@@ -1213,8 +1252,11 @@ export default {
       this.due = momentToDue.unix()
     },
     test() {
-      this.saveToLocal(1738554918)
-    }
+      this.saveToLocal(12)
+    },
+    test2() {
+      this.saveToLocal(0)
+    },
   },
 }
 </script>
