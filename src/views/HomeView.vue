@@ -717,7 +717,7 @@
 import SettingModal from '../components/SettingModal.vue'
 import moment from 'moment'
 import { useWakeLock } from '@vueuse/core'
-var interval
+var intervalRun
 
 export default {
   components: { SettingModal },
@@ -1021,7 +1021,7 @@ export default {
     this.getFromLocal()
     this.wakeLock = useWakeLock()
     this.pageState = this.states[this.mode]
-    interval = setInterval(this.updateTime, 1000)
+    this.setTicking()
     // this.runStartOfDay()
   },
   methods: {
@@ -1247,17 +1247,24 @@ export default {
       }
       let momentToDue = moment().add(seconds, 'seconds')
       if (toAdd) momentToDue.add(toAdd, 'seconds')
+      this.setTicking()
       this.due = momentToDue.unix()
+      console.log("due", this.due, this.current, this.secondsToDue)
       this.wakeLock.request()
       return this.saveToLocal()
       // this.due = moment().add('seconds',2).unix()
+    },
+    setTicking(){
+      clearInterval(intervalRun);
+      this.updateTime()
+      intervalRun = setInterval(this.updateTime, 1000)
     },
     updateTime() {
       this.current = moment().unix()
     },
     fastForward() {
-      let momentToDue = moment().add(3, 'seconds')
-      this.due = momentToDue.unix()
+      this.setTicking()
+      this.due = moment().add(3, 'seconds').unix()
     },
     test() {
       this.saveToLocal(12)
