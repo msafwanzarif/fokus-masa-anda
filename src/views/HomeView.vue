@@ -1,5 +1,5 @@
 <template>
-  <!-- <div class="position-absolute" style="z-index: 9999;"><button class="btn btn-primary" @click="test">Test 1 {{ mode }}</button><button class="btn btn-primary" @click="test2">Test 2</button></div> -->
+  <!-- <div class="position-absolute" style="z-index: 9999;"><button class="btn btn-primary" @click="test">Test 1</button><button class="btn btn-primary" @click="test2">Test 2</button></div> -->
   <div class="container-fluid w-100 h-100" :class="pageState.bg">
     <div class="d-flex flex-column justify-content-between h-100">
       <div class="">
@@ -1032,7 +1032,7 @@ export default {
       this.welcome.title = "Selamat Datang"
       if(this.last_online) this.welcome.title = "Welcome Back!"
       this.resetStack()
-      // this.stopTimer(this.last_online)
+      this.stopTimer(this.last_online)
       this.nextReduce = [0, 0]
       this.welcome.dayLine = moment().format("dddd, D MMMM YYYY")
       this.welcome.motivationQuote = "Setiap perjalanan menuju kejayaan pasti ada onak dan duri. Teruskan usaha dan semangat, dan jangan sesekali menyerah. Kerana penghujungnya ada kemanisan yang menanti."
@@ -1114,6 +1114,8 @@ export default {
       }
       if (!this.last_online) return this.runStartOfDay()
       let startOfDay = moment().startOf('day').add(6, 'hours').unix()
+      console.log("startOfDay", startOfDay)
+      console.log("last_online", this.last_online)
       if (this.last_online < startOfDay) return this.runStartOfDay()
     },
     changeStack(index) {
