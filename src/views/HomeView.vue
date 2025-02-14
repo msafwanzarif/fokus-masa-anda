@@ -378,7 +378,7 @@
                   <path d="M17 4h-10a3 3 0 0 0 -3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3 -3v-10a3 3 0 0 0 -3 -3z" />
                 </svg></button>
             </div>
-            <button @click="startFocus" type="button" class="btn btn-success">Let's GO!</button>
+            <button @click="startFocus()" type="button" class="btn btn-success">Let's GO!</button>
           </div>
         </div>
       </div>
@@ -1107,7 +1107,7 @@ export default {
           this.timer.focusTime = timer.focus ? timer.focus : 25
         }
         let last2Hour = moment().subtract(2, "hours").unix()
-        if (due && !paused_on && due < last2Hour) this.stopTimer()
+        if (due && !paused_on && due < last2Hour) this.stopTimer(last_online)
         setTimeout(() => {
           this.loading = false
         }, 500)
