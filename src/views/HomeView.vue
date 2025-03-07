@@ -1,5 +1,5 @@
 <template>
-  <div class="position-absolute" style="z-index: 9999;">{{ last_online }}<button class="btn btn-primary" @click="test">Test 1</button><button class="btn btn-primary" @click="test2">Test 2</button></div>
+  <!-- <div class="position-absolute" style="z-index: 9999;">{{ last_online }}<button class="btn btn-primary" @click="test">Test 1</button><button class="btn btn-primary" @click="test2">Test 2</button></div> -->
   <div class="container-fluid w-100 h-100" :class="pageState.bg">
     <div class="d-flex flex-column justify-content-between h-100">
       <div class="">
