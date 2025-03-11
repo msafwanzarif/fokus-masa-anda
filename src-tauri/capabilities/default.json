@@ -6,6 +6,10 @@
     "main"
   ],
   "permissions": [
-    "core:default"
+    "core:default",
+    "notification:default",
+    "core:window:allow-request-user-attention",
+    "core:window:allow-show",
+    "core:window:allow-set-focus"
   ]
 }

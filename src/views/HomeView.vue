@@ -718,6 +718,11 @@ import SettingModal from '../components/SettingModal.vue'
 import moment from 'moment'
 import { useWakeLock } from '@vueuse/core'
 var intervalRun
+import {
+  isPermissionGranted,
+  requestPermission,
+} from '@tauri-apps/plugin-notification'
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 export default {
   components: { SettingModal },
@@ -1009,7 +1014,7 @@ export default {
       }
     }
   },
-  mounted() {
+  async mounted() {
     moment.updateLocale('en', {
         weekdays: [
             "Ahad", "Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu"
@@ -1022,6 +1027,15 @@ export default {
     this.wakeLock = useWakeLock()
     this.pageState = this.states[this.mode]
     this.setTicking()
+    // Do you have permission to send a notification?
+    let permissionGranted = await isPermissionGranted()
+
+    // If not we need to request it
+    if (!permissionGranted) {
+      const permission = await requestPermission()
+      permissionGranted = permission === 'granted'
+    }
+
     // this.runStartOfDay()
   },
   methods: {
@@ -1184,16 +1198,23 @@ export default {
       }
       return this.runTimer(1, this.focusInSecond, toAdd)
     },
-    promptChange(mode) {
+    async promptChange(mode) {
       this.releaseAfter()
+      const appWindow = getCurrentWindow();
       if (mode == 1) {
         this.promptBreak()
+        // await appWindow.show();
+        // await appWindow.setFocus();
+        await appWindow.requestUserAttention(2);
         return notifyMe("Break Time!", "Let's take a break")
       }
       if (mode == 4) {
         return this.showModal("startPrompt")
       }
       this.promptFocus()
+      // await appWindow.show();
+      // await appWindow.setFocus();
+      await appWindow.requestUserAttention(1);
       return notifyMe("Focus Time!", "Let's go change the world!")
     },
     getModal(id) {
