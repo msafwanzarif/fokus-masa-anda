@@ -3,13 +3,18 @@
   "identifier": "default",
   "description": "enables the default permissions",
   "windows": [
-    "main"
+    "main",
+    "my-label"
   ],
   "permissions": [
     "core:default",
     "notification:default",
     "core:window:allow-request-user-attention",
     "core:window:allow-show",
-    "core:window:allow-set-focus"
+    "core:window:allow-set-focus",
+    "core:webview:allow-create-webview-window",
+    "core:window:allow-set-always-on-top",
+    "core:window:allow-close",
+    "core:window:allow-set-decorations"
   ]
 }

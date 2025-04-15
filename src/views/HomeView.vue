@@ -1,5 +1,5 @@
 <template>
-  <!-- <div class="position-absolute" style="z-index: 9999;">{{ last_online }}<button class="btn btn-primary" @click="test">Test 1</button><button class="btn btn-primary" @click="test2">Test 2</button></div> -->
+  <div class="position-absolute" style="z-index: 9999;"><button class="btn btn-primary" @click="test">Test 1</button><button class="btn btn-primary" @click="test2">Test 2</button></div>
   <div class="container-fluid w-100 h-100" :class="pageState.bg">
     <div class="d-flex flex-column justify-content-between h-100">
       <div class="">
@@ -721,8 +721,13 @@ var intervalRun
 import {
   isPermissionGranted,
   requestPermission,
+  sendNotification
 } from '@tauri-apps/plugin-notification'
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getAllWindows, getCurrentWindow } from "@tauri-apps/api/window";
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
+import { listen } from '@tauri-apps/api/event';
+var unlisten
+var webview
 
 export default {
   components: { SettingModal },
@@ -1035,8 +1040,14 @@ export default {
       const permission = await requestPermission()
       permissionGranted = permission === 'granted'
     }
-
+    unlisten = await listen('close-control', (event) => {
+      console.log(`Closing control`);
+      webview.setAlwaysOnTop(false)
+    });
     // this.runStartOfDay()
+  },
+  unmounted(){
+    unlisten()
   },
   methods: {
     alert(message){
@@ -1289,11 +1300,36 @@ export default {
       this.setTicking()
       this.due = moment().add(3, 'seconds').unix()
     },
-    test() {
-      this.saveToLocal(12)
+    async test() {
+      // this.saveToLocal(12)
+      // webview = (await getAllWindows()).find(w => w.label === 'my-label')
+      // if(webview) return webview.setFocus()
+      // webview = new WebviewWindow('my-label', {
+      //   url: '/translation',skipTaskbar:true
+      // });
+      // webview.once('tauri://created', function () {
+      //   console.log('webview created')
+      //   webview.setAlwaysOnTop(true)
+      //   webview.setDecorations(false)
+      // });
+      // webview.once('tauri://error', function (e) {
+      //   console.error('webview error', e)
+      // });
     },
-    test2() {
-      this.saveToLocal(0)
+    async test2() {
+      // this.saveToLocal(0)
+      let permissionGranted = await isPermissionGranted();
+
+      // If not we need to request it
+      if (!permissionGranted) {
+        const permission = await requestPermission();
+        permissionGranted = permission === 'granted';
+      }
+
+      // Once permission has been granted we can send the notification
+      if (permissionGranted) {
+        sendNotification({ title: 'Tauri is here', largeBody: 'Tauri is awesome!' });
+      }
     },
   },
 }
