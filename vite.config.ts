@@ -6,7 +6,12 @@ import vueI18n from '@intlify/vite-plugin-vue-i18n'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(),
+  plugins: [vue({
+    script: {
+      defineModel: true,
+      propsDestructure: true
+    }
+  }),
     vueI18n({
       // if you want to use Vue I18n Legacy API, you need to set `compositionOnly: false`
       compositionOnly: false,

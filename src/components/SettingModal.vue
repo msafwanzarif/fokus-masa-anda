@@ -17,12 +17,20 @@
     </div>
 </template>
 
-<script>
-export default {
-  props:{
-    title:{default:"No Title",type:String},
-    id:String,
-  }
+<script lang="ts">
+import { defineComponent } from 'vue'
 
-}
+export default defineComponent({
+  name: 'SettingModal',
+  props: {
+    title: {
+      type: String,
+      default: "No Title"
+    },
+    id: {
+      type: String,
+      required: true
+    }
+  }
+})
 </script>

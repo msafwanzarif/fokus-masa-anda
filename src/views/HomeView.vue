@@ -267,12 +267,12 @@
             </div>
           </div>
           <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
-            <h2 class="sub-title text-center mb-3">{{ rehatDetail[nextRehat].text }}</h2>
+            <h2 class="sub-title text-center mb-3">{{ rehatDetail[nextRehat]?.text || "Rehat" }}</h2>
             <button v-if="isOvertime" class="btn btn-outline-warning w-75">Overtime: {{ hoursOvertime }}{{ hoursOvertime ? " : " : "" }}{{ minutesOvertime }} : {{
               secondsOvertime }}</button>
             <button v-else class="btn btn-outline-info w-75 d-flex justify-content-center"><span style="min-width: 2.3rem;font-weight: bold;">{{ timer.extra_pad - secondsAfterDue }}</span> <span>saat sebelum overtime</span></button>
-            <h3 class="text-center mt-3 fs-4">Tempoh Rehat:{{ timer.break[nextRehat] > 0 ? ` ${timer.break[nextRehat]}
-              Minit`:"" }}{{ timer.breakSecond[nextRehat] > 0 ? ` ${timer.breakSecond[nextRehat]} Saat` : "" }} </h3>
+            <h3 class="text-center mt-3 fs-4">Tempoh Rehat:{{ (timer.break[nextRehat] || 0) > 0 ? ` ${timer.break[nextRehat]}
+              Minit`:"" }}{{ (timer.breakSecond[nextRehat] || 0) > 0 ? ` ${timer.breakSecond[nextRehat]} Saat` : "" }} </h3>
           </div>
           <div class="modal-footer d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
@@ -713,13 +713,61 @@
 }
 </style>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue'
 import SettingModal from '../components/SettingModal.vue'
 import moment from 'moment'
 import { useWakeLock } from '@vueuse/core'
-var intervalRun
 
-export default {
+// Define types for our data structures
+interface TimerConfig {
+  focusTime: number
+  focusSecond: number
+  planTime: number
+  planSecond: number
+  break: [number, number, number]
+  breakSecond: [number, number, number]
+  simpleStack: boolean
+  breakNumber: number
+  stack: number[]
+  extra_pad: number
+  focus_extra_mode: number
+  focus_extra_deduct_min: number
+  focus_extra_add_rate: number
+  rest_extra_mode: number
+  rest_extra_deduct_min: number
+  rest_extra_add_rate: number
+}
+
+interface WelcomeData {
+  title: string
+  dayLine: string
+  motivationQuote: string
+}
+
+interface RehatDetail {
+  text: string
+}
+
+interface PageState {
+  bg: string
+  bigText: string
+  timeClass: string
+  buttonClass: string
+  countDownClass: string
+}
+
+declare global {
+  interface Window {
+    bootstrap: any
+    notifyMe: (title?: string, message?: string, icon?: string) => void
+  }
+}
+
+let intervalRun: number | undefined
+
+export default defineComponent({
+  name: 'HomeView',
   components: { SettingModal },
   data() {
     return {
@@ -732,13 +780,13 @@ export default {
         title: "Selamat Datang",
         dayLine: "Rabu, 5 Feb 2025",
         motivationQuote: "Setiap perjalanan menuju kejayaan pasti ada onak dan duri. Teruskan usaha dan semangat, dan jangan sesekali menyerah. Kerana penghujungnya ada kemanisan yang menanti.",
-      },
+      } as WelcomeData,
       loading: false,
       mode: 0,
       showClock: true,
-      wakeLock: {},
-      nextReduce: [0, 0],
-      stack: [1, 1, 1, 2],
+      wakeLock: {} as any,
+      nextReduce: [0, 0] as number[],
+      stack: [1, 1, 1, 2] as number[],
       due: 0,
       current: 0,
       paused_on: 0,
@@ -748,8 +796,8 @@ export default {
         focusSecond: 0,
         planTime: 15,
         planSecond: 0,
-        break: [0, 5, 20],
-        breakSecond: [0, 0, 0],
+        break: [0, 5, 20] as [number, number, number],
+        breakSecond: [0, 0, 0] as [number, number, number],
         simpleStack: true,
         breakNumber: 4,
         stack: [1, 1, 1, 2],
@@ -760,7 +808,7 @@ export default {
         rest_extra_mode: 0,
         rest_extra_deduct_min: 1,
         rest_extra_add_rate: 5,
-      },
+      } as TimerConfig,
       rehatDetail: [
         null,
         {
@@ -769,7 +817,7 @@ export default {
         {
           text: "Masa untuk Rehat !",
         },
-      ],
+      ] as (RehatDetail | null)[],
       states: [
         {
           bg: "",
@@ -806,72 +854,72 @@ export default {
           buttonClass: "btn-outline-white",
           countDownClass: "border border-white text-white w-100 mx-3",
         },
-      ],
-      pageState: {}
+      ] as PageState[],
+      pageState: {} as PageState
     }
   },
   computed: {
-    isOvertime(){
+    isOvertime(): boolean {
       return this.secondsAfterDue > this.timer.extra_pad
     },
-    validTimer() {
+    validTimer(): boolean {
       return this.focusInSecond > 0 && this.shortBreakInSecond > 0 && this.longBreakInSecond > 0
     },
-    focusInSecond() {
+    focusInSecond(): number {
       return this.timer.focusTime * 60 + (this.timer.focusSecond ? this.timer.focusSecond : 0)
     },
-    shortBreakInSecond() {
+    shortBreakInSecond(): number {
       try {
         return this.timer.break[1] * 60 + (this.timer.breakSecond[1] ? this.timer.breakSecond[1] : 0)
       } catch (error) {
         return 0
       }
     },
-    longBreakInSecond() {
+    longBreakInSecond(): number {
       try {
         return this.timer.break[2] * 60 + (this.timer.breakSecond[2] ? this.timer.breakSecond[2] : 0)
       } catch (error) {
         return 0
       }
     },
-    shortBreakMinute() {
+    shortBreakMinute(): number {
       return this.timer.break[1]
     },
-    longBreakMinute() {
+    longBreakMinute(): number {
       return this.timer.break[2]
     },
-    focusMinute() {
+    focusMinute(): number {
       return this.timer.focusTime
     },
-    focusSecond() {
+    focusSecond(): number {
       return this.timer.focusSecond
     },
-    shortBreakSecond() {
+    shortBreakSecond(): number {
       return this.timer.breakSecond[1]
     },
-    longBreakSecond() {
+    longBreakSecond(): number {
       return this.timer.breakSecond[2]
     },
-    stackNotSame() {
+    stackNotSame(): boolean {
       return JSON.stringify(this.stack) != JSON.stringify(this.timer.stack)
     },
-    breakNumber() {
+    breakNumber(): number {
       return this.timer.breakNumber
     },
-    simpleStack() {
+    simpleStack(): boolean {
       return this.timer.simpleStack
     },
-    nextRehat() {
+    nextRehat(): number {
       if (this.stack[0]) return this.stack[0]
       return 1
     },
-    secondsToDue() {
+    secondsToDue(): number {
       return this.due - this.current
     },
-    secondsAfterDue() {
+    secondsAfterDue(): number {
       return this.current - this.due
     },
-    hours() {
+    hours(): string {
       if (!this.due) {
         if (this.timer.focusTime < 60) return ""
         return Math.floor(this.timer.focusTime / 60).toString().padStart(2, "0")
@@ -886,7 +934,7 @@ export default {
       if (time < 3600) return ""
       return Math.floor(time / 3600).toString().padStart(2, "0")
     },
-    minutes() {
+    minutes(): string {
       if (!this.due) return (this.timer.focusTime % 60).toString().padStart(2, "0")
       var time = this.secondsToDue
       if (this.paused_on) {
@@ -898,7 +946,7 @@ export default {
       if (time < 60) return "00"
       return (Math.floor(time / 60) % 60).toString().padStart(2, "0")
     },
-    seconds() {
+    seconds(): string {
       if (!this.due) return this.timer.focusSecond.toString().padStart(2, "0")
       if (this.paused_on) {
         let time = this.due - this.paused_on
@@ -910,7 +958,7 @@ export default {
       if (time < 0) return "00"
       return (time % 60).toString().padStart(2, "0")
     },
-    hoursOvertime() {
+    hoursOvertime(): string {
       if(this.secondsPassedOvertime > 0){
         let time = Math.floor(this.secondsPassedOvertime / 3600)
         if (time <= 0) return ""
@@ -918,32 +966,32 @@ export default {
       }
       return ""
     },
-    minutesOvertime() {
+    minutesOvertime(): string {
       if(this.secondsPassedOvertime > 0){
         return (Math.floor(this.secondsPassedOvertime / 60) % 60).toString().padStart(2, "0")
       } 
       return "00"
     },
-    secondsPassedOvertime(){
+    secondsPassedOvertime(): number {
       return this.secondsAfterDue - this.timer.extra_pad
     },
-    secondsOvertime(){
+    secondsOvertime(): string {
       if(this.secondsPassedOvertime > 0){
         return (this.secondsPassedOvertime % 60).toString().padStart(2, "0")
       } 
       return "00"
     },
-    passedDue() {
+    passedDue(): boolean {
       if (this.paused_on) return false
-      return this.due && this.due <= this.current
+      return Boolean(this.due && this.due <= this.current)
     },
-    currentTime() {
+    currentTime(): string {
       if (this.current) return moment(this.current * 1000).format("hh:mm A")
       return "00 : 00 AM"
     }
   },
   watch: {
-    validTimer(newVal, oldVal) {
+    validTimer(newVal: boolean, oldVal: boolean) {
       if (!newVal) {
         if (this.focusInSecond <= 0) {
           if (this.timer.focusTime < 0) this.timer.focusTime = 0
@@ -959,53 +1007,59 @@ export default {
         }
       }
     },
-    focusMinute(newVal, oldVal) {
+    focusMinute(newVal: number, oldVal: number) {
       if (this.loading) return
       if (newVal > 0) this.timer.focusSecond = 0
     },
-    shortBreakMinute(newVal, oldVal) {
+    shortBreakMinute(newVal: number, oldVal: number) {
       if (this.loading) return
       if (newVal > 0) this.timer.breakSecond[1] = 0
     },
-    longBreakMinute(newVal, oldVal) {
+    longBreakMinute(newVal: number, oldVal: number) {
       if (this.loading) return
       if (newVal > 0) this.timer.breakSecond[2] = 0
     },
-    focusSecond(newVal, oldVal) {
+    focusSecond(newVal: number, oldVal: number) {
       if (newVal > 59) this.timer.focusSecond = 59
       if (newVal < 0) this.timer.focusSecond = 0
     },
-    shortBreakSecond(newVal, oldVal) {
+    shortBreakSecond(newVal: number, oldVal: number) {
       if (newVal > 59) this.timer.breakSecond[1] = 59
       if (newVal < 0) this.timer.breakSecond[1] = 0
     },
-    longBreakSecond(newVal, oldVal) {
+    longBreakSecond(newVal: number, oldVal: number) {
       if (newVal > 59) this.timer.breakSecond[2] = 59
       if (newVal < 0) this.timer.breakSecond[2] = 0
     },
-    mode(newVal, oldVal) {
-      this.pageState = this.states[newVal]
+    mode(newVal: number, oldVal: number) {
+      this.pageState = this.states[newVal] || {
+        bg: "",
+        bigText: "Fokus",
+        timeClass: "fs-1",
+        buttonClass: "btn-outline-info",
+        countDownClass: "btn-outline-info w-75 me-2",
+      }
     },
-    passedDue(newVal, oldVal) {
+    passedDue(newVal: boolean, oldVal: boolean) {
       if (newVal) this.promptChange(this.mode)
     },
-    breakNumber(newVal, oldVal) {
+    breakNumber(newVal: number, oldVal: number) {
       if (newVal > 1 && this.timer.simpleStack) {
         let newStack = Array(newVal - 1).fill(1)
         newStack.push(2)
-        return this.timer.stack = newStack
+        this.timer.stack = newStack
       }
     },
-    simpleStack(newVal, oldVal) {
+    simpleStack(newVal: boolean, oldVal: boolean) {
       if (newVal) {
         let newStack = Array(this.timer.breakNumber - 1).fill(1)
         newStack.push(2)
-        return this.timer.stack = newStack
+        this.timer.stack = newStack
       }
     },
-    paused_on(newVal, oldVal) {
+    paused_on(newVal: number, oldVal: number) {
       if (newVal) {
-        return this.promptPause()
+        this.promptPause()
       }
     }
   },
@@ -1020,15 +1074,21 @@ export default {
     });
     this.getFromLocal()
     this.wakeLock = useWakeLock()
-    this.pageState = this.states[this.mode]
+    this.pageState = this.states[this.mode] || {
+      bg: "",
+      bigText: "Fokus",
+      timeClass: "fs-1",
+      buttonClass: "btn-outline-info",
+      countDownClass: "btn-outline-info w-75 me-2",
+    }
     this.setTicking()
     // this.runStartOfDay()
   },
   methods: {
-    alert(message){
+    alert(message: string): void {
       alert(message)
     },
-    runStartOfDay() {
+    runStartOfDay(): void {
       this.welcome.title = "Selamat Datang"
       if(this.last_online) this.welcome.title = "Welcome Back!"
       this.resetStack()
@@ -1038,19 +1098,19 @@ export default {
       this.welcome.motivationQuote = "Setiap perjalanan menuju kejayaan pasti ada onak dan duri. Teruskan usaha dan semangat, dan jangan sesekali menyerah. Kerana penghujungnya ada kemanisan yang menanti."
       this.showModal("welcome-prompt")
     },
-    resetStack() {
+    resetStack(): void {
       this.stack = [...this.timer.stack]
     },
-    releaseAfter(time = 0) {
+    releaseAfter(time: number = 0): void {
       if (!time) time = this.timer.extra_pad * 1000
       setTimeout(() => { this.wakeLock.release() }, time)
     },
-    pauseTimer() {
+    pauseTimer(): void {
       this.paused_on = moment().unix()
       this.saveToLocal()
-      return this.releaseAfter()
+      this.releaseAfter()
     },
-    resumeTimer() {
+    resumeTimer(): void {
       let lag = this.current - this.paused_on
       this.due = this.due + lag
       this.paused_on = 0
@@ -1058,7 +1118,7 @@ export default {
       this.wakeLock.request()
       this.promptPause()
     },
-    saveToLocal(last_online = undefined) {
+    saveToLocal(last_online?: number): void {
       if (last_online === undefined) last_online = moment().unix()
       this.last_online = last_online
       let data = {
@@ -1073,11 +1133,12 @@ export default {
       }
       localStorage.setItem("fokus-data", JSON.stringify(data))
     },
-    getFromLocal() {
+    getFromLocal(): void {
       let data = localStorage.getItem("fokus-data")
       // let data = '{"mode":3,"showClock":true,"nextReduce":[36,0],"stack":[1,1],"due":1719028169,"current":1719026369,"paused_on":0,"timer":{"focus":1,"break":[0,5,30],"simpleStack":false,"breakNumber":3,"stack":[2,1,1],"extra_pad":10,"focus_extra_mode":1,"focus_extra_deduct_min":5,"focus_extra_add_rate":0.5,"rest_extra_mode":2,"rest_extra_deduct_min":1,"rest_extra_add_rate":2.5}}'
       if (data) {
         this.loading = true
+        let parsed = JSON.parse(data)
         let {
           mode,
           showClock,
@@ -1086,7 +1147,7 @@ export default {
           due,
           paused_on,
           last_online,
-          timer } = JSON.parse(data)
+          timer } = parsed
         this.mode = mode
         this.showClock = showClock
         this.nextReduce = nextReduce
@@ -1118,16 +1179,18 @@ export default {
       console.log("last_online", this.last_online)
       if (this.last_online < startOfDay) return this.runStartOfDay()
     },
-    changeStack(index) {
-      if (!this.simpleStack) return this.timer.stack[index] = this.timer.stack[index] % 2 + 1
+    changeStack(index: number): void {
+      if (!this.simpleStack && this.timer.stack[index] !== undefined) {
+        this.timer.stack[index] = this.timer.stack[index] % 2 + 1
+      }
     },
-    removeStack(index) {
-      if (!this.simpleStack) return this.timer.stack.splice(index, 1)
+    removeStack(index: number): void {
+      if (!this.simpleStack) this.timer.stack.splice(index, 1)
     },
-    pushStack() {
-      if (!this.simpleStack) return this.timer.stack.push(1)
+    pushStack(): void {
+      if (!this.simpleStack) this.timer.stack.push(1)
     },
-    stopTimer(last_online = undefined) {
+    stopTimer(last_online?: number): void {
       let mode = this.mode
       this.mode = 0
       this.due = 0
@@ -1145,18 +1208,18 @@ export default {
       }
       this.promptFocus(true)
       if(last_online) return this.saveToLocal(last_online)
-      return this.saveToLocal(last_online)
+      return this.saveToLocal()
     },
-    fokusSemula() {
+    fokusSemula(): void {
       this.promptBreak()
       this.startTimer()
     },
-    startPlanning() {
+    startPlanning(): void {
       this.hideModal("welcome-prompt")
-      return this.runTimer(4, this.timer.planTime * 60 + this.timer.planSecond)
+      this.runTimer(4, this.timer.planTime * 60 + this.timer.planSecond)
     },
-    startBreak() {
-      let currentRehat = this.stack.shift()
+    startBreak(): void {
+      let currentRehat = this.stack.shift() || 1
       this.promptBreak()
       let toAdd = 0
       if (this.timer.focus_extra_mode && this.timer.extra_pad < this.secondsAfterDue) {
@@ -1166,9 +1229,10 @@ export default {
         else toAdd = Math.floor(this.secondsPassedOvertime * this.timer.focus_extra_add_rate)
       }
       if (!this.stack.length) this.stack = [...this.timer.stack]
-      return this.runTimer(currentRehat + 1, this.timer.break[currentRehat] * 60 + this.timer.breakSecond[currentRehat], toAdd)
+      const breakDuration = (this.timer.break[currentRehat] || 0) * 60 + (this.timer.breakSecond[currentRehat] || 0)
+      this.runTimer(currentRehat + 1, breakDuration, toAdd)
     },
-    startFocus(startOfDay = false) {
+    startFocus(startOfDay: boolean = false): void {
       this.hideModal("focus-prompt")
       if(startOfDay) return this.runTimer(1, this.focusInSecond)
       if (this.mode == 4) {
@@ -1182,58 +1246,58 @@ export default {
         }
         else toAdd = Math.floor(this.secondsPassedOvertime * this.timer.rest_extra_add_rate)
       }
-      return this.runTimer(1, this.focusInSecond, toAdd)
+      this.runTimer(1, this.focusInSecond, toAdd)
     },
-    promptChange(mode) {
+    promptChange(mode: number): void {
       this.releaseAfter()
       if (mode == 1) {
         this.promptBreak()
-        return notifyMe("Break Time!", "Let's take a break")
+        return window.notifyMe("Break Time!", "Let's take a break")
       }
       if (mode == 4) {
         return this.showModal("startPrompt")
       }
       this.promptFocus()
-      return notifyMe("Focus Time!", "Let's go change the world!")
+      return window.notifyMe("Focus Time!", "Let's go change the world!")
     },
-    getModal(id) {
+    getModal(id: string): any {
       var myModalEl = document.querySelector(`#${id}`)
-      return bootstrap.Modal.getOrCreateInstance(myModalEl)
+      return window.bootstrap.Modal.getOrCreateInstance(myModalEl)
     },
-    showModal(id) {
+    showModal(id: string): void {
       this.getModal(id).show()
     },
-    hideModal(id) {
+    hideModal(id: string): void {
       this.getModal(id).hide()
     },
-    toggleModal(id) {
+    toggleModal(id: string): void {
       this.getModal(id).toggle()
     },
-    promptSetting() {
+    promptSetting(): void {
       var myModalEl = document.querySelector('#main-settings')
-      var modal = bootstrap.Modal.getOrCreateInstance(myModalEl)
+      var modal = window.bootstrap.Modal.getOrCreateInstance(myModalEl)
       modal.toggle()
     },
-    promptPause() {
+    promptPause(): void {
       var myModalEl = document.querySelector('#pause-prompt')
-      var modal = bootstrap.Modal.getOrCreateInstance(myModalEl)
+      var modal = window.bootstrap.Modal.getOrCreateInstance(myModalEl)
       modal.toggle()
     },
-    promptBreak() {
+    promptBreak(): void {
       var myModalEl = document.querySelector('#break-prompt')
-      var modal = bootstrap.Modal.getOrCreateInstance(myModalEl)
+      var modal = window.bootstrap.Modal.getOrCreateInstance(myModalEl)
       modal.toggle()
     },
-    promptFocus(close = false) {
+    promptFocus(close: boolean = false): void {
       var myModalEl = document.querySelector('#focus-prompt')
-      var modal = bootstrap.Modal.getOrCreateInstance(myModalEl)
+      var modal = window.bootstrap.Modal.getOrCreateInstance(myModalEl)
       if (close) return modal.hide()
       modal.toggle()
     },
-    startTimer() {
+    startTimer(): void {
       this.runTimer(1, this.focusInSecond)
     },
-    runTimer(mode, interval, toAdd = 0) {
+    runTimer(mode: number, interval: number, toAdd: number = 0): void {
       console.log("running timer m,i,tA", mode, interval,toAdd)
       this.mode = mode
       let seconds = interval
@@ -1253,27 +1317,27 @@ export default {
       this.due = momentToDue.unix()
       console.log("due", this.due, this.current, this.secondsToDue)
       this.wakeLock.request()
-      return this.saveToLocal()
+      this.saveToLocal()
       // this.due = moment().add('seconds',2).unix()
     },
-    setTicking(){
+    setTicking(): void {
       clearInterval(intervalRun);
       this.updateTime()
-      intervalRun = setInterval(this.updateTime, 1000)
+      intervalRun = setInterval(this.updateTime, 1000) as unknown as number
     },
-    updateTime() {
+    updateTime(): void {
       this.current = moment().unix()
     },
-    fastForward() {
+    fastForward(): void {
       this.setTicking()
       this.due = moment().add(3, 'seconds').unix()
     },
-    test() {
+    test(): void {
       this.saveToLocal(12)
     },
-    test2() {
+    test2(): void {
       this.saveToLocal(0)
     },
   },
-}
+})
 </script>
