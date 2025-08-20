@@ -54,9 +54,9 @@
               <path d="M6 19v2" />
               <path d="M18 19v2" />
             </svg>
-            <svg v-else-if="mode == 4" xmlns="http://www.w3.org/2000/svg" width="45vmin" height="45vmin" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-              class="icon icon-tabler icons-tabler-outline icon-tabler-notebook">
+            <svg v-else-if="mode == 4" xmlns="http://www.w3.org/2000/svg" width="45vmin" height="45vmin"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-notebook">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-11a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1m3 0v18" />
               <path d="M13 8l2 0" />
@@ -111,8 +111,9 @@
               <path d="M6 19v2" />
               <path d="M18 19v2" />
             </svg>
-            <svg v-else-if="mode == 4" xmlns="http://www.w3.org/2000/svg" width="30vmin" height="30vmin" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            <svg v-else-if="mode == 4" xmlns="http://www.w3.org/2000/svg" width="30vmin" height="30vmin"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round"
               class="icon icon-tabler icons-tabler-outline icon-tabler-notebook d-none d-md-block">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-11a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1m3 0v18" />
@@ -120,21 +121,6 @@
               <path d="M13 12l2 0" />
             </svg>
           </div>
-          <!-- <div v-if="mode < 2" class="d-flex align-items-center justify-content-center">
-            <h2 class="sub-title me-3">Menulis</h2>
-            <button class="btn btn-outline-info">
-              <svg xmlns="http://www.w3.org/2000/svg" width="6vmin" height="6vmin" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-switch-3">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path
-                  d="M3 17h2.397a5 5 0 0 0 4.096 -2.133l.177 -.253m3.66 -5.227l.177 -.254a5 5 0 0 1 4.096 -2.133h3.397" />
-                <path d="M18 4l3 3l-3 3" />
-                <path d="M3 7h2.397a5 5 0 0 1 4.096 2.133l4.014 5.734a5 5 0 0 0 4.096 2.133h3.397" />
-                <path d="M18 20l3 -3l-3 -3" />
-              </svg>
-            </button>
-          </div> -->
           <div class="d-flex align-items-center justify-content-center mt-5">
             <button @click="mode < 2 ? showClock = !showClock : null"
               class="btn d-flex align-items-center justify-content-center"
@@ -162,7 +148,6 @@
             </button>
             <button v-if="mode == 0" @click="startTimer"
               class="h-100 btn btn-outline-warning text-white d-flex align-items-center justify-content-center">
-              <!-- <span class="d-none d-md-block fs-1"> Pause </span> -->
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="icon icon-tabler icons-tabler-outline icon-tabler-player-play">
@@ -172,7 +157,6 @@
             </button>
             <button v-else @click="fastForward"
               class="h-100 btn btn-outline-light border border-white text-white d-flex align-items-center justify-content-center">
-              <!-- <span class="d-none d-md-block fs-1"> Pause </span> -->
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="icon icon-tabler icons-tabler-outline icon-tabler-player-track-next">
@@ -186,506 +170,25 @@
       </div>
       <div class=" text-end">2025 | Safwan Zarif</div>
     </div>
-    <div id="startPrompt" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-      aria-labelledby="staticBackdropLabel" aria-hidden="true">
-      <div class="modal-dialog modal-md modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <div @click="promptSetting" class="c-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path
-                  d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
-                <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
-              </svg>
-            </div>
-          </div>
-          <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
-            <h2 class="sub-title text-center mb-3">Let's do this!</h2>
-            <p class="text-center fs-5">Mulakan dengan Bismillah 😄</p>
-          </div>
-          <div class="modal-footer d-flex align-items-center justify-content-center">
-            <button @click="startFocus()" type="button" class="btn btn-success">Let's GO!</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="welcome-prompt" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-      aria-labelledby="staticBackdropLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" :class="{'modal-md': last_online,'modal-lg':!last_online}">
-        <div class="modal-content">
-          <div class="modal-header">
-            <div @click="promptSetting" class="c-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path
-                  d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
-                <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
-              </svg>
-            </div>
-            <span class="ms-2" v-if="!last_online"> <-- butang setting di sini</span>
-          </div>
-          <div class="modal-body d-flex flex-column justify-content-around align-items-center py-3 py-md-5">
-            <h2 class="welcome-title text-center mb-3" :class="{'first-time-title':!last_online}">{{ welcome.title }}</h2>
-            <p class="text-center fs-6">Hari ini: <b>{{ welcome.dayLine }}</b></p>
-            <div v-if="last_online" class="py-2 px-5 border border-light rounded-4 mt-2">
-              <h2 class="quote-text fs-5 text-center fst-italic">" {{ welcome.motivationQuote }} "</h2>
-            </div>
-            <div v-else class="mx-4 px-4 py-2 border border-light rounded-2">
-              <p class="fs-6 fs-md-5">Jom <b>fokuskan masa anda</b> dengan memanfaatkan <a href="https://medschoolinsiders.com/pre-med/the-pomodoro-technique/" target="_blank">teknik pomodoro</a>, kaedah yang dapat meningkatkan produktiviti anda! </p>
-              <p class="fs-6 fs-md-5">Anda boleh tekan butang setting di atas untuk <b>tetapkan timer, susunan rehat dan kawalan overtime</b> yang sesuai dengan anda</p>
-              <p class="fs-6 fs-md-5">Pada setiap permulaan hari, anda juga disarankan menggunakan sedikit masa untuk 'Plan' dahulu segala tugasan yang anda ingin buat.</p>
-              <p class="fs-6 fs-md-5"><i>"Semoga Berjaya 😄"</i> - Safwan Zarif di <a href="mailto:">safzardevs@gmail.com</a></p>
-            </div>
 
-          </div>
-          <div class="modal-footer d-flex align-items-center justify-content-center">
-            <button type="button" class="btn btn-primary" @click="startPlanning">Mulakan Planning Dahulu</button>
-            <button type="button" class="btn btn-success" @click="startFocus(true)" data-bs-dismiss="modal">Terus Fokus!</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="break-prompt" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-      aria-labelledby="staticBackdropLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <div @click="promptSetting" class="c-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path
-                  d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
-                <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
-              </svg>
-            </div>
-          </div>
-          <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
-            <h2 class="sub-title text-center mb-3">{{ rehatDetail[nextRehat]?.text || "Rehat" }}</h2>
-            <button v-if="isOvertime" class="btn btn-outline-warning w-75">Overtime: {{ hoursOvertime }}{{ hoursOvertime ? " : " : "" }}{{ minutesOvertime }} : {{
-              secondsOvertime }}</button>
-            <button v-else class="btn btn-outline-info w-75 d-flex justify-content-center"><span style="min-width: 2.3rem;font-weight: bold;">{{ timer.extra_pad - secondsAfterDue }}</span> <span>saat sebelum overtime</span></button>
-            <h3 class="text-center mt-3 fs-4">Tempoh Rehat:{{ (timer.break[nextRehat] || 0) > 0 ? ` ${timer.break[nextRehat]}
-              Minit`:"" }}{{ (timer.breakSecond[nextRehat] || 0) > 0 ? ` ${timer.breakSecond[nextRehat]} Saat` : "" }} </h3>
-          </div>
-          <div class="modal-footer d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center">
-              <button @click="stopTimer()" type="button" class="btn btn-outline-danger me-1"><svg
-                  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
-                  class="icon icon-tabler icons-tabler-filled icon-tabler-player-stop">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path d="M17 4h-10a3 3 0 0 0 -3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3 -3v-10a3 3 0 0 0 -3 -3z" />
-                </svg></button>
-              <button @click="fokusSemula" type="button" class="btn btn-primary d-flex align-items-center">
-                <span class="me-2 d-none d-md-block">Fokus Semula</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                  class="icon icon-tabler icons-tabler-outline icon-tabler-rotate-clockwise">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path d="M4.05 11a8 8 0 1 1 .5 4m-.5 5v-5h5" />
-                </svg>
-              </button>
-            </div>
-            <button type="button" class="btn btn-success" @click="startBreak">Mulakan Rehat</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="pause-prompt" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-      aria-labelledby="staticBackdropLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered ">
-        <div class="modal-content">
-          <div class="modal-header">
-            <div @click="promptSetting" class="c-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path
-                  d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
-                <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
-              </svg>
-            </div>
-          </div>
-          <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
-            <h2 class="sub-title text-center mb-3">Paused !</h2>
-            <button class="btn btn-outline-warning w-75 mb-4">Masa yang Tinggal: {{ hours }}{{ hours ? " : " : "" }}{{
-              minutes }} : {{ seconds }}</button>
-          </div>
-          <div class="modal-footer d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center">
-              <button @click="stopTimer()" type="button" class="btn btn-outline-danger me-1"><svg
-                  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
-                  class="icon icon-tabler icons-tabler-filled icon-tabler-player-stop">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path d="M17 4h-10a3 3 0 0 0 -3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3 -3v-10a3 3 0 0 0 -3 -3z" />
-                </svg></button>
-            </div>
-            <button @click="resumeTimer" type="button" class="btn btn-success">Sambung</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="focus-prompt" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-      aria-labelledby="staticBackdropLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered ">
-        <div class="modal-content bg-primary">
-          <div class="modal-header">
-            <div @click="promptSetting" class="c-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path
-                  d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
-                <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
-              </svg>
-            </div>
-          </div>
-          <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
-            <h2 class="sub-title text-center mb-3">Masa untuk Fokus !</h2>
-            <button v-if="isOvertime" class="btn btn-outline-warning w-75 mb-4">Overtime Rehat: {{ hoursOvertime }}{{ hoursOvertime ? " : " : "" }}{{ minutesOvertime }} : {{
-              secondsOvertime }}</button>
-            <button v-else class="btn btn-outline-light w-75 mb-4 d-flex justify-content-center"><span style="min-width: 2.3rem;font-weight: bold;">{{ timer.extra_pad - secondsAfterDue }}</span> <span>saat sebelum overtime</span></button>
-            <!-- <div class="d-flex align-items-center justify-content-center">
-              <h2 class="fs-4 me-3">Menulis</h2>
-              <button class="btn btn-outline-info">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                  class="icon icon-tabler icons-tabler-outline icon-tabler-switch-3">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path
-                    d="M3 17h2.397a5 5 0 0 0 4.096 -2.133l.177 -.253m3.66 -5.227l.177 -.254a5 5 0 0 1 4.096 -2.133h3.397" />
-                  <path d="M18 4l3 3l-3 3" />
-                  <path d="M3 7h2.397a5 5 0 0 1 4.096 2.133l4.014 5.734a5 5 0 0 0 4.096 2.133h3.397" />
-                  <path d="M18 20l3 -3l-3 -3" />
-                </svg>
-              </button>
-            </div> -->
-          </div>
-          <div class="modal-footer d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center">
-              <button @click="stopTimer()" type="button" class="btn btn-outline-danger me-1"><svg
-                  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
-                  class="icon icon-tabler icons-tabler-filled icon-tabler-player-stop">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path d="M17 4h-10a3 3 0 0 0 -3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3 -3v-10a3 3 0 0 0 -3 -3z" />
-                </svg></button>
-            </div>
-            <button @click="startFocus()" type="button" class="btn btn-success">Let's GO!</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="main-settings" class="modal fade" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-      <div class="modal-dialog modal-fullscreen-md-down modal-lg p-3 px-md-5 modal-dialog-centered">
-        <div class="modal-content h-100">
-          <div class="modal-header">
-            <h5 class="modal-title">Tetapan</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true"></span>
-            </button>
-          </div>
-          <div class="modal-body d-flex flex-column justify-content-between align-items-center p-3 p-md-5"
-            style="height: 75vh;">
-            <div class="d-flex flex-column justify-content-start w-100">
-              <!-- <button class="btn btn-outline-light w-100 fs-1 mb-3 d-flex align-items-center justify-content-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="5vh" height="5vh" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                  class="icon icon-tabler icons-tabler-outline icon-tabler-user-square-rounded">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path d="M12 13a3 3 0 1 0 0 -6a3 3 0 0 0 0 6z" />
-                  <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z" />
-                  <path d="M6 20.05v-.05a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v.05" />
-                </svg>
-                <span class="ms-2">Pengguna</span>
-              </button> -->
-              <button data-bs-target="#timer-settings" data-bs-toggle="modal" data-bs-dismiss="modal"
-                class="btn btn-outline-light w-100 fs-1 mb-3 d-flex align-items-center justify-content-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="5vh" height="5vh" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                  class="icon icon-tabler icons-tabler-outline icon-tabler-clock-2">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path d="M4 4m0 1a1 1 0 0 1 1 -1h14a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-14a1 1 0 0 1 -1 -1z" />
-                  <path d="M12 7v5l3 3" />
-                  <path d="M4 12h1" />
-                  <path d="M19 12h1" />
-                  <path d="M12 19v1" />
-                </svg>
-                <span class="ms-2">Timer</span>
-              </button>
-              <!-- <button class="btn btn-outline-light w-100 fs-1 mb-3 d-flex align-items-center justify-content-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="5vh" height="5vh" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                  class="icon icon-tabler icons-tabler-outline icon-tabler-target-arrow">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-                  <path d="M12 7a5 5 0 1 0 5 5" />
-                  <path d="M13 3.055a9 9 0 1 0 7.941 7.945" />
-                  <path d="M15 6v3h3l3 -3h-3v-3z" />
-                  <path d="M15 9l-3 3" />
-                </svg>
-                <span class="ms-2">Target</span>
-              </button> -->
-            </div>
-            <div class="d-flex flex-column justify-content-start w-100">
-              <button @click="runStartOfDay" class="btn btn-outline-primary w-100 fs-3 mb-3" data-bs-dismiss="modal"
-                aria-label="Close">Reset Hari</button>
-              <button class="btn btn-outline-danger w-100 fs-3 mb-3" data-bs-dismiss="modal"
-                aria-label="Close">Tutup</button>
-            </div>
-          </div>
-          <!-- <div class="modal-footer d-flex align-items-center justify-content-end">
-            <button type="button" class="btn btn-outline-warning">Batal</button>
-            <button type="button" class="btn btn-success">Simpan</button>
-          </div> -->
-        </div>
-      </div>
-    </div>
-    <SettingModal id="timer-settings" title="Tetapan > Timer">
-      <div class="d-flex flex-column justify-content-start w-100">
-        <div class="d-flex mb-2 fw-bold">
-          <button class="btn btn-outline-light fs-5 w-100 d-flex align-items-center justify-content-center fw-bold"
-            disabled>
-            Tetapan Tempoh
-          </button>
-          <button class="btn btn-outline-light fs-5 w-25 d-flex align-items-center justify-content-center fw-bold"
-            disabled>
-            Minit
-          </button>
-          <button class="btn btn-outline-light fs-5 w-25 d-flex align-items-center justify-content-center fw-bold"
-            disabled>
-            Saat
-          </button>
-        </div>
-        <div class="d-flex mb-2">
-          <button class="btn btn-outline-light fs-5 w-100 d-flex align-items-center justify-content-center" disabled>
-            <span class="ms-2">Fokus</span>
-          </button>
-          <input v-model="timer.focusTime" type="number"
-            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="0">
-          <input v-model="timer.focusSecond" type="number" max="59"
-            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="0">
-        </div>
-        <div class="d-flex mb-2">
-          <button class="btn btn-outline-light fs-5 w-100 d-flex align-items-center justify-content-center" disabled>
-            <span class="ms-2">Planning</span>
-          </button>
-          <input v-model="timer.planTime" type="number"
-            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="0">
-          <input v-model="timer.planSecond" type="number" max="59"
-            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="0">
-        </div>
-        <div class="d-flex mb-2">
-          <button class="btn btn-outline-light fs-5 w-100 d-flex align-items-center justify-content-center" disabled>
-            <span class="ms-2">Rehat Pendek</span>
-          </button>
-          <input v-model="timer.break[1]" type="number"
-            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="0">
-          <input v-model="timer.breakSecond[1]" type="number" max="59"
-            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="0">
-        </div>
-        <div class="d-flex mb-2">
-          <button class="btn btn-outline-light fs-5 w-100 d-flex align-items-center justify-content-center" disabled>
-            <span class="ms-2">Rehat Panjang</span>
-          </button>
-          <input v-model="timer.break[2]" type="number"
-            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="0">
-          <input v-model="timer.breakSecond[2]" type="number" max="59"
-            class="form-control w-25 h-100 bg-dark text-white fs-1 border border-light" min="0">
-        </div>
-        <button data-bs-target="#timer-rehat-settings" data-bs-toggle="modal" data-bs-dismiss="modal"
-          class="btn btn-outline-light w-100 fs-3 mb-2 d-flex align-items-center justify-content-center">
-          <svg xmlns="http://www.w3.org/2000/svg" width="1.5rem" height="1.5rem" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="icon icon-tabler icons-tabler-outline icon-tabler-stack-middle">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M16 10l4 -2l-8 -4l-8 4l4 2" />
-            <path d="M12 12l-4 -2l-4 2l8 4l8 -4l-4 -2l-4 2z" fill="currentColor" />
-            <path d="M8 14l-4 2l8 4l8 -4l-4 -2" />
-          </svg>
-          <span class="ms-2">Tetapan Rehat</span>
-        </button>
-        <button data-bs-target="#timer-overtime-settings" data-bs-toggle="modal" data-bs-dismiss="modal"
-          class="btn btn-outline-light w-100 fs-3 mb-2 d-flex align-items-center justify-content-center">
-          <svg xmlns="http://www.w3.org/2000/svg" width="1.5rem" height="1.5rem" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="icon icon-tabler icons-tabler-outline icon-tabler-clock-bolt">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M20.984 12.53a9 9 0 1 0 -7.552 8.355" />
-            <path d="M12 7v5l3 3" />
-            <path d="M19 16l-2 3h4l-2 3" />
-          </svg>
-          <span class="ms-2">Tetapan Overtime</span>
-        </button>
-      </div>
-      <button data-bs-target="#main-settings" data-bs-toggle="modal" data-bs-dismiss="modal"
-        class="btn btn-outline-warning w-100 fs-3 mb-3" aria-label="Close">Kembali
-      </button>
-    </SettingModal>
-    <SettingModal id="timer-rehat-settings" title="Tetapan > Timer > Rehat">
-      <div class="d-flex flex-column justify-content-start w-100">
-        <label class="form-label fs-5">Jenis Susunan Rehat</label>
-        <div class="w-100 mb-2 ">
-          <div class="btn-group w-100" role="group" aria-label="Basic radio toggle button group">
-            <input v-model="timer.simpleStack" type="radio" class="btn-check" name="jenismudah" id="jenismudah"
-              :value="true">
-            <label class="btn btn-outline-light fs-4" for="jenismudah">Mudah</label>
-            <input v-model="timer.simpleStack" type="radio" class="btn-check" name="jenismudah" id="jeniscustom"
-              :value="false">
-            <label class="btn btn-outline-light fs-4" for="jeniscustom">Custom</label>
-          </div>
-        </div>
-        <div v-if="timer.simpleStack" class="d-flex mb-2">
-          <button class="btn btn-outline-light fs-3 w-100 d-flex align-items-center justify-content-center" disabled>
-            <span class="ms-2">Bilangan Rehat</span>
-          </button>
-          <input v-model="timer.breakNumber" type="number"
-            class="form-control w-25 h-100 bg-dark text-white fs-2 border border-light" min="1">
-        </div>
-        <hr>
-        <label class="form-label fs-4">Susunan Cycle Rehat</label>
-        <div class="w-100">
-          <div class="list-group">
-            <div v-for="item, index in timer.stack" class="list-group-item">
-              <div class="d-flex align-items-center justify-content-between">
-                <span :class="{ 'fw-bold': item == 2 }">{{ index + 1 }}) Rehat {{ item == 1 ? "Pendek" : "Panjang"
-                  }}</span>
-                <div class="d-flex align-items-center">
-                  <button v-if="!timer.simpleStack" @click="changeStack(index)" class="btn btn-outline-light me-2">
-                    Tukar </button>
-                  <button v-if="!timer.simpleStack" @click="removeStack(index)" class="btn btn-outline-light"> Buang
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <button v-if="!timer.simpleStack" @click="pushStack()" class="btn btn-outline-light w-100 mt-3">
-            Tambah</button>
-        </div>
-        <template v-if="stackNotSame">
-          <hr>
-          <label class="form-label fs-4">Susunan Sekarang</label>
-          <div class="w-100">
-            <div class="list-group">
-              <div v-for="item, index in stack" class="list-group-item">
-                <span :class="{ 'fw-bold': item == 2 }">{{ index + 1 }}) Rehat {{ item == 1 ? "Pendek" : "Panjang"
-                  }}</span>
-              </div>
-            </div>
-            <button @click="resetStack" class="btn btn-outline-light w-100 mt-3"> Samakan</button>
-          </div>
-        </template>
-      </div>
-      <button data-bs-target="#timer-settings" data-bs-toggle="modal" data-bs-dismiss="modal"
-        class="btn btn-outline-warning w-100 fs-3 mt-5" aria-label="Close">Kembali
-      </button>
-    </SettingModal>
-    <SettingModal id="timer-overtime-settings" title="Tetapan > Timer > Overtime">
-      <div class="d-flex flex-column justify-content-start w-100">
-        <div class="d-flex mb-2">
-          <button class="btn btn-outline-light fs-4 w-100 d-flex align-items-center justify-content-center" disabled>
-            <span class="ms-2">OT Padding (saat)</span>
-          </button>
-          <input v-model="timer.extra_pad" type="number"
-            class="form-control w-25 h-100 bg-dark text-white fs-4 border border-light" min="1">
-        </div>
-        <span class="fs-6 mb-0">{{`* ${timer.extra_pad} saat pertama selepas tempoh fokus atau rehat tidak akan dikira sebagai overtime`}} </span>
-        <hr class="my-2">
-        <label class="form-label fs-4 mt-2"> Jika Fokus Overtime :</label>
-        <div class="w-100 mb-2">
-          <div class="form-check">
-            <input v-model="timer.focus_extra_mode" class="form-check-input" type="radio" name="focusExtraMode"
-              id="optionsRadios1" :value="1">
-            <label class="form-check-label" for="optionsRadios1">
-              Kurangkan Fokus seterusnya
-            </label>
-          </div>
-          <div class="form-check">
-            <input v-model="timer.focus_extra_mode" class="form-check-input" type="radio" name="focusExtraMode"
-              id="optionsRadios2" :value="2">
-            <label class="form-check-label" for="optionsRadios2">
-              Tambah masa rehat
-            </label>
-          </div>
-          <div class="form-check">
-            <input v-model="timer.focus_extra_mode" class="form-check-input" type="radio" name="focusExtraMode"
-              id="optionsRadios3" :value="0">
-            <label class="form-check-label" for="optionsRadios3">
-              Biarkan
-            </label>
-          </div>
-        </div>
-        <div v-if="timer.focus_extra_mode == 2" class="mb-2">
-          <div class="d-flex">
-            <button class="btn btn-outline-light fs-4 w-100 d-flex align-items-center justify-content-center" disabled>
-              <span class="ms-2">Nisbah Tukaran</span>
-            </button>
-            <input v-model="timer.focus_extra_add_rate" type="number"
-              class="form-control w-25 bg-dark text-white fs-4 border border-light" min="1">
-          </div>
-          <div class="mt-1 ">{{`* untuk setiap 1 saat overtime fokus, ${timer.focus_extra_add_rate} saat akan ditambah pada tempoh rehat`}}</div>
-        </div>
-        <div v-if="timer.focus_extra_mode == 1" class="d-flex mb-2">
-          <button class="btn btn-outline-light fs-4 w-100 d-flex align-items-center justify-content-center" disabled>
-            <span class="ms-2">Minimum Fokus (minit)</span>
-          </button>
-          <input v-model="timer.focus_extra_deduct_min" type="number"
-            class="form-control w-25 h-100 bg-dark text-white fs-4 border border-light" min="1">
-        </div>
-        <hr class="my-2">
-        <label class="form-label fs-4 mt-2"> Jika Rehat Overtime :</label>
-        <div class="w-100 mb-2">
-          <div class="form-check">
-            <input v-model="timer.rest_extra_mode" class="form-check-input" type="radio" name="restExtraMode"
-              id="optionsRadios1" :value="1">
-            <label class="form-check-label" for="optionsRadios1">
-              Kurangkan Rehat seterusnya
-            </label>
-          </div>
-          <div class="form-check">
-            <input v-model="timer.rest_extra_mode" class="form-check-input" type="radio" name="restExtraMode"
-              id="optionsRadios2" :value="2">
-            <label class="form-check-label" for="optionsRadios2">
-              Tambah masa Fokus
-            </label>
-          </div>
-          <div class="form-check">
-            <input v-model="timer.rest_extra_mode" class="form-check-input" type="radio" name="restExtraMode"
-              id="optionsRadios3" :value="0">
-            <label class="form-check-label" for="optionsRadios3">
-              Biarkan
-            </label>
-          </div>
-        </div>
-        <div v-if="timer.rest_extra_mode == 2" class="mb-2">
-          <div class="d-flex">
-            <button class="btn btn-outline-light fs-4 w-100 d-flex align-items-center justify-content-center" disabled>
-              <span class="ms-2">Nisbah Tukaran</span>
-            </button>
-            <input v-model="timer.rest_extra_add_rate" type="number"
-              class="form-control w-25 bg-dark text-white fs-4 border border-light" min="1">
-          </div>
-          <div class="mt-1">{{`* untuk setiap 1 saat overtime rehat, ${timer.rest_extra_add_rate} saat akan ditambah pada tempoh fokus`}}</div>
-        </div>
-        <div v-if="timer.rest_extra_mode == 1" class="d-flex mb-2">
-          <button class="btn btn-outline-light fs-4 w-100 d-flex align-items-center justify-content-center" disabled>
-            <span class="ms-2">Minimum Rehat (minit)</span>
-          </button>
-          <input v-model="timer.rest_extra_deduct_min" type="number"
-            class="form-control w-25 h-100 bg-dark text-white fs-4 border border-light" min="1">
-        </div>
-      </div>
-      <button data-bs-target="#timer-settings" data-bs-toggle="modal" data-bs-dismiss="modal"
-        class="btn btn-outline-warning w-100 fs-3 mb-3" aria-label="Close">Kembali
-      </button>
-    </SettingModal>
+    <!-- Modal Components -->
+    <StartPrompt @settings-click="promptSetting" @start-focus="startFocus" />
+    <WelcomePrompt :welcome="welcome" :last-online="last_online" @settings-click="promptSetting"
+      @start-planning="startPlanning" @start-focus="startFocus" />
+    <BreakPrompt :rehat-detail="rehatDetail" :next-rehat="nextRehat" :is-overtime="isOvertime"
+      :hours-overtime="hoursOvertime" :minutes-overtime="minutesOvertime" :seconds-overtime="secondsOvertime"
+      :timer="timer" :seconds-after-due="secondsAfterDue" @settings-click="promptSetting" @stop-timer="stopTimer"
+      @fokus-semula="fokusSemula" @start-break="startBreak" />
+    <PausePrompt :hours="hours" :minutes="minutes" :seconds="seconds" @settings-click="promptSetting"
+      @stop-timer="stopTimer" @resume-timer="resumeTimer" />
+    <FocusPrompt :is-overtime="isOvertime" :hours-overtime="hoursOvertime" :minutes-overtime="minutesOvertime"
+      :seconds-overtime="secondsOvertime" :timer="timer" :seconds-after-due="secondsAfterDue"
+      @settings-click="promptSetting" @stop-timer="stopTimer" @start-focus="startFocus" />
+    <MainSettings @start-day="runStartOfDay" />
+    <TimerSettings :timer="timer" />
+    <TimerRehatSettings :timer="timer" :stackNotSame="stackNotSame" :stack="stack" @reset-stack="resetStack"
+      @change-stack="changeStack" @remove-stack="removeStack" @push-stack="pushStack" />
+    <TimerOvertimeSettings :timer="timer" />
   </div>
 </template>
 
@@ -694,81 +197,47 @@
   font-size: 20vmin;
 }
 
-.quote-text {
-  line-height: 1.3;
-}
-
-.sub-title {
-  font-size: 8vmin;
-}
-
-.welcome-title {
-  font-size: 6vmin;
-}
-.first-time-title{
-  font-size: 10vmin;
-}
 .rest-time {
   font-size: 11.5vmin;
 }
 </style>
-
 <script lang="ts">
 import { defineComponent } from 'vue'
 import SettingModal from '../components/SettingModal.vue'
+import StartPrompt from '../components/StartPrompt.vue'
+import WelcomePrompt from '../components/WelcomePrompt.vue'
+import BreakPrompt from '../components/BreakPrompt.vue'
+import PausePrompt from '../components/PausePrompt.vue'
+import FocusPrompt from '../components/FocusPrompt.vue'
+import MainSettings from '../components/MainSettings.vue'
+import TimerSettings from '../components/TimerSettings.vue'
+import TimerRehatSettings from '../components/TimerRehatSettings.vue'
+import TimerOvertimeSettings from '../components/TimerOvertimeSettings.vue'
 import moment from 'moment'
 import { useWakeLock } from '@vueuse/core'
-
-// Define types for our data structures
-interface TimerConfig {
-  focusTime: number
-  focusSecond: number
-  planTime: number
-  planSecond: number
-  break: [number, number, number]
-  breakSecond: [number, number, number]
-  simpleStack: boolean
-  breakNumber: number
-  stack: number[]
-  extra_pad: number
-  focus_extra_mode: number
-  focus_extra_deduct_min: number
-  focus_extra_add_rate: number
-  rest_extra_mode: number
-  rest_extra_deduct_min: number
-  rest_extra_add_rate: number
-}
-
-interface WelcomeData {
-  title: string
-  dayLine: string
-  motivationQuote: string
-}
-
-interface RehatDetail {
-  text: string
-}
-
-interface PageState {
-  bg: string
-  bigText: string
-  timeClass: string
-  buttonClass: string
-  countDownClass: string
-}
-
-declare global {
-  interface Window {
-    bootstrap: any
-    notifyMe: (title?: string, message?: string, icon?: string) => void
-  }
-}
+import type {
+  TimerConfig,
+  WelcomeData,
+  RehatDetail,
+  PageState
+} from '@/types'
 
 let intervalRun: number | undefined
 
 export default defineComponent({
   name: 'HomeView',
-  components: { SettingModal },
+  components: {
+    SettingModal,
+    StartPrompt,
+    WelcomePrompt,
+    BreakPrompt,
+    PausePrompt,
+    FocusPrompt,
+    MainSettings,
+    TimerSettings,
+    TimerRehatSettings,
+    TimerOvertimeSettings
+  },
   data() {
     return {
       // 0 Not Started / Stopped
@@ -959,7 +428,7 @@ export default defineComponent({
       return (time % 60).toString().padStart(2, "0")
     },
     hoursOvertime(): string {
-      if(this.secondsPassedOvertime > 0){
+      if (this.secondsPassedOvertime > 0) {
         let time = Math.floor(this.secondsPassedOvertime / 3600)
         if (time <= 0) return ""
         return Math.floor(this.secondsPassedOvertime / 3600).toString().padStart(2, "0")
@@ -967,18 +436,18 @@ export default defineComponent({
       return ""
     },
     minutesOvertime(): string {
-      if(this.secondsPassedOvertime > 0){
+      if (this.secondsPassedOvertime > 0) {
         return (Math.floor(this.secondsPassedOvertime / 60) % 60).toString().padStart(2, "0")
-      } 
+      }
       return "00"
     },
     secondsPassedOvertime(): number {
       return this.secondsAfterDue - this.timer.extra_pad
     },
     secondsOvertime(): string {
-      if(this.secondsPassedOvertime > 0){
+      if (this.secondsPassedOvertime > 0) {
         return (this.secondsPassedOvertime % 60).toString().padStart(2, "0")
-      } 
+      }
       return "00"
     },
     passedDue(): boolean {
@@ -1065,12 +534,12 @@ export default defineComponent({
   },
   mounted() {
     moment.updateLocale('en', {
-        weekdays: [
-            "Ahad", "Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu"
-        ],
-        months: ["Januari", "Februari", "Mac", "April", "Mei", "Jun", "Julai", "Ogos", "September",
-            "Oktober", "November", "Disember"
-        ]
+      weekdays: [
+        "Ahad", "Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu"
+      ],
+      months: ["Januari", "Februari", "Mac", "April", "Mei", "Jun", "Julai", "Ogos", "September",
+        "Oktober", "November", "Disember"
+      ]
     });
     this.getFromLocal()
     this.wakeLock = useWakeLock()
@@ -1090,7 +559,7 @@ export default defineComponent({
     },
     runStartOfDay(): void {
       this.welcome.title = "Selamat Datang"
-      if(this.last_online) this.welcome.title = "Welcome Back!"
+      if (this.last_online) this.welcome.title = "Welcome Back!"
       this.resetStack()
       this.stopTimer(this.last_online)
       this.nextReduce = [0, 0]
@@ -1198,16 +667,16 @@ export default defineComponent({
       if (this.paused_on) {
         this.paused_on = 0
         this.hideModal("pause-prompt")
-        if(last_online) return this.saveToLocal(last_online)
+        if (last_online) return this.saveToLocal(last_online)
         return this.saveToLocal()
       }
       if (mode == 1) {
         this.hideModal("break-prompt")
-        if(last_online) return this.saveToLocal(last_online)
+        if (last_online) return this.saveToLocal(last_online)
         return this.saveToLocal()
       }
       this.promptFocus(true)
-      if(last_online) return this.saveToLocal(last_online)
+      if (last_online) return this.saveToLocal(last_online)
       return this.saveToLocal()
     },
     fokusSemula(): void {
@@ -1234,7 +703,7 @@ export default defineComponent({
     },
     startFocus(startOfDay: boolean = false): void {
       this.hideModal("focus-prompt")
-      if(startOfDay) return this.runTimer(1, this.focusInSecond)
+      if (startOfDay) return this.runTimer(1, this.focusInSecond)
       if (this.mode == 4) {
         this.hideModal("startPrompt")
         return this.runTimer(1, this.focusInSecond)
@@ -1298,7 +767,7 @@ export default defineComponent({
       this.runTimer(1, this.focusInSecond)
     },
     runTimer(mode: number, interval: number, toAdd: number = 0): void {
-      console.log("running timer m,i,tA", mode, interval,toAdd)
+      console.log("running timer m,i,tA", mode, interval, toAdd)
       this.mode = mode
       let seconds = interval
       // let seconds = 2 //Use for testing
