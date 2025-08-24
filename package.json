@@ -11,7 +11,8 @@
   "dependencies": {
     "@vueuse/core": "^10.11.0",
     "moment": "^2.30.1",
-    "szutils.vue": "^0.0.9",
+    "pinia": "^3.0.3",
+    "szutils.vue": "^0.0.11",
     "vue": "^3.2.38",
     "vue-router": "^4.1.5"
   },

@@ -13,6 +13,7 @@
             <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
           </svg>
           <div class="d-flex align-items-center">
+            <button class="btn me-2" :class="pageState.buttonClass" v-if="userEmail"> User: {{ userEmail }}</button>
             <button class="btn me-2" :class="pageState.buttonClass"> {{ currentTime }}</button>
 
           </div>
@@ -189,6 +190,7 @@
     <TimerRehatSettings :timer="timer" :stackNotSame="stackNotSame" :stack="stack" @reset-stack="resetStack"
       @change-stack="changeStack" @remove-stack="removeStack" @push-stack="pushStack" />
     <TimerOvertimeSettings :timer="timer" />
+    <UserSettings />
   </div>
 </template>
 
@@ -203,6 +205,7 @@
 </style>
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { useFirebaseDoc } from 'szutils.vue'
 import SettingModal from '../components/SettingModal.vue'
 import StartPrompt from '../components/StartPrompt.vue'
 import WelcomePrompt from '../components/WelcomePrompt.vue'
@@ -221,11 +224,18 @@ import type {
   RehatDetail,
   PageState
 } from '@/types'
+import UserSettings from '@/components/UserSettings.vue'
+import { useDocStore } from '@/stores/doc.store'
+
 
 let intervalRun: number | undefined
 
 export default defineComponent({
   name: 'HomeView',
+  setup() {
+    const doc = useDocStore()
+    return { doc }
+  },
   components: {
     SettingModal,
     StartPrompt,
@@ -236,7 +246,8 @@ export default defineComponent({
     MainSettings,
     TimerSettings,
     TimerRehatSettings,
-    TimerOvertimeSettings
+    TimerOvertimeSettings,
+    UserSettings,
   },
   data() {
     return {
@@ -328,6 +339,12 @@ export default defineComponent({
     }
   },
   computed: {
+    docData(){
+      return this.doc?.data
+    },
+    userEmail(){
+      return this.doc?.userEmail
+    },
     isOvertime(): boolean {
       return this.secondsAfterDue > this.timer.extra_pad
     },
@@ -460,6 +477,16 @@ export default defineComponent({
     }
   },
   watch: {
+    docData:{
+      handler(newVal, oldVal) {
+        if(newVal.last_online == this.last_online) return
+        if(newVal.last_online > this.last_online) return this.$router.push('/idle')
+      },
+      deep: true
+    },
+    userEmail(newVal,oldVal){
+      this.setupSync()
+    },
     validTimer(newVal: boolean, oldVal: boolean) {
       if (!newVal) {
         if (this.focusInSecond <= 0) {
@@ -533,6 +560,7 @@ export default defineComponent({
     }
   },
   mounted() {
+    this.setupSync()
     moment.updateLocale('en', {
       weekdays: [
         "Ahad", "Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu"
@@ -554,6 +582,14 @@ export default defineComponent({
     // this.runStartOfDay()
   },
   methods: {
+    async setupSync(){
+      if (!this.doc.isSet || !this.userEmail) return
+      this.doc.changeDoc(`fokus-settings/${this.userEmail}`)
+      let data = await this.doc.getData()
+      console.log('Got data:', data)
+      if(data) this.getFromFirebase(data)
+      else this.saveToFirebase()
+    },
     alert(message: string): void {
       alert(message)
     },
@@ -601,6 +637,22 @@ export default defineComponent({
         last_online,
       }
       localStorage.setItem("fokus-data", JSON.stringify(data))
+      if(this.userEmail) this.saveToFirebase(last_online)
+    },
+    saveToFirebase(last_online?: number): void {
+      if (last_online === undefined) last_online = moment().unix()
+      this.last_online = last_online
+      let data = {
+        mode: this.mode,
+        showClock: this.showClock,
+        nextReduce: this.nextReduce,
+        stack: this.stack,
+        due: this.due,
+        paused_on: this.paused_on,
+        timer: this.timer,
+        last_online,
+      }
+      this.doc.saveData(data)
     },
     getFromLocal(): void {
       let data = localStorage.getItem("fokus-data")
@@ -643,7 +695,53 @@ export default defineComponent({
         }, 500)
       }
       if (!this.last_online) return this.runStartOfDay()
-      let startOfDay = moment().startOf('day').add(6, 'hours').unix()
+      let hour = moment().hour()
+      let startOfDay = moment().startOf('day').add(hour < 6 ? -18 : 6, 'hours').unix()
+      console.log("startOfDay", startOfDay)
+      console.log("last_online", this.last_online)
+      if (this.last_online < startOfDay) return this.runStartOfDay()
+    },
+    getFromFirebase(data:any): void {
+      // let data = '{"mode":3,"showClock":true,"nextReduce":[36,0],"stack":[1,1],"due":1719028169,"current":1719026369,"paused_on":0,"timer":{"focus":1,"break":[0,5,30],"simpleStack":false,"breakNumber":3,"stack":[2,1,1],"extra_pad":10,"focus_extra_mode":1,"focus_extra_deduct_min":5,"focus_extra_add_rate":0.5,"rest_extra_mode":2,"rest_extra_deduct_min":1,"rest_extra_add_rate":2.5}}'
+      if (data) {
+        this.loading = true
+        let {
+          mode,
+          showClock,
+          nextReduce,
+          stack,
+          due,
+          paused_on,
+          last_online,
+          timer } = data
+        this.mode = mode
+        this.showClock = showClock
+        this.nextReduce = nextReduce
+        this.stack = stack
+        this.paused_on = paused_on
+        this.due = due
+        this.timer = timer
+        this.last_online = last_online
+        if (timer.focusSecond === undefined) {
+          this.timer.focusSecond = 0
+          this.timer.breakSecond = [0, 0, 0]
+        }
+        if (timer.planTime === undefined) {
+          this.timer.planTime = 15
+          this.timer.planSecond = 0
+        }
+        if (timer.focusTime === undefined) {
+          this.timer.focusTime = timer.focus ? timer.focus : 25
+        }
+        let last2Hour = moment().subtract(2, "hours").unix()
+        if (due && !paused_on && due < last2Hour) this.stopTimer(last_online)
+        setTimeout(() => {
+          this.loading = false
+        }, 500)
+      }
+      if (!this.last_online) return this.runStartOfDay()
+      let hour = moment().hour()
+      let startOfDay = moment().startOf('day').add(hour < 6 ? -18 : 6, 'hours').unix()
       console.log("startOfDay", startOfDay)
       console.log("last_online", this.last_online)
       if (this.last_online < startOfDay) return this.runStartOfDay()
