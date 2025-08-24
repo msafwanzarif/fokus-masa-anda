@@ -107,7 +107,8 @@
 
 <script setup lang="ts">
 import SettingModal from './SettingModal.vue';
-interface Props {
+
+defineProps<{
   timer: {
     extra_pad: number;
     focus_extra_mode: number;
@@ -117,7 +118,5 @@ interface Props {
     rest_extra_add_rate: number;
     rest_extra_deduct_min: number;
   };
-}
-
-defineProps<Props>();
+}>();
 </script>
