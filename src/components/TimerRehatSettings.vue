@@ -61,7 +61,7 @@
 
 <script setup lang="ts">
 import SettingModal from './SettingModal.vue';
-interface Props{
+defineProps<{
   timer: {
     simpleStack: boolean;
     breakNumber: number;
@@ -69,13 +69,11 @@ interface Props{
   };
   stackNotSame: boolean;
   stack: number[];
-}
-interface Emits{
+}>();
+defineEmits<{
   (e: 'change-stack', index:number): void;
   (e: 'remove-stack', index:number): void;
   (e: 'push-stack'): void;
   (e: 'reset-stack'): void;
-}
-defineProps<Props>();
-defineEmits<Emits>()
+}>()
 </script>

@@ -85,7 +85,7 @@
 <script setup lang="ts">
 import SettingModal from './SettingModal.vue'
 
-interface Props {
+defineProps<{
   timer: {
     planTime: number
     planSecond: number
@@ -94,7 +94,5 @@ interface Props {
     break: number[]
     breakSecond: number[]
   }
-}
-
-defineProps<Props>()
+}>()
 </script>
