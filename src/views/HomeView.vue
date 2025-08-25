@@ -14,7 +14,7 @@
           </svg>
           <div class="d-flex align-items-center">
             <button class="btn me-2" :class="pageState.buttonClass" v-if="userEmail"> User: {{ userEmail }}</button>
-            <button class="btn me-2" :class="pageState.buttonClass"> {{ currentTime }}</button>
+            <button class="btn me-2" :class="pageState.buttonClass">{{ currentTime }}</button>
 
           </div>
         </div>
@@ -190,7 +190,7 @@
     <TimerRehatSettings :timer="timer" :stackNotSame="stackNotSame" :stack="stack" @reset-stack="resetStack"
       @change-stack="changeStack" @remove-stack="removeStack" @push-stack="pushStack" />
     <TimerOvertimeSettings :timer="timer" />
-    <UserSettings />
+    <UserSettings :userEmail="userEmail" />
   </div>
 </template>
 
@@ -203,9 +203,10 @@
   font-size: 11.5vmin;
 }
 </style>
-<script lang="ts">
-import { defineComponent } from 'vue'
-import { useFirebaseDoc } from 'szutils.vue'
+<script setup lang="ts">
+import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { onAuthStateChanged  } from 'firebase/auth'
+import { useFirebaseDb, useFirebaseDoc } from 'szutils.vue'
 import SettingModal from '../components/SettingModal.vue'
 import StartPrompt from '../components/StartPrompt.vue'
 import WelcomePrompt from '../components/WelcomePrompt.vue'
@@ -225,686 +226,620 @@ import type {
   PageState
 } from '@/types'
 import UserSettings from '@/components/UserSettings.vue'
-import { useDocStore } from '@/stores/doc.store'
-
 
 let intervalRun: number | undefined
-
-export default defineComponent({
-  name: 'HomeView',
-  setup() {
-    const doc = useDocStore()
-    return { doc }
-  },
-  components: {
-    SettingModal,
-    StartPrompt,
-    WelcomePrompt,
-    BreakPrompt,
-    PausePrompt,
-    FocusPrompt,
-    MainSettings,
-    TimerSettings,
-    TimerRehatSettings,
-    TimerOvertimeSettings,
-    UserSettings,
-  },
-  data() {
-    return {
-      // 0 Not Started / Stopped
-      // 1 Focus
-      // 2 Short Break
-      // 3 Long Break
-      // 4 Planning
-      welcome: {
-        title: "Selamat Datang",
-        dayLine: "Rabu, 5 Feb 2025",
-        motivationQuote: "Setiap perjalanan menuju kejayaan pasti ada onak dan duri. Teruskan usaha dan semangat, dan jangan sesekali menyerah. Kerana penghujungnya ada kemanisan yang menanti.",
-      } as WelcomeData,
-      loading: false,
-      mode: 0,
-      showClock: true,
-      wakeLock: {} as any,
-      nextReduce: [0, 0] as number[],
-      stack: [1, 1, 1, 2] as number[],
-      due: 0,
-      current: 0,
-      paused_on: 0,
-      last_online: 0,
-      timer: {
-        focusTime: 25,
-        focusSecond: 0,
-        planTime: 15,
-        planSecond: 0,
-        break: [0, 5, 20] as [number, number, number],
-        breakSecond: [0, 0, 0] as [number, number, number],
-        simpleStack: true,
-        breakNumber: 4,
-        stack: [1, 1, 1, 2],
-        extra_pad: 10,
-        focus_extra_mode: 0,
-        focus_extra_deduct_min: 5,
-        focus_extra_add_rate: 0.5,
-        rest_extra_mode: 0,
-        rest_extra_deduct_min: 1,
-        rest_extra_add_rate: 5,
-      } as TimerConfig,
-      rehatDetail: [
-        null,
-        {
-          text: "Rehat Sebentar !",
-        },
-        {
-          text: "Masa untuk Rehat !",
-        },
-      ] as (RehatDetail | null)[],
-      states: [
-        {
-          bg: "",
-          bigText: "Fokus",
-          timeClass: "fs-1",
-          buttonClass: "btn-outline-info",
-          countDownClass: "btn-outline-info w-75 me-2",
-        },
-        {
-          bg: "",
-          bigText: "Fokus",
-          timeClass: "fs-1",
-          buttonClass: "btn-outline-info",
-          countDownClass: "btn-outline-info w-75 me-2",
-        },
-        {
-          bg: "bg-primary",
-          bigText: "Rehat",
-          timeClass: "rest-time",
-          buttonClass: "btn-outline-white",
-          countDownClass: "border border-white text-white w-100 mx-3",
-        },
-        {
-          bg: "bg-success",
-          bigText: "Rehat",
-          timeClass: "rest-time",
-          buttonClass: "btn-outline-white",
-          countDownClass: "border border-white text-white w-100 mx-3",
-        },
-        {
-          bg: "",
-          bigText: "Planning",
-          timeClass: "rest-time",
-          buttonClass: "btn-outline-white",
-          countDownClass: "border border-white text-white w-100 mx-3",
-        },
-      ] as PageState[],
-      pageState: {} as PageState
-    }
-  },
-  computed: {
-    docData(){
-      return this.doc?.data
-    },
-    userEmail(){
-      return this.doc?.userEmail
-    },
-    isOvertime(): boolean {
-      return this.secondsAfterDue > this.timer.extra_pad
-    },
-    validTimer(): boolean {
-      return this.focusInSecond > 0 && this.shortBreakInSecond > 0 && this.longBreakInSecond > 0
-    },
-    focusInSecond(): number {
-      return this.timer.focusTime * 60 + (this.timer.focusSecond ? this.timer.focusSecond : 0)
-    },
-    shortBreakInSecond(): number {
-      try {
-        return this.timer.break[1] * 60 + (this.timer.breakSecond[1] ? this.timer.breakSecond[1] : 0)
-      } catch (error) {
-        return 0
-      }
-    },
-    longBreakInSecond(): number {
-      try {
-        return this.timer.break[2] * 60 + (this.timer.breakSecond[2] ? this.timer.breakSecond[2] : 0)
-      } catch (error) {
-        return 0
-      }
-    },
-    shortBreakMinute(): number {
-      return this.timer.break[1]
-    },
-    longBreakMinute(): number {
-      return this.timer.break[2]
-    },
-    focusMinute(): number {
-      return this.timer.focusTime
-    },
-    focusSecond(): number {
-      return this.timer.focusSecond
-    },
-    shortBreakSecond(): number {
-      return this.timer.breakSecond[1]
-    },
-    longBreakSecond(): number {
-      return this.timer.breakSecond[2]
-    },
-    stackNotSame(): boolean {
-      return JSON.stringify(this.stack) != JSON.stringify(this.timer.stack)
-    },
-    breakNumber(): number {
-      return this.timer.breakNumber
-    },
-    simpleStack(): boolean {
-      return this.timer.simpleStack
-    },
-    nextRehat(): number {
-      if (this.stack[0]) return this.stack[0]
-      return 1
-    },
-    secondsToDue(): number {
-      return this.due - this.current
-    },
-    secondsAfterDue(): number {
-      return this.current - this.due
-    },
-    hours(): string {
-      if (!this.due) {
-        if (this.timer.focusTime < 60) return ""
-        return Math.floor(this.timer.focusTime / 60).toString().padStart(2, "0")
-      }
-      if (this.paused_on) {
-        let time = this.due - this.paused_on
-        if (time < 3600) return ""
-        return Math.floor(time / 3600).toString().padStart(2, "0")
-      }
-      var time = this.secondsToDue
-      if (this.passedDue) time = this.secondsAfterDue
-      if (time < 3600) return ""
-      return Math.floor(time / 3600).toString().padStart(2, "0")
-    },
-    minutes(): string {
-      if (!this.due) return (this.timer.focusTime % 60).toString().padStart(2, "0")
-      var time = this.secondsToDue
-      if (this.paused_on) {
-        let time = this.due - this.paused_on
-        if (time < 60) return "00"
-        return (Math.floor(time / 60) % 60).toString().padStart(2, "0")
-      }
-      if (this.passedDue) time = this.secondsAfterDue
-      if (time < 60) return "00"
-      return (Math.floor(time / 60) % 60).toString().padStart(2, "0")
-    },
-    seconds(): string {
-      if (!this.due) return this.timer.focusSecond.toString().padStart(2, "0")
-      if (this.paused_on) {
-        let time = this.due - this.paused_on
-        if (time < 0) return "00"
-        return (time % 60).toString().padStart(2, "0")
-      }
-      var time = this.secondsToDue
-      if (this.passedDue) time = this.secondsAfterDue
-      if (time < 0) return "00"
-      return (time % 60).toString().padStart(2, "0")
-    },
-    hoursOvertime(): string {
-      if (this.secondsPassedOvertime > 0) {
-        let time = Math.floor(this.secondsPassedOvertime / 3600)
-        if (time <= 0) return ""
-        return Math.floor(this.secondsPassedOvertime / 3600).toString().padStart(2, "0")
-      }
-      return ""
-    },
-    minutesOvertime(): string {
-      if (this.secondsPassedOvertime > 0) {
-        return (Math.floor(this.secondsPassedOvertime / 60) % 60).toString().padStart(2, "0")
-      }
-      return "00"
-    },
-    secondsPassedOvertime(): number {
-      return this.secondsAfterDue - this.timer.extra_pad
-    },
-    secondsOvertime(): string {
-      if (this.secondsPassedOvertime > 0) {
-        return (this.secondsPassedOvertime % 60).toString().padStart(2, "0")
-      }
-      return "00"
-    },
-    passedDue(): boolean {
-      if (this.paused_on) return false
-      return Boolean(this.due && this.due <= this.current)
-    },
-    currentTime(): string {
-      if (this.current) return moment(this.current * 1000).format("hh:mm A")
-      return "00 : 00 AM"
-    }
-  },
-  watch: {
-    docData:{
-      handler(newVal, oldVal) {
-        if(newVal.last_online == this.last_online) return
-        if(newVal.last_online > this.last_online) return this.$router.push('/idle')
-      },
-      deep: true
-    },
-    userEmail(newVal,oldVal){
-      this.setupSync()
-    },
-    validTimer(newVal: boolean, oldVal: boolean) {
-      if (!newVal) {
-        if (this.focusInSecond <= 0) {
-          if (this.timer.focusTime < 0) this.timer.focusTime = 0
-          if (this.timer.focusTime == 0 && this.timer.focusSecond <= 0) this.timer.focusSecond = 5
-        }
-        if (this.shortBreakInSecond <= 0) {
-          if (this.timer.break[1] < 0) this.timer.break[1] = 0
-          if (this.timer.break[1] == 0 && this.timer.breakSecond[1] <= 0) this.timer.breakSecond[1] = 5
-        }
-        if (this.longBreakInSecond <= 0) {
-          if (this.timer.break[2] < 0) this.timer.break[2] = 0
-          if (this.timer.break[2] == 0 && this.timer.breakSecond[2] <= 0) this.timer.breakSecond[2] = 5
-        }
-      }
-    },
-    focusMinute(newVal: number, oldVal: number) {
-      if (this.loading) return
-      if (newVal > 0) this.timer.focusSecond = 0
-    },
-    shortBreakMinute(newVal: number, oldVal: number) {
-      if (this.loading) return
-      if (newVal > 0) this.timer.breakSecond[1] = 0
-    },
-    longBreakMinute(newVal: number, oldVal: number) {
-      if (this.loading) return
-      if (newVal > 0) this.timer.breakSecond[2] = 0
-    },
-    focusSecond(newVal: number, oldVal: number) {
-      if (newVal > 59) this.timer.focusSecond = 59
-      if (newVal < 0) this.timer.focusSecond = 0
-    },
-    shortBreakSecond(newVal: number, oldVal: number) {
-      if (newVal > 59) this.timer.breakSecond[1] = 59
-      if (newVal < 0) this.timer.breakSecond[1] = 0
-    },
-    longBreakSecond(newVal: number, oldVal: number) {
-      if (newVal > 59) this.timer.breakSecond[2] = 59
-      if (newVal < 0) this.timer.breakSecond[2] = 0
-    },
-    mode(newVal: number, oldVal: number) {
-      this.pageState = this.states[newVal] || {
-        bg: "",
-        bigText: "Fokus",
-        timeClass: "fs-1",
-        buttonClass: "btn-outline-info",
-        countDownClass: "btn-outline-info w-75 me-2",
-      }
-    },
-    passedDue(newVal: boolean, oldVal: boolean) {
-      if (newVal) this.promptChange(this.mode)
-    },
-    breakNumber(newVal: number, oldVal: number) {
-      if (newVal > 1 && this.timer.simpleStack) {
-        let newStack = Array(newVal - 1).fill(1)
-        newStack.push(2)
-        this.timer.stack = newStack
-      }
-    },
-    simpleStack(newVal: boolean, oldVal: boolean) {
-      if (newVal) {
-        let newStack = Array(this.timer.breakNumber - 1).fill(1)
-        newStack.push(2)
-        this.timer.stack = newStack
-      }
-    },
-    paused_on(newVal: number, oldVal: number) {
-      if (newVal) {
-        this.promptPause()
-      }
-    }
-  },
-  mounted() {
-    this.setupSync()
-    moment.updateLocale('en', {
-      weekdays: [
-        "Ahad", "Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu"
-      ],
-      months: ["Januari", "Februari", "Mac", "April", "Mei", "Jun", "Julai", "Ogos", "September",
-        "Oktober", "November", "Disember"
-      ]
-    });
-    this.getFromLocal()
-    this.wakeLock = useWakeLock()
-    this.pageState = this.states[this.mode] || {
-      bg: "",
-      bigText: "Fokus",
-      timeClass: "fs-1",
-      buttonClass: "btn-outline-info",
-      countDownClass: "btn-outline-info w-75 me-2",
-    }
-    this.setTicking()
-    // this.runStartOfDay()
-  },
-  methods: {
-    async setupSync(){
-      if (!this.doc.isSet || !this.userEmail) return
-      this.doc.changeDoc(`fokus-settings/${this.userEmail}`)
-      let data = await this.doc.getData()
-      console.log('Got data:', data)
-      if(data) this.getFromFirebase(data)
-      else this.saveToFirebase()
-    },
-    alert(message: string): void {
-      alert(message)
-    },
-    runStartOfDay(): void {
-      this.welcome.title = "Selamat Datang"
-      if (this.last_online) this.welcome.title = "Welcome Back!"
-      this.resetStack()
-      this.stopTimer(this.last_online)
-      this.nextReduce = [0, 0]
-      this.welcome.dayLine = moment().format("dddd, D MMMM YYYY")
-      this.welcome.motivationQuote = "Setiap perjalanan menuju kejayaan pasti ada onak dan duri. Teruskan usaha dan semangat, dan jangan sesekali menyerah. Kerana penghujungnya ada kemanisan yang menanti."
-      this.showModal("welcome-prompt")
-    },
-    resetStack(): void {
-      this.stack = [...this.timer.stack]
-    },
-    releaseAfter(time: number = 0): void {
-      if (!time) time = this.timer.extra_pad * 1000
-      setTimeout(() => { this.wakeLock.release() }, time)
-    },
-    pauseTimer(): void {
-      this.paused_on = moment().unix()
-      this.saveToLocal()
-      this.releaseAfter()
-    },
-    resumeTimer(): void {
-      let lag = this.current - this.paused_on
-      this.due = this.due + lag
-      this.paused_on = 0
-      this.saveToLocal()
-      this.wakeLock.request()
-      this.promptPause()
-    },
-    saveToLocal(last_online?: number): void {
-      if (last_online === undefined) last_online = moment().unix()
-      this.last_online = last_online
-      let data = {
-        mode: this.mode,
-        showClock: this.showClock,
-        nextReduce: this.nextReduce,
-        stack: this.stack,
-        due: this.due,
-        paused_on: this.paused_on,
-        timer: this.timer,
-        last_online,
-      }
-      localStorage.setItem("fokus-data", JSON.stringify(data))
-      if(this.userEmail) this.saveToFirebase(last_online)
-    },
-    saveToFirebase(last_online?: number): void {
-      if (last_online === undefined) last_online = moment().unix()
-      this.last_online = last_online
-      let data = {
-        mode: this.mode,
-        showClock: this.showClock,
-        nextReduce: this.nextReduce,
-        stack: this.stack,
-        due: this.due,
-        paused_on: this.paused_on,
-        timer: this.timer,
-        last_online,
-      }
-      this.doc.saveData(data)
-    },
-    getFromLocal(): void {
-      let data = localStorage.getItem("fokus-data")
-      // let data = '{"mode":3,"showClock":true,"nextReduce":[36,0],"stack":[1,1],"due":1719028169,"current":1719026369,"paused_on":0,"timer":{"focus":1,"break":[0,5,30],"simpleStack":false,"breakNumber":3,"stack":[2,1,1],"extra_pad":10,"focus_extra_mode":1,"focus_extra_deduct_min":5,"focus_extra_add_rate":0.5,"rest_extra_mode":2,"rest_extra_deduct_min":1,"rest_extra_add_rate":2.5}}'
-      if (data) {
-        this.loading = true
-        let parsed = JSON.parse(data)
-        let {
-          mode,
-          showClock,
-          nextReduce,
-          stack,
-          due,
-          paused_on,
-          last_online,
-          timer } = parsed
-        this.mode = mode
-        this.showClock = showClock
-        this.nextReduce = nextReduce
-        this.stack = stack
-        this.paused_on = paused_on
-        this.due = due
-        this.timer = timer
-        this.last_online = last_online
-        if (timer.focusSecond === undefined) {
-          this.timer.focusSecond = 0
-          this.timer.breakSecond = [0, 0, 0]
-        }
-        if (timer.planTime === undefined) {
-          this.timer.planTime = 15
-          this.timer.planSecond = 0
-        }
-        if (timer.focusTime === undefined) {
-          this.timer.focusTime = timer.focus ? timer.focus : 25
-        }
-        let last2Hour = moment().subtract(2, "hours").unix()
-        if (due && !paused_on && due < last2Hour) this.stopTimer(last_online)
-        setTimeout(() => {
-          this.loading = false
-        }, 500)
-      }
-      if (!this.last_online) return this.runStartOfDay()
-      let hour = moment().hour()
-      let startOfDay = moment().startOf('day').add(hour < 6 ? -18 : 6, 'hours').unix()
-      console.log("startOfDay", startOfDay)
-      console.log("last_online", this.last_online)
-      if (this.last_online < startOfDay) return this.runStartOfDay()
-    },
-    getFromFirebase(data:any): void {
-      // let data = '{"mode":3,"showClock":true,"nextReduce":[36,0],"stack":[1,1],"due":1719028169,"current":1719026369,"paused_on":0,"timer":{"focus":1,"break":[0,5,30],"simpleStack":false,"breakNumber":3,"stack":[2,1,1],"extra_pad":10,"focus_extra_mode":1,"focus_extra_deduct_min":5,"focus_extra_add_rate":0.5,"rest_extra_mode":2,"rest_extra_deduct_min":1,"rest_extra_add_rate":2.5}}'
-      if (data) {
-        this.loading = true
-        let {
-          mode,
-          showClock,
-          nextReduce,
-          stack,
-          due,
-          paused_on,
-          last_online,
-          timer } = data
-        this.mode = mode
-        this.showClock = showClock
-        this.nextReduce = nextReduce
-        this.stack = stack
-        this.paused_on = paused_on
-        this.due = due
-        this.timer = timer
-        this.last_online = last_online
-        if (timer.focusSecond === undefined) {
-          this.timer.focusSecond = 0
-          this.timer.breakSecond = [0, 0, 0]
-        }
-        if (timer.planTime === undefined) {
-          this.timer.planTime = 15
-          this.timer.planSecond = 0
-        }
-        if (timer.focusTime === undefined) {
-          this.timer.focusTime = timer.focus ? timer.focus : 25
-        }
-        let last2Hour = moment().subtract(2, "hours").unix()
-        if (due && !paused_on && due < last2Hour) this.stopTimer(last_online)
-        setTimeout(() => {
-          this.loading = false
-        }, 500)
-      }
-      if (!this.last_online) return this.runStartOfDay()
-      let hour = moment().hour()
-      let startOfDay = moment().startOf('day').add(hour < 6 ? -18 : 6, 'hours').unix()
-      console.log("startOfDay", startOfDay)
-      console.log("last_online", this.last_online)
-      if (this.last_online < startOfDay) return this.runStartOfDay()
-    },
-    changeStack(index: number): void {
-      if (!this.simpleStack && this.timer.stack[index] !== undefined) {
-        this.timer.stack[index] = this.timer.stack[index] % 2 + 1
-      }
-    },
-    removeStack(index: number): void {
-      if (!this.simpleStack) this.timer.stack.splice(index, 1)
-    },
-    pushStack(): void {
-      if (!this.simpleStack) this.timer.stack.push(1)
-    },
-    stopTimer(last_online?: number): void {
-      let mode = this.mode
-      this.mode = 0
-      this.due = 0
-      this.releaseAfter()
-      if (this.paused_on) {
-        this.paused_on = 0
-        this.hideModal("pause-prompt")
-        if (last_online) return this.saveToLocal(last_online)
-        return this.saveToLocal()
-      }
-      if (mode == 1) {
-        this.hideModal("break-prompt")
-        if (last_online) return this.saveToLocal(last_online)
-        return this.saveToLocal()
-      }
-      this.promptFocus(true)
-      if (last_online) return this.saveToLocal(last_online)
-      return this.saveToLocal()
-    },
-    fokusSemula(): void {
-      this.promptBreak()
-      this.startTimer()
-    },
-    startPlanning(): void {
-      this.hideModal("welcome-prompt")
-      this.runTimer(4, this.timer.planTime * 60 + this.timer.planSecond)
-    },
-    startBreak(): void {
-      let currentRehat = this.stack.shift() || 1
-      this.promptBreak()
-      let toAdd = 0
-      if (this.timer.focus_extra_mode && this.timer.extra_pad < this.secondsAfterDue) {
-        if (this.timer.focus_extra_mode == 1) {
-          this.nextReduce[0] = this.secondsPassedOvertime
-        }
-        else toAdd = Math.floor(this.secondsPassedOvertime * this.timer.focus_extra_add_rate)
-      }
-      if (!this.stack.length) this.stack = [...this.timer.stack]
-      const breakDuration = (this.timer.break[currentRehat] || 0) * 60 + (this.timer.breakSecond[currentRehat] || 0)
-      this.runTimer(currentRehat + 1, breakDuration, toAdd)
-    },
-    startFocus(startOfDay: boolean = false): void {
-      this.hideModal("focus-prompt")
-      if (startOfDay) return this.runTimer(1, this.focusInSecond)
-      if (this.mode == 4) {
-        this.hideModal("startPrompt")
-        return this.runTimer(1, this.focusInSecond)
-      }
-      let toAdd = 0
-      if (this.timer.rest_extra_mode && this.timer.extra_pad < this.secondsAfterDue) {
-        if (this.timer.rest_extra_mode == 1) {
-          this.nextReduce[1] = this.secondsPassedOvertime
-        }
-        else toAdd = Math.floor(this.secondsPassedOvertime * this.timer.rest_extra_add_rate)
-      }
-      this.runTimer(1, this.focusInSecond, toAdd)
-    },
-    promptChange(mode: number): void {
-      this.releaseAfter()
-      if (mode == 1) {
-        this.promptBreak()
-        return window.notifyMe("Break Time!", "Let's take a break")
-      }
-      if (mode == 4) {
-        return this.showModal("startPrompt")
-      }
-      this.promptFocus()
-      return window.notifyMe("Focus Time!", "Let's go change the world!")
-    },
-    getModal(id: string): any {
-      var myModalEl = document.querySelector(`#${id}`)
-      return window.bootstrap.Modal.getOrCreateInstance(myModalEl)
-    },
-    showModal(id: string): void {
-      this.getModal(id).show()
-    },
-    hideModal(id: string): void {
-      this.getModal(id).hide()
-    },
-    toggleModal(id: string): void {
-      this.getModal(id).toggle()
-    },
-    promptSetting(): void {
-      var myModalEl = document.querySelector('#main-settings')
-      var modal = window.bootstrap.Modal.getOrCreateInstance(myModalEl)
-      modal.toggle()
-    },
-    promptPause(): void {
-      var myModalEl = document.querySelector('#pause-prompt')
-      var modal = window.bootstrap.Modal.getOrCreateInstance(myModalEl)
-      modal.toggle()
-    },
-    promptBreak(): void {
-      var myModalEl = document.querySelector('#break-prompt')
-      var modal = window.bootstrap.Modal.getOrCreateInstance(myModalEl)
-      modal.toggle()
-    },
-    promptFocus(close: boolean = false): void {
-      var myModalEl = document.querySelector('#focus-prompt')
-      var modal = window.bootstrap.Modal.getOrCreateInstance(myModalEl)
-      if (close) return modal.hide()
-      modal.toggle()
-    },
-    startTimer(): void {
-      this.runTimer(1, this.focusInSecond)
-    },
-    runTimer(mode: number, interval: number, toAdd: number = 0): void {
-      console.log("running timer m,i,tA", mode, interval, toAdd)
-      this.mode = mode
-      let seconds = interval
-      // let seconds = 2 //Use for testing
-      let reduceMode = mode - 1
-      if (reduceMode > 0) reduceMode = 1
-      let reduceBy = this.nextReduce[reduceMode]
-      if (reduceBy) {
-        let minimum = reduceMode ? this.timer.rest_extra_deduct_min * 60 : this.timer.focus_extra_deduct_min * 60
-        seconds = seconds - reduceBy
-        if (seconds < minimum) seconds = minimum
-        this.nextReduce[reduceMode] = 0
-      }
-      let momentToDue = moment().add(seconds, 'seconds')
-      if (toAdd) momentToDue.add(toAdd, 'seconds')
-      this.setTicking()
-      this.due = momentToDue.unix()
-      console.log("due", this.due, this.current, this.secondsToDue)
-      this.wakeLock.request()
-      this.saveToLocal()
-      // this.due = moment().add('seconds',2).unix()
-    },
-    setTicking(): void {
-      clearInterval(intervalRun);
-      this.updateTime()
-      intervalRun = setInterval(this.updateTime, 1000) as unknown as number
-    },
-    updateTime(): void {
-      this.current = moment().unix()
-    },
-    fastForward(): void {
-      this.setTicking()
-      this.due = moment().add(3, 'seconds').unix()
-    },
-    test(): void {
-      this.saveToLocal(12)
-    },
-    test2(): void {
-      this.saveToLocal(0)
-    },
-  },
+// --- State ---
+const welcome = reactive<WelcomeData>({
+  title: 'Selamat Datang',
+  dayLine: 'Rabu, 5 Feb 2025',
+  motivationQuote: 'Setiap perjalanan menuju kejayaan pasti ada onak dan duri. Teruskan usaha dan semangat, dan jangan sesekali menyerah. Kerana penghujungnya ada kemanisan yang menanti.'
 })
+const loading = ref(false)
+const mode = ref(0)
+const showClock = ref(true)
+const nextReduce = ref([0, 0])
+const stack = ref([1, 1, 1, 2])
+const due = ref(0)
+const current = ref(0)
+const paused_on = ref(0)
+const last_online = ref(0)
+const timer = reactive<TimerConfig>({
+  focusTime: 25,
+  focusSecond: 0,
+  planTime: 15,
+  planSecond: 0,
+  break: [0, 5, 20],
+  breakSecond: [0, 0, 0],
+  simpleStack: true,
+  breakNumber: 4,
+  stack: [1, 1, 1, 2],
+  extra_pad: 10,
+  focus_extra_mode: 0,
+  focus_extra_deduct_min: 5,
+  focus_extra_add_rate: 0.5,
+  rest_extra_mode: 0,
+  rest_extra_deduct_min: 1,
+  rest_extra_add_rate: 5,
+})
+const rehatDetail = [
+  null,
+  { text: 'Rehat Sebentar !' },
+  { text: 'Masa untuk Rehat !' },
+] as (RehatDetail | null)[]
+const states = [
+  {
+    bg: '',
+    bigText: 'Fokus',
+    timeClass: 'fs-1',
+    buttonClass: 'btn-outline-info',
+    countDownClass: 'btn-outline-info w-75 me-2',
+  },
+  {
+    bg: '',
+    bigText: 'Fokus',
+    timeClass: 'fs-1',
+    buttonClass: 'btn-outline-info',
+    countDownClass: 'btn-outline-info w-75 me-2',
+  },
+  {
+    bg: 'bg-primary',
+    bigText: 'Rehat',
+    timeClass: 'rest-time',
+    buttonClass: 'btn-outline-white',
+    countDownClass: 'border border-white text-white w-100 mx-3',
+  },
+  {
+    bg: 'bg-success',
+    bigText: 'Rehat',
+    timeClass: 'rest-time',
+    buttonClass: 'btn-outline-white',
+    countDownClass: 'border border-white text-white w-100 mx-3',
+  },
+  {
+    bg: '',
+    bigText: 'Planning',
+    timeClass: 'rest-time',
+    buttonClass: 'btn-outline-white',
+    countDownClass: 'border border-white text-white w-100 mx-3',
+  },
+] as PageState[]
+const pageState = ref<PageState>({} as PageState)
+
+// --- Firebase composable ---
+const doc = useFirebaseDoc({}, 'fokus-settings/anon')
+const { auth, data:docData } = doc
+
+const userEmail = ref("")
+watch(() => auth.value, (auth) => {
+  if(auth){
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in
+        //console.log("User:", user);
+        userEmail.value = user.email || ""
+      } else {
+        // User is signed out
+        console.log("No user signed in");
+      }
+    });
+  }
+},{deep: true, immediate: true})
+const wakeLock = useWakeLock()
+
+// --- Computed ---
+const isOvertime = computed(() => secondsAfterDue.value > timer.extra_pad)
+const validTimer = computed(() => focusInSecond.value > 0 && shortBreakInSecond.value > 0 && longBreakInSecond.value > 0)
+const focusInSecond = computed(() => timer.focusTime * 60 + (timer.focusSecond ? timer.focusSecond : 0))
+const shortBreakInSecond = computed(() => {
+  try {
+    return timer.break[1] * 60 + (timer.breakSecond[1] ? timer.breakSecond[1] : 0)
+  } catch (error) {
+    return 0
+  }
+})
+const longBreakInSecond = computed(() => {
+  try {
+    return timer.break[2] * 60 + (timer.breakSecond[2] ? timer.breakSecond[2] : 0)
+  } catch (error) {
+    return 0
+  }
+})
+const shortBreakMinute = computed(() => timer.break[1])
+const longBreakMinute = computed(() => timer.break[2])
+const focusMinute = computed(() => timer.focusTime)
+const focusSecond = computed(() => timer.focusSecond)
+const shortBreakSecond = computed(() => timer.breakSecond[1])
+const longBreakSecond = computed(() => timer.breakSecond[2])
+const stackNotSame = computed(() => JSON.stringify(stack.value) != JSON.stringify(timer.stack))
+const breakNumber = computed(() => timer.breakNumber)
+const simpleStack = computed(() => timer.simpleStack)
+const nextRehat = computed(() => stack.value[0] || 1)
+const secondsToDue = computed(() => due.value - current.value)
+const secondsAfterDue = computed(() => current.value - due.value)
+const hours = computed(() => {
+  if (!due.value) {
+    if (timer.focusTime < 60) return ''
+    return Math.floor(timer.focusTime / 60).toString().padStart(2, '0')
+  }
+  if (paused_on.value) {
+    let time = due.value - paused_on.value
+    if (time < 3600) return ''
+    return Math.floor(time / 3600).toString().padStart(2, '0')
+  }
+  let time = secondsToDue.value
+  if (passedDue.value) time = secondsAfterDue.value
+  if (time < 3600) return ''
+  return Math.floor(time / 3600).toString().padStart(2, '0')
+})
+const minutes = computed(() => {
+  if (!due.value) return (timer.focusTime % 60).toString().padStart(2, '0')
+  let time = secondsToDue.value
+  if (paused_on.value) {
+    let time = due.value - paused_on.value
+    if (time < 60) return '00'
+    return (Math.floor(time / 60) % 60).toString().padStart(2, '0')
+  }
+  if (passedDue.value) time = secondsAfterDue.value
+  if (time < 60) return '00'
+  return (Math.floor(time / 60) % 60).toString().padStart(2, '0')
+})
+const seconds = computed(() => {
+  if (!due.value) return timer.focusSecond.toString().padStart(2, '0')
+  if (paused_on.value) {
+    let time = due.value - paused_on.value
+    if (time < 0) return '00'
+    return (time % 60).toString().padStart(2, '0')
+  }
+  let time = secondsToDue.value
+  if (passedDue.value) time = secondsAfterDue.value
+  if (time < 0) return '00'
+  return (time % 60).toString().padStart(2, '0')
+})
+const hoursOvertime = computed(() => {
+  if (secondsPassedOvertime.value > 0) {
+    let time = Math.floor(secondsPassedOvertime.value / 3600)
+    if (time <= 0) return ''
+    return Math.floor(secondsPassedOvertime.value / 3600).toString().padStart(2, '0')
+  }
+  return ''
+})
+const minutesOvertime = computed(() => {
+  if (secondsPassedOvertime.value > 0) {
+    return (Math.floor(secondsPassedOvertime.value / 60) % 60).toString().padStart(2, '0')
+  }
+  return '00'
+})
+const secondsPassedOvertime = computed(() => secondsAfterDue.value - timer.extra_pad)
+const secondsOvertime = computed(() => {
+  if (secondsPassedOvertime.value > 0) {
+    return (secondsPassedOvertime.value % 60).toString().padStart(2, '0')
+  }
+  return '00'
+})
+const passedDue = computed(() => {
+  if (paused_on.value) return false
+  return Boolean(due.value && due.value <= current.value)
+})
+const currentTime = computed(() => {
+  if (current.value) return moment(current.value * 1000).format('hh:mm A')
+  return '00 : 00 AM'
+})
+
+// --- Watchers ---
+watch(docData, (newVal, oldVal) => {
+  if (newVal?.last_online == last_online.value) return
+  if (newVal?.last_online > last_online.value) return window.location.href = '/idle'
+}, { deep: true })
+watch(userEmail, () => {
+  setupSync()
+})
+watch(validTimer, (newVal) => {
+  if (!newVal) {
+    if (focusInSecond.value <= 0) {
+      if (timer.focusTime < 0) timer.focusTime = 0
+      if (timer.focusTime == 0 && timer.focusSecond <= 0) timer.focusSecond = 5
+    }
+    if (shortBreakInSecond.value <= 0) {
+      if (timer.break[1] < 0) timer.break[1] = 0
+      if (timer.break[1] == 0 && timer.breakSecond[1] <= 0) timer.breakSecond[1] = 5
+    }
+    if (longBreakInSecond.value <= 0) {
+      if (timer.break[2] < 0) timer.break[2] = 0
+      if (timer.break[2] == 0 && timer.breakSecond[2] <= 0) timer.breakSecond[2] = 5
+    }
+  }
+})
+watch(focusMinute, (newVal) => {
+  if (loading.value) return
+  if (newVal > 0) timer.focusSecond = 0
+})
+watch(shortBreakMinute, (newVal) => {
+  if (loading.value) return
+  if (newVal > 0) timer.breakSecond[1] = 0
+})
+watch(longBreakMinute, (newVal) => {
+  if (loading.value) return
+  if (newVal > 0) timer.breakSecond[2] = 0
+})
+watch(focusSecond, (newVal) => {
+  if (newVal > 59) timer.focusSecond = 59
+  if (newVal < 0) timer.focusSecond = 0
+})
+watch(shortBreakSecond, (newVal) => {
+  if (newVal > 59) timer.breakSecond[1] = 59
+  if (newVal < 0) timer.breakSecond[1] = 0
+})
+watch(longBreakSecond, (newVal) => {
+  if (newVal > 59) timer.breakSecond[2] = 59
+  if (newVal < 0) timer.breakSecond[2] = 0
+})
+watch(mode, (newVal) => {
+  pageState.value = states[newVal] || {
+    bg: '',
+    bigText: 'Fokus',
+    timeClass: 'fs-1',
+    buttonClass: 'btn-outline-info',
+    countDownClass: 'btn-outline-info w-75 me-2',
+  }
+})
+watch(passedDue, (newVal) => {
+  if (newVal) promptChange(mode.value)
+})
+watch(breakNumber, (newVal) => {
+  if (newVal > 1 && timer.simpleStack) {
+    let newStack = Array(newVal - 1).fill(1)
+    newStack.push(2)
+    timer.stack = newStack
+  }
+})
+watch(simpleStack, (newVal) => {
+  if (newVal) {
+    let newStack = Array(timer.breakNumber - 1).fill(1)
+    newStack.push(2)
+    timer.stack = newStack
+  }
+})
+watch(paused_on, (newVal) => {
+  if (newVal) promptPause()
+})
+
+// --- Methods ---
+function setupSync() {
+  if (!doc.isSet.value || !userEmail.value) return tryLoginIfNeeded()
+  doc.changeDoc(`fokus-settings/${userEmail.value}`)
+  localStorage.setItem(`loggedInAs`, userEmail.value)
+  doc.getData().then((data: any) => {
+    if (data) getFromFirebase(data)
+    else saveToFirebase()
+  })
+}
+async function tryLoginIfNeeded() {
+  // Firebase login logic (adapted for Composition API)
+  // ...existing code...
+}
+function promptChange(m: number) {
+  releaseAfter()
+  if (m == 1) {
+    promptBreak()
+    return window.notifyMe('Break Time!', `Let's take a break`)
+  }
+  if (m == 4) {
+    return showModal('startPrompt')
+  }
+  promptFocus()
+  return window.notifyMe('Focus Time!', `Let's go change the world!`)
+}
+function promptSetting(): void {
+  var myModalEl = document.querySelector('#main-settings')
+  var modal = window.bootstrap.Modal.getOrCreateInstance(myModalEl)
+  modal.toggle()
+}
+
+function promptPause() {
+  var myModalEl = document.querySelector('#pause-prompt')
+  var modal = (window as any).bootstrap.Modal.getOrCreateInstance(myModalEl)
+  modal.toggle()
+}
+function promptBreak() {
+  var myModalEl = document.querySelector('#break-prompt')
+  var modal = (window as any).bootstrap.Modal.getOrCreateInstance(myModalEl)
+  modal.toggle()
+}
+function promptFocus(close = false) {
+  var myModalEl = document.querySelector('#focus-prompt')
+  var modal = (window as any).bootstrap.Modal.getOrCreateInstance(myModalEl)
+  if (close) return modal.hide()
+  modal.toggle()
+}
+function showModal(id: string) {
+  const myModalEl = document.querySelector(`#${id}`) as HTMLElement | null
+  if (!myModalEl) return
+  (window as any).bootstrap.Modal.getOrCreateInstance(myModalEl).show()
+}
+function hideModal(id: string) {
+  const myModalEl = document.querySelector(`#${id}`) as HTMLElement | null
+  if (!myModalEl) return
+  (window as any).bootstrap.Modal.getOrCreateInstance(myModalEl).hide()
+}
+function releaseAfter(time = 0) {
+  if (!time) time = timer.extra_pad * 1000
+  setTimeout(() => { wakeLock.release?.() }, time)
+}
+function pauseTimer() {
+  paused_on.value = moment().unix()
+  saveToLocal()
+  releaseAfter()
+}
+function resumeTimer() {
+  let lag = current.value - paused_on.value
+  due.value = due.value + lag
+  paused_on.value = 0
+  saveToLocal()
+  wakeLock.request?.("screen")
+  promptPause()
+}
+function saveToLocal(lastOnline?: number) {
+  if (lastOnline === undefined) lastOnline = moment().unix()
+  last_online.value = lastOnline
+  let data = {
+    mode: mode.value,
+    showClock: showClock.value,
+    nextReduce: nextReduce.value,
+    stack: stack.value,
+    due: due.value,
+    paused_on: paused_on.value,
+    timer: { ...timer },
+    last_online: lastOnline,
+  }
+  localStorage.setItem('fokus-data', JSON.stringify(data))
+  if (userEmail.value) saveToFirebase(lastOnline)
+}
+function saveToFirebase(lastOnline?: number) {
+  if (lastOnline === undefined) lastOnline = moment().unix()
+  last_online.value = lastOnline
+  let data = {
+    mode: mode.value,
+    showClock: showClock.value,
+    nextReduce: nextReduce.value,
+    stack: stack.value,
+    due: due.value,
+    paused_on: paused_on.value,
+    timer: { ...timer },
+    last_online: lastOnline,
+  }
+  doc.saveData(data)
+}
+function getFromLocal() {
+  let data = localStorage.getItem('fokus-data')
+  if (data) {
+    loading.value = true
+    let parsed = JSON.parse(data)
+    const { mode: m, showClock: sc, nextReduce: nr, stack: st, due: d, paused_on: po, last_online: lo, timer: t } = parsed
+    mode.value = m
+    showClock.value = sc
+    nextReduce.value = nr
+    stack.value = st
+    paused_on.value = po
+    due.value = d
+    Object.assign(timer, t)
+    last_online.value = lo
+    if (t.focusSecond === undefined) {
+      timer.focusSecond = 0
+      timer.breakSecond = [0, 0, 0]
+    }
+    if (t.planTime === undefined) {
+      timer.planTime = 15
+      timer.planSecond = 0
+    }
+    if (t.focusTime === undefined) {
+      timer.focusTime = t.focus ? t.focus : 25
+    }
+    let last2Hour = moment().subtract(2, 'hours').unix()
+    if (d && !po && d < last2Hour) stopTimer(lo)
+    setTimeout(() => {
+      loading.value = false
+    }, 500)
+  }
+  if (!last_online.value) return runStartOfDay()
+  let hour = moment().hour()
+  let startOfDay = moment().startOf('day').add(hour < 6 ? -18 : 6, 'hours').unix()
+  if (last_online.value < startOfDay) return runStartOfDay()
+}
+function getFromFirebase(data: any) {
+  if (data) {
+    loading.value = true
+    const { mode: m, showClock: sc, nextReduce: nr, stack: st, due: d, paused_on: po, last_online: lo, timer: t } = data
+    mode.value = m
+    showClock.value = sc
+    nextReduce.value = nr
+    stack.value = st
+    paused_on.value = po
+    due.value = d
+    Object.assign(timer, t)
+    last_online.value = lo
+    if (t.focusSecond === undefined) {
+      timer.focusSecond = 0
+      timer.breakSecond = [0, 0, 0]
+    }
+    if (t.planTime === undefined) {
+      timer.planTime = 15
+      timer.planSecond = 0
+    }
+    if (t.focusTime === undefined) {
+      timer.focusTime = t.focus ? t.focus : 25
+    }
+    let last2Hour = moment().subtract(2, 'hours').unix()
+    if (d && !po && d < last2Hour) stopTimer(lo)
+    setTimeout(() => {
+      loading.value = false
+    }, 500)
+  }
+  if (!last_online.value) return runStartOfDay()
+  let hour = moment().hour()
+  let startOfDay = moment().startOf('day').add(hour < 6 ? -18 : 6, 'hours').unix()
+  if (last_online.value < startOfDay) return runStartOfDay()
+}
+function runStartOfDay() {
+  welcome.title = 'Selamat Datang'
+  if (last_online.value) welcome.title = 'Welcome Back!'
+  resetStack()
+  stopTimer(last_online.value)
+  nextReduce.value = [0, 0]
+  welcome.dayLine = moment().format('dddd, D MMMM YYYY')
+  welcome.motivationQuote = 'Setiap perjalanan menuju kejayaan pasti ada onak dan duri. Teruskan usaha dan semangat, dan jangan sesekali menyerah. Kerana penghujungnya ada kemanisan yang menanti.'
+  showModal('welcome-prompt')
+}
+function resetStack() {
+  stack.value = [...timer.stack]
+}
+function stopTimer(lastOnline?: number) {
+  let m = mode.value
+  mode.value = 0
+  due.value = 0
+  releaseAfter()
+  if (paused_on.value) {
+    paused_on.value = 0
+    hideModal('pause-prompt')
+    if (lastOnline) return saveToLocal(lastOnline)
+    return saveToLocal()
+  }
+  if (m == 1) {
+    hideModal('break-prompt')
+    if (lastOnline) return saveToLocal(lastOnline)
+    return saveToLocal()
+  }
+  promptFocus(true)
+  if (lastOnline) return saveToLocal(lastOnline)
+  return saveToLocal()
+}
+function fokusSemula() {
+  promptBreak()
+  startTimer()
+}
+function startPlanning() {
+  hideModal('welcome-prompt')
+  runTimer(4, timer.planTime * 60 + timer.planSecond)
+}
+function startBreak() {
+  let currentRehat = stack.value.shift() || 1
+  promptBreak()
+  let toAdd = 0
+  if (timer.focus_extra_mode && timer.extra_pad < secondsAfterDue.value) {
+    if (timer.focus_extra_mode == 1) {
+      nextReduce.value[0] = secondsPassedOvertime.value
+    } else toAdd = Math.floor(secondsPassedOvertime.value * timer.focus_extra_add_rate)
+  }
+  if (!stack.value.length) stack.value = [...timer.stack]
+  const breakDuration = (timer.break[currentRehat] || 0) * 60 + (timer.breakSecond[currentRehat] || 0)
+  runTimer(currentRehat + 1, breakDuration, toAdd)
+}
+function startFocus(startOfDay = false) {
+  hideModal('focus-prompt')
+  if (startOfDay) return runTimer(1, focusInSecond.value)
+  if (mode.value == 4) {
+    hideModal('startPrompt')
+    return runTimer(1, focusInSecond.value)
+  }
+  let toAdd = 0
+  if (timer.rest_extra_mode && timer.extra_pad < secondsAfterDue.value) {
+    if (timer.rest_extra_mode == 1) {
+      nextReduce.value[1] = secondsPassedOvertime.value
+    } else toAdd = Math.floor(secondsPassedOvertime.value * timer.rest_extra_add_rate)
+  }
+  runTimer(1, focusInSecond.value, toAdd)
+}
+function changeStack(index: number) {
+  if (!timer.simpleStack && timer.stack[index] !== undefined) {
+    timer.stack[index] = timer.stack[index] % 2 + 1
+  }
+}
+function removeStack(index: number) {
+  if (!timer.simpleStack) timer.stack.splice(index, 1)
+}
+function pushStack() {
+  if (!timer.simpleStack) timer.stack.push(1)
+}
+function startTimer() {
+  runTimer(1, focusInSecond.value)
+}
+function runTimer(m: number, interval: number, toAdd = 0) {
+  mode.value = m
+  let seconds = interval
+  let reduceMode = m - 1
+  if (reduceMode > 0) reduceMode = 1
+  let reduceBy = nextReduce.value[reduceMode]
+  if (reduceBy) {
+    let minimum = reduceMode ? timer.rest_extra_deduct_min * 60 : timer.focus_extra_deduct_min * 60
+    seconds = seconds - reduceBy
+    if (seconds < minimum) seconds = minimum
+    nextReduce.value[reduceMode] = 0
+  }
+  let momentToDue = moment().add(seconds, 'seconds')
+  if (toAdd) momentToDue.add(toAdd, 'seconds')
+  setTicking()
+  due.value = momentToDue.unix()
+  wakeLock.request?.("screen")
+  saveToLocal()
+}
+function setTicking() {
+  clearInterval(intervalRun)
+  updateTime()
+  intervalRun = setInterval(updateTime, 1000) as unknown as number
+}
+function updateTime() {
+  current.value = moment().unix()
+}
+function fastForward() {
+  setTicking()
+  due.value = moment().add(3, 'seconds').unix()
+}
+function test() {
+  saveToLocal(12)
+}
+function test2() {
+  saveToLocal(0)
+}
+
+// --- Lifecycle ---
+onMounted(() => {
+  setupSync()
+  moment.updateLocale('en', {
+    weekdays: [
+      'Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'
+    ],
+    months: ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun', 'Julai', 'Ogos', 'September',
+      'Oktober', 'November', 'Disember'
+    ]
+  })
+  getFromLocal()
+  pageState.value = states[mode.value] || {
+    bg: '',
+    bigText: 'Fokus',
+    timeClass: 'fs-1',
+    buttonClass: 'btn-outline-info',
+    countDownClass: 'btn-outline-info w-75 me-2',
+  }
+  setTicking()
+})
+
+
+function isIdTokenValid(idToken: string) {
+  if (!idToken) return false;
+  const parts = idToken.split('.');
+  if (parts.length < 2 || !parts[1]) return false;
+  const payload = JSON.parse(atob(parts[1]));
+  const now = Math.floor(Date.now() / 1000);
+  return payload.exp > now;
+}
+
+async function refreshIdToken(refreshToken: string) {
+  const apiKey = import.meta.env.VITE_FIREBASE_API_KEY; // from Firebase project config
+  const res = await fetch(`https://securetoken.googleapis.com/v1/token?key=${apiKey}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `grant_type=refresh_token&refresh_token=${refreshToken}`
+  });
+  const data = await res.json();
+  return data; // contains id_token, refresh_token, expires_in, etc.
+}
 </script>
