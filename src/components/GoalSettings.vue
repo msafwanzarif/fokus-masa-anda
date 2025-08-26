@@ -11,13 +11,13 @@
     </button>
   </SettingModal>
   <template v-for="(goal, index) in goalsList" :key="index">
-    <GoalDetailsettings :userEmail="userEmail" :goalName="goalsLabel[index]??''" :goalId="goal" />
+    <GoalDetailSettings :userEmail="userEmail" :goalName="goalsLabel[index]??''" :goalId="goal" />
   </template>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import GoalDetailsettings from './GoalDetailsettings.vue'
+import GoalDetailSettings from './GoalDetailSettings.vue'
 import IconBullseye from './icons/IconBullseye.vue'
 import SettingModal from './SettingModal.vue'
 const props = defineProps<{
