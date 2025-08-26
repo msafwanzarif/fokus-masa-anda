@@ -18,7 +18,7 @@
               <IconUserCheck />
             </button>
             <button class="btn me-2" :class="pageState.buttonClass">{{ currentTime }}</button>
-            <button class="btn me-2" :class="pageState.buttonClass">{{ today.isSuccess }}</button>
+            <!-- <button class="btn me-2" :class="pageState.buttonClass">{{ today.isSuccess }}</button> -->
 
           </div>
         </div>

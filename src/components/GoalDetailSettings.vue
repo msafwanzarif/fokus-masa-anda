@@ -32,7 +32,7 @@
               v-slot="{ bahasa }">{{ bahasa }}</DurationDisplayFromSeconds></span>
         </div>
       </div>
-      <DurationDisplayFromSeconds :seconds="today.progress" v-slot="{ bahasa }">{{ bahasa }}</DurationDisplayFromSeconds>
+      <!-- <DurationDisplayFromSeconds :seconds="today.progress" v-slot="{ bahasa }">{{ bahasa }}</DurationDisplayFromSeconds> -->
       <hr>
       <div class="fs-4 mb-2">Progress Hari Ini</div>
       <div class="progress mt-2" style="height: 2rem;">
