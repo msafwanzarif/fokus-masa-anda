@@ -15,6 +15,7 @@ export interface WelcomePromptProps {
     dayLine: string
     motivationQuote: string
   }
+  userEmail?:string
   lastOnline: number
 }
 

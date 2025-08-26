@@ -13,7 +13,10 @@
             <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
           </svg>
           <div class="d-flex align-items-center">
-            <button class="btn me-2" :class="pageState.buttonClass" v-if="userEmail"> User: {{ userEmail }}</button>
+            <button @click="showModal('user-settings')" id="loggedInIndicator"  class="btn me-2" :class="pageState.buttonClass" v-show="userEmail" data-bs-toggle="tooltip"
+              data-bs-placement="left" :title="userEmail">
+              <IconUserCheck />
+            </button>
             <button class="btn me-2" :class="pageState.buttonClass">{{ currentTime }}</button>
 
           </div>
@@ -175,7 +178,7 @@
     <!-- Modal Components -->
     <StartPrompt @settings-click="promptSetting" @start-focus="startFocus" />
     <WelcomePrompt :welcome="welcome" :last-online="last_online" @settings-click="promptSetting"
-      @start-planning="startPlanning" @start-focus="startFocus" />
+      @start-planning="startPlanning" @start-focus="startFocus" :userEmail="userEmail" />
     <BreakPrompt :rehat-detail="rehatDetail" :next-rehat="nextRehat" :is-overtime="isOvertime"
       :hours-overtime="hoursOvertime" :minutes-overtime="minutesOvertime" :seconds-overtime="secondsOvertime"
       :timer="timer" :seconds-after-due="secondsAfterDue" @settings-click="promptSetting" @stop-timer="stopTimer"
@@ -226,6 +229,7 @@ import type {
   PageState
 } from '@/types'
 import UserSettings from '@/components/UserSettings.vue'
+import IconUserCheck from '@/components/icons/IconUserCheck.vue'
 
 let intervalRun: number | undefined
 // --- State ---
@@ -432,6 +436,7 @@ watch(docData, (newVal, oldVal) => {
 }, { deep: true })
 watch(userEmail, () => {
   setupSync()
+  if(email) setTimeout(() =>{ enableTooltip() },5) 
 })
 watch(validTimer, (newVal) => {
   if (!newVal) {
@@ -512,6 +517,10 @@ function setupSync() {
     if (data) getFromFirebase(data)
     else saveToFirebase()
   })
+}
+function enableTooltip(){
+  var myTooltipEl = document.getElementById('loggedInIndicator')
+  var tooltip = new window.bootstrap.Tooltip(myTooltipEl,{offset:[0,12]})
 }
 async function tryLoginIfNeeded() {
   // Firebase login logic (adapted for Composition API)
