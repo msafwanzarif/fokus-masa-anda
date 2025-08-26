@@ -434,7 +434,7 @@ watch(docData, (newVal, oldVal) => {
   if (newVal?.last_online == last_online.value) return
   if (newVal?.last_online > last_online.value) return window.location.href = '/idle'
 }, { deep: true })
-watch(userEmail, () => {
+watch(userEmail, (email) => {
   setupSync()
   if(email) setTimeout(() =>{ enableTooltip() },5) 
 })
