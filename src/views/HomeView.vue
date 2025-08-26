@@ -18,6 +18,7 @@
               <IconUserCheck />
             </button>
             <button class="btn me-2" :class="pageState.buttonClass">{{ currentTime }}</button>
+            <!-- <button class="btn me-2" :class="pageState.buttonClass">{{ today.isSuccess }}</button> -->
 
           </div>
         </div>
@@ -25,7 +26,7 @@
       <div class="">
         <div class="d-flex flex-column justify-content-between h-100 p-3">
           <div class="d-flex justify-content-center d-md-none">
-            <svg v-if="mode < 2" xmlns="http://www.w3.org/2000/svg" width="45vmin" height="45vmin" viewBox="0 0 24 24"
+            <svg @click="showModal('goal-detail-settings-fokus')" :class="targetClass" v-if="mode < 2" xmlns="http://www.w3.org/2000/svg" width="45vmin" height="45vmin" viewBox="0 0 24 24"
               fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
               class="icon icon-tabler icons-tabler-outline icon-tabler-target">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -69,7 +70,7 @@
           </div>
           <div class="d-flex align-items-center justify-content-center mb-2">
             <h1 class="main-title me-md-3">{{ pageState.bigText }}</h1>
-            <svg v-if="mode < 2" xmlns="http://www.w3.org/2000/svg" width="30vmin" height="30vmin" viewBox="0 0 24 24"
+            <svg @click="showModal('goal-detail-settings-fokus')" :class="targetClass" v-if="mode < 2" xmlns="http://www.w3.org/2000/svg" width="30vmin" height="30vmin" viewBox="0 0 24 24"
               fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
               class="icon icon-tabler icons-tabler-outline icon-tabler-target d-none d-md-block">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -194,6 +195,7 @@
       @change-stack="changeStack" @remove-stack="removeStack" @push-stack="pushStack" />
     <TimerOvertimeSettings :timer="timer" />
     <UserSettings :userEmail="userEmail" />
+    <GoalSettings :userEmail="userEmail" :goalsList="goalsList" :goalsLabel="goalsLabel" />
   </div>
 </template>
 
@@ -208,9 +210,8 @@
 </style>
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted } from 'vue'
-import { onAuthStateChanged  } from 'firebase/auth'
-import { useFirebaseDb, useFirebaseDoc } from 'szutils.vue'
-import SettingModal from '../components/SettingModal.vue'
+import { onAuthStateChanged } from 'firebase/auth'
+import { useHabitTracker, useFirebaseDoc } from 'szutils.vue'
 import StartPrompt from '../components/StartPrompt.vue'
 import WelcomePrompt from '../components/WelcomePrompt.vue'
 import BreakPrompt from '../components/BreakPrompt.vue'
@@ -229,6 +230,7 @@ import type {
   PageState
 } from '@/types'
 import UserSettings from '@/components/UserSettings.vue'
+import GoalSettings from '@/components/GoalSettings.vue'
 import IconUserCheck from '@/components/icons/IconUserCheck.vue'
 
 let intervalRun: number | undefined
@@ -245,6 +247,7 @@ const nextReduce = ref([0, 0])
 const stack = ref([1, 1, 1, 2])
 const due = ref(0)
 const current = ref(0)
+const startedOn = ref(0)
 const paused_on = ref(0)
 const last_online = ref(0)
 const timer = reactive<TimerConfig>({
@@ -308,14 +311,26 @@ const states = [
   },
 ] as PageState[]
 const pageState = ref<PageState>({} as PageState)
+const goalsList = ref(["fokus"])
+const goalsLabel = ref(["Fokus"])
+
+
+const focusTracker = useHabitTracker('fokus')
+const { today } = focusTracker
+const targetClass = computed(() => {
+  if (today.value.isSuccess) return 'text-success c-pointer'
+  if (today.value.isPassed) return 'text-info c-pointer'
+  if (today.value.progress > 0) return 'text-warning c-pointer opacity-50'
+  return 'text-white c-pointer'
+})
 
 // --- Firebase composable ---
 const doc = useFirebaseDoc({}, 'fokus-settings/anon')
-const { auth, data:docData } = doc
+const { auth, data: docData } = doc
 
 const userEmail = ref("")
 watch(() => auth.value, (auth) => {
-  if(auth){
+  if (auth) {
     onAuthStateChanged(auth, (user) => {
       if (user) {
         // User is signed in
@@ -327,7 +342,7 @@ watch(() => auth.value, (auth) => {
       }
     });
   }
-},{deep: true, immediate: true})
+}, { deep: true, immediate: true })
 const wakeLock = useWakeLock()
 
 // --- Computed ---
@@ -576,6 +591,8 @@ function releaseAfter(time = 0) {
 }
 function pauseTimer() {
   paused_on.value = moment().unix()
+  if(mode.value == 1) updateHabitTracker('fokus')
+  startedOn.value = 0
   saveToLocal()
   releaseAfter()
 }
@@ -583,6 +600,7 @@ function resumeTimer() {
   let lag = current.value - paused_on.value
   due.value = due.value + lag
   paused_on.value = 0
+  startedOn.value = moment().unix()
   saveToLocal()
   wakeLock.request?.("screen")
   promptPause()
@@ -596,9 +614,12 @@ function saveToLocal(lastOnline?: number) {
     nextReduce: nextReduce.value,
     stack: stack.value,
     due: due.value,
+    started_on: startedOn.value,
     paused_on: paused_on.value,
     timer: { ...timer },
     last_online: lastOnline,
+    goals: goalsList.value,
+    goalsLabel: goalsLabel.value
   }
   localStorage.setItem('fokus-data', JSON.stringify(data))
   if (userEmail.value) saveToFirebase(lastOnline)
@@ -612,9 +633,12 @@ function saveToFirebase(lastOnline?: number) {
     nextReduce: nextReduce.value,
     stack: stack.value,
     due: due.value,
+    started_on: startedOn.value,
     paused_on: paused_on.value,
     timer: { ...timer },
     last_online: lastOnline,
+    goals: goalsList.value,
+    goalsLabel: goalsLabel.value
   }
   doc.saveData(data)
 }
@@ -630,6 +654,9 @@ function getFromLocal() {
     stack.value = st
     paused_on.value = po
     due.value = d
+    if (parsed.goals) goalsList.value = parsed.goals
+    if (parsed.goalsLabel) goalsLabel.value = parsed.goalsLabel
+    if (parsed.started_on) startedOn.value = parsed.started_on
     Object.assign(timer, t)
     last_online.value = lo
     if (t.focusSecond === undefined) {
@@ -664,6 +691,9 @@ function getFromFirebase(data: any) {
     stack.value = st
     paused_on.value = po
     due.value = d
+    if (data.goals) goalsList.value = data.goals
+    if (data.goalsLabel) goalsLabel.value = data.goalsLabel
+    if (data.started_on) startedOn.value = data.started_on
     Object.assign(timer, t)
     last_online.value = lo
     if (t.focusSecond === undefined) {
@@ -705,6 +735,8 @@ function stopTimer(lastOnline?: number) {
   let m = mode.value
   mode.value = 0
   due.value = 0
+  if(mode.value == 1) updateHabitTracker('fokus')
+  startedOn.value = 0
   releaseAfter()
   if (paused_on.value) {
     paused_on.value = 0
@@ -722,6 +754,8 @@ function stopTimer(lastOnline?: number) {
   return saveToLocal()
 }
 function fokusSemula() {
+  updateHabitTracker('fokus')
+  startedOn.value = 0
   promptBreak()
   startTimer()
 }
@@ -729,8 +763,19 @@ function startPlanning() {
   hideModal('welcome-prompt')
   runTimer(4, timer.planTime * 60 + timer.planSecond)
 }
+
+function updateHabitTracker(goal: string) {
+  let index = goalsList.value.indexOf(goal)
+  if (index === -1) return
+  if(!startedOn.value) return
+  const tracker = useHabitTracker(goal, undefined)
+  let seconds = moment().unix() - startedOn.value
+  console.log("adding", seconds)
+  tracker.recordRep(seconds, goalsLabel.value[index] || "")
+}
 function startBreak() {
   let currentRehat = stack.value.shift() || 1
+  updateHabitTracker('fokus')
   promptBreak()
   let toAdd = 0
   if (timer.focus_extra_mode && timer.extra_pad < secondsAfterDue.value) {
@@ -786,6 +831,7 @@ function runTimer(m: number, interval: number, toAdd = 0) {
   let momentToDue = moment().add(seconds, 'seconds')
   if (toAdd) momentToDue.add(toAdd, 'seconds')
   setTicking()
+  startedOn.value = moment().unix()
   due.value = momentToDue.unix()
   wakeLock.request?.("screen")
   saveToLocal()
