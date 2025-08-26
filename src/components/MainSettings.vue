@@ -34,6 +34,13 @@
                 <span class="ms-2">Timer</span>
               </button>
             </div>
+            <div class="d-flex flex-column justify-content-start w-100">
+              <button data-bs-target="#goals-settings" data-bs-toggle="modal" data-bs-dismiss="modal"
+                class="btn btn-outline-light w-100 fs-1 mb-3 d-flex align-items-center justify-content-center">
+                <IconTarget width="5vh" height="5vh" /> 
+                <span class="ms-2">Goals</span>
+              </button>
+            </div>
           </div>
           <div class="d-flex flex-column justify-content-start w-100">
             <button @click="$emit('start-day')" class="btn btn-outline-primary w-100 fs-3 mb-3" data-bs-dismiss="modal"
@@ -48,6 +55,8 @@
 </template>
 
 <script setup lang="ts">
+import IconTarget from './icons/IconTarget.vue'
+
 defineEmits<{
   (e: 'start-day'): void
 }>()

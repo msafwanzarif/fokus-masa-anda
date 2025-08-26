@@ -67,7 +67,6 @@ onMounted(() => {
   var myModalEl = document.getElementById('welcome-prompt')
   if (myModalEl) {
     let modal = window.bootstrap.Modal.getOrCreateInstance(myModalEl)
-    console.log(modal)
     if(modal){
       myModalEl.addEventListener('shown.bs.modal', () => {
         var myTooltipEl = document.getElementById('loggedInIndicatorOnModal')
