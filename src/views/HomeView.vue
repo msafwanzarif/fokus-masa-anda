@@ -13,21 +13,21 @@
             <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
           </svg>
           <div class="d-flex align-items-center">
-            <button @click="showModal('user-settings')" id="loggedInIndicator"  class="btn me-2" :class="pageState.buttonClass" v-show="userEmail" data-bs-toggle="tooltip"
-              data-bs-placement="left" :title="userEmail">
+            <button @click="showModal('user-settings')" id="loggedInIndicator" class="btn me-2"
+              :class="pageState.buttonClass" v-show="userEmail" data-bs-toggle="tooltip" data-bs-placement="left"
+              :title="userEmail">
               <IconUserCheck />
             </button>
             <button class="btn me-2" :class="pageState.buttonClass">{{ currentTime }}</button>
-            <!-- <button class="btn me-2" :class="pageState.buttonClass">{{ today.isSuccess }}</button> -->
-
           </div>
         </div>
       </div>
       <div class="">
         <div class="d-flex flex-column justify-content-between h-100 p-3">
           <div class="d-flex justify-content-center d-md-none">
-            <svg @click="showModal('goal-detail-settings-fokus')" :class="targetClass" v-if="mode < 2" xmlns="http://www.w3.org/2000/svg" width="45vmin" height="45vmin" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            <svg @click="showModal('goal-detail-settings-fokus')" :class="targetClass" v-if="mode < 2"
+              xmlns="http://www.w3.org/2000/svg" width="45vmin" height="45vmin" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
               class="icon icon-tabler icons-tabler-outline icon-tabler-target">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
@@ -70,8 +70,9 @@
           </div>
           <div class="d-flex align-items-center justify-content-center mb-2">
             <h1 class="main-title me-md-3">{{ pageState.bigText }}</h1>
-            <svg @click="showModal('goal-detail-settings-fokus')" :class="targetClass" v-if="mode < 2" xmlns="http://www.w3.org/2000/svg" width="30vmin" height="30vmin" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            <svg @click="showModal('goal-detail-settings-fokus')" :class="targetClass" v-if="mode < 2"
+              xmlns="http://www.w3.org/2000/svg" width="30vmin" height="30vmin" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
               class="icon icon-tabler icons-tabler-outline icon-tabler-target d-none d-md-block">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
@@ -126,6 +127,15 @@
               <path d="M13 12l2 0" />
             </svg>
           </div>
+          <div class="d-flex w-100 align-items-center justify-content-center" v-if="mode <= 1">
+            <select v-model="selectedGoalId" id="goalSelectHome"
+              class="w-50 fs-3 form-select bg-focus text-center text-white border border-white c-pointer"
+              style="background-image: none;" aria-label="Default select example">
+              <option v-if="!selectedGoalId" value="" disabled selected class="bg-transparent">Set a Goal</option>
+              <option v-for="goal in goalsSelect" :key="goal.id" :value="goal.id">{{ goal.label }}</option>
+            </select>
+            <!-- <IconBullseye @click="openGoalSelect" class="ms-2 c-pointer" width="2.0rem" height="2.0rem" /> -->
+          </div>
           <div class="d-flex align-items-center justify-content-center mt-5">
             <button @click="mode < 2 ? showClock = !showClock : null"
               class="btn d-flex align-items-center justify-content-center"
@@ -177,16 +187,20 @@
     </div>
 
     <!-- Modal Components -->
-    <StartPrompt @settings-click="promptSetting" @start-focus="startFocus" />
-    <WelcomePrompt :welcome="welcome" :last-online="last_online" @settings-click="promptSetting"
-      @start-planning="startPlanning" @start-focus="startFocus" :userEmail="userEmail" />
+    <StartPrompt :selectedGoalId="selectedGoalId" :goalsSelect="goalsSelect" @update-goal="updateGoal"
+      @settings-click="promptSetting" @start-focus="startFocus" />
+    <WelcomePrompt :selectedGoalId="selectedGoalId" :goalsSelect="goalsSelect" @update-goal="updateGoal"
+      :welcome="welcome" :last-online="last_online" @settings-click="promptSetting" @start-planning="startPlanning"
+      @start-focus="startFocus" :userEmail="userEmail" />
     <BreakPrompt :rehat-detail="rehatDetail" :next-rehat="nextRehat" :is-overtime="isOvertime"
       :hours-overtime="hoursOvertime" :minutes-overtime="minutesOvertime" :seconds-overtime="secondsOvertime"
       :timer="timer" :seconds-after-due="secondsAfterDue" @settings-click="promptSetting" @stop-timer="stopTimer"
       @fokus-semula="fokusSemula" @start-break="startBreak" />
-    <PausePrompt :hours="hours" :minutes="minutes" :seconds="seconds" @settings-click="promptSetting"
-      @stop-timer="stopTimer" @resume-timer="resumeTimer" />
-    <FocusPrompt :is-overtime="isOvertime" :hours-overtime="hoursOvertime" :minutes-overtime="minutesOvertime"
+    <PausePrompt :selectedGoalId="selectedGoalId" :goalsSelect="goalsSelect" @update-goal="updateGoal" :hours="hours"
+      :minutes="minutes" :seconds="seconds" @settings-click="promptSetting" @stop-timer="stopTimer"
+      @resume-timer="resumeTimer" />
+    <FocusPrompt :goalsSelect="goalsSelect" @update-goal="updateGoal" :selectedGoalId="selectedGoalId"
+      :is-overtime="isOvertime" :hours-overtime="hoursOvertime" :minutes-overtime="minutesOvertime"
       :seconds-overtime="secondsOvertime" :timer="timer" :seconds-after-due="secondsAfterDue"
       @settings-click="promptSetting" @stop-timer="stopTimer" @start-focus="startFocus" />
     <MainSettings @start-day="runStartOfDay" />
@@ -195,7 +209,7 @@
       @change-stack="changeStack" @remove-stack="removeStack" @push-stack="pushStack" />
     <TimerOvertimeSettings :timer="timer" />
     <UserSettings :userEmail="userEmail" />
-    <GoalSettings :userEmail="userEmail" :goalsList="goalsList" :goalsLabel="goalsLabel" />
+    <GoalSettings @new-goal="addNewGoal()" :userEmail="userEmail" :goalsList="goalsList" :goalsLabel="goalsLabel" />
   </div>
 </template>
 
@@ -209,9 +223,9 @@
 }
 </style>
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue'
 import { onAuthStateChanged } from 'firebase/auth'
-import { useHabitTracker, useFirebaseDoc } from 'szutils.vue'
+import { useHabitTracker, useFirebaseDoc, generateId } from 'szutils.vue'
 import StartPrompt from '../components/StartPrompt.vue'
 import WelcomePrompt from '../components/WelcomePrompt.vue'
 import BreakPrompt from '../components/BreakPrompt.vue'
@@ -275,14 +289,14 @@ const rehatDetail = [
 ] as (RehatDetail | null)[]
 const states = [
   {
-    bg: '',
+    bg: 'bg-focus',
     bigText: 'Fokus',
     timeClass: 'fs-1',
     buttonClass: 'btn-outline-info',
     countDownClass: 'btn-outline-info w-75 me-2',
   },
   {
-    bg: '',
+    bg: 'bg-focus',
     bigText: 'Fokus',
     timeClass: 'fs-1',
     buttonClass: 'btn-outline-info',
@@ -313,7 +327,36 @@ const states = [
 const pageState = ref<PageState>({} as PageState)
 const goalsList = ref(["fokus"])
 const goalsLabel = ref(["Fokus"])
-
+const goalsSelect = computed(() => {
+  let list = goalsList.value.map((goal, index) => ({
+    id: goal,
+    label: goalsLabel.value[index]
+  })).filter(goal => goal.id != "fokus")
+  if(list.length < 9) list.push({ id: "new-goal", label: "Add a new Goal" })
+  return list
+})
+const goalsMap = computed(() => {
+  const map: Record<string, string> = {}
+  goalsList.value.forEach((goal, index) => {
+    map[goal] = goalsLabel.value[index] || ""
+  })
+  return map
+})
+const selectedGoalId = ref("")
+function updateGoal(goalId: string) {
+  selectedGoalId.value = goalId
+}
+watch(selectedGoalId, async (newVal, oldVal) => {
+  if(mode.value == 1 && startedOn.value > 0 && oldVal && oldVal != 'new-goal'){
+    updateHabitTracker(oldVal)
+    updateHabitTracker('fokus')
+    startedOn.value = moment().unix()
+  }
+  if(newVal == 'new-goal'){
+    let id = await addNewGoal()
+    return selectedGoalId.value = id
+  }
+})
 
 const focusTracker = useHabitTracker('fokus')
 const { today } = focusTracker
@@ -451,7 +494,7 @@ watch(docData, (newVal, oldVal) => {
 }, { deep: true })
 watch(userEmail, (email) => {
   setupSync()
-  if(email) setTimeout(() =>{ enableTooltip() },5) 
+  if (email) setTimeout(() => { enableTooltip() }, 5)
 })
 watch(validTimer, (newVal) => {
   if (!newVal) {
@@ -533,9 +576,9 @@ function setupSync() {
     else saveToFirebase()
   })
 }
-function enableTooltip(){
+function enableTooltip() {
   var myTooltipEl = document.getElementById('loggedInIndicator')
-  var tooltip = new window.bootstrap.Tooltip(myTooltipEl,{offset:[0,12]})
+  var tooltip = new window.bootstrap.Tooltip(myTooltipEl, { offset: [0, 12] })
 }
 async function tryLoginIfNeeded() {
   // Firebase login logic (adapted for Composition API)
@@ -591,7 +634,10 @@ function releaseAfter(time = 0) {
 }
 function pauseTimer() {
   paused_on.value = moment().unix()
-  if(mode.value == 1) updateHabitTracker('fokus')
+  if (mode.value == 1) {
+    updateHabitTracker('fokus')
+    updateHabitTracker()
+  }
   startedOn.value = 0
   saveToLocal()
   releaseAfter()
@@ -619,7 +665,8 @@ function saveToLocal(lastOnline?: number) {
     timer: { ...timer },
     last_online: lastOnline,
     goals: goalsList.value,
-    goalsLabel: goalsLabel.value
+    goalsLabel: goalsLabel.value,
+    selectedGoalId: selectedGoalId.value
   }
   localStorage.setItem('fokus-data', JSON.stringify(data))
   if (userEmail.value) saveToFirebase(lastOnline)
@@ -638,7 +685,8 @@ function saveToFirebase(lastOnline?: number) {
     timer: { ...timer },
     last_online: lastOnline,
     goals: goalsList.value,
-    goalsLabel: goalsLabel.value
+    goalsLabel: goalsLabel.value,
+    selectedGoalId: selectedGoalId.value
   }
   doc.saveData(data)
 }
@@ -657,6 +705,7 @@ function getFromLocal() {
     if (parsed.goals) goalsList.value = parsed.goals
     if (parsed.goalsLabel) goalsLabel.value = parsed.goalsLabel
     if (parsed.started_on) startedOn.value = parsed.started_on
+    if (parsed.selectedGoalId) selectedGoalId.value = parsed.selectedGoalId
     Object.assign(timer, t)
     last_online.value = lo
     if (t.focusSecond === undefined) {
@@ -694,6 +743,7 @@ function getFromFirebase(data: any) {
     if (data.goals) goalsList.value = data.goals
     if (data.goalsLabel) goalsLabel.value = data.goalsLabel
     if (data.started_on) startedOn.value = data.started_on
+    if (data.selectedGoalId) selectedGoalId.value = data.selectedGoalId
     Object.assign(timer, t)
     last_online.value = lo
     if (t.focusSecond === undefined) {
@@ -731,11 +781,15 @@ function runStartOfDay() {
 function resetStack() {
   stack.value = [...timer.stack]
 }
-function stopTimer(lastOnline?: number) {
+async function stopTimer(lastOnline?: number) {
   let m = mode.value
-  mode.value = 0
   due.value = 0
-  if(mode.value == 1) updateHabitTracker('fokus')
+  if (mode.value == 1) {
+    updateHabitTracker('fokus')
+    updateHabitTracker()
+  }
+  await nextTick()
+  mode.value = 0
   startedOn.value = 0
   releaseAfter()
   if (paused_on.value) {
@@ -755,6 +809,7 @@ function stopTimer(lastOnline?: number) {
 }
 function fokusSemula() {
   updateHabitTracker('fokus')
+  updateHabitTracker()
   startedOn.value = 0
   promptBreak()
   startTimer()
@@ -764,18 +819,20 @@ function startPlanning() {
   runTimer(4, timer.planTime * 60 + timer.planSecond)
 }
 
-function updateHabitTracker(goal: string) {
+function updateHabitTracker(goal?: string) {
+  if (!goal) goal = selectedGoalId.value
   let index = goalsList.value.indexOf(goal)
   if (index === -1) return
-  if(!startedOn.value) return
-  const tracker = useHabitTracker(goal, undefined)
+  if (!startedOn.value) return
+  const tracker = useHabitTracker(goal)
   let seconds = moment().unix() - startedOn.value
-  console.log("adding", seconds)
-  tracker.recordRep(seconds, goalsLabel.value[index] || "")
+  //console.log("adding", seconds)
+  tracker.recordRep(seconds, goalsMap.value[goal])
 }
 function startBreak() {
   let currentRehat = stack.value.shift() || 1
   updateHabitTracker('fokus')
+  updateHabitTracker()
   promptBreak()
   let toAdd = 0
   if (timer.focus_extra_mode && timer.extra_pad < secondsAfterDue.value) {
@@ -896,5 +953,17 @@ async function refreshIdToken(refreshToken: string) {
   });
   const data = await res.json();
   return data; // contains id_token, refresh_token, expires_in, etc.
+}
+
+async function addNewGoal() {
+  let id = generateId()
+  goalsList.value.push(id)
+  goalsLabel.value.push(`New Goal`)
+  const tracker = useHabitTracker(id, 'New Goal')
+  tracker.minDaily.value = 300
+  tracker.setDailyGoal(focusInSecond.value)
+  await nextTick()
+  showModal(`goal-detail-settings-${id}`)
+  return id
 }
 </script>

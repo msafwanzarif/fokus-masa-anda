@@ -6,7 +6,7 @@
           <span class="ms-2">Label</span>
         </button>
         <div class="col m-0 p-0">
-          <input type="text" :disabled="goalId == 'fokus'" v-model="label" class="form-control bg-dark text-white fs-4 border border-light" min="1" />
+          <input type="text" :disabled="goalId == 'fokus'" v-model="labelState" class="form-control bg-dark text-white fs-4 border border-light" min="1" />
         </div>
       </div>
       <div class="row mb-2">
@@ -14,9 +14,9 @@
           <span class="ms-2">Minimum (Saat)</span>
         </button>
         <div class="col m-0 p-0">
-          <input type="number" v-model="minDaily" class="form-control bg-dark text-white fs-4 border border-light"
+          <input type="number" v-model="minDailyState" class="form-control bg-dark text-white fs-4 border border-light"
             min="1">
-          <div class="fs-6 ms-2">* {{ minDaily }} saat = <DurationDisplayFromSeconds :seconds="minDaily"
+          <div class="fs-6 ms-2">* {{ minDailyState }} saat = <DurationDisplayFromSeconds :seconds="minDailyState"
               v-slot="{ bahasa }">{{ bahasa }}</DurationDisplayFromSeconds>
           </div>
         </div>
@@ -56,7 +56,7 @@
       <div class="fs-4 mt-2"><DurationDisplayFromSeconds :seconds="passedMinimum?toTarget : toMinimum" v-slot="{ bahasa }">
         <span v-if="passedTarget">Berjaya capai target! Anda memang terbaik!! 🎉🎉 </span>
         <template v-else-if="passedMinimum">
-          <div>Tahniah! anda dah mula {{ label }} hari ini 👏</div>
+          <div>Tahniah! anda dapat {{ label }} hari ini 👏</div>
           <span> Teruskan <b>{{ bahasa }} </b> je lagi untuk capai Target!!! 💪🔥</span>
         </template>
         <span v-else-if="!passedTarget">Jom kita {{ label }}! Luangkan <b>{{ bahasa }}</b> je <span v-if="progress > 0">lagi</span> 😁</span>
@@ -85,6 +85,9 @@ const props = defineProps<{
   goalName: string,
   goalId: string
 }>()
+const emit = defineEmits<{
+  (e: 'update-label', id:string, label: string): void
+}>()
 
 const goalUniqueId = computed(() => isConnected.value ? `${props.userEmail}-fokus-goal-${props.goalId}` : `fokus-goal-${props.goalId}`)
 const isConnected = computed(() => !!props.userEmail)
@@ -103,6 +106,24 @@ watch(isConnected, () => {
 })
 
 const { label, minDaily, today } = tracker
+
+const { state:labelState, debounced:debouncedLabel } = useDebouncedRef(label.value, 1000)
+watch(debouncedLabel, (newLabel) => {
+  if(newLabel) label.value = newLabel
+  else labelState.value = label.value
+}, {})
+watch(label, (newLabel) => {
+  labelState.value = newLabel
+  if(newLabel) emit('update-label', props.goalId, newLabel)
+}, {immediate:true})
+
+const { state:minDailyState, debounced:debouncedMinDaily } = useDebouncedRef(minDaily.value, 1000)
+watch(debouncedMinDaily, (newLabel) => {
+  minDaily.value = newLabel
+}, {})
+watch(minDaily, (newLabel) => {
+  minDailyState.value = newLabel
+}, {immediate:true})
 
 const currentGoal = computed(() => today.value.goal)
 const { state: goalInput, debounced: goalInputDebounced } = useDebouncedRef(0, 1000)

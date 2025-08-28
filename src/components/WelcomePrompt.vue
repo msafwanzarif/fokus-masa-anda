@@ -33,6 +33,13 @@
             <p class="fs-6 fs-md-5">Pada setiap permulaan hari, anda juga disarankan menggunakan sedikit masa untuk 'Plan' dahulu segala tugasan yang anda ingin buat.</p>
             <p class="fs-6 fs-md-5"><i>"Semoga Berjaya 😄"</i> - Safwan Zarif di <a href="mailto:">safzardevs@gmail.com</a></p>
           </div>
+           <div class="d-flex w-75 align-items-center justify-content-center mt-4">
+            <select v-model="selectedGoalId" id="goalSelectWelcome" class="w-100 form-select bg-dark text-center text-white border border-white c-pointer" style="background-image: none;" aria-label="Default select example">
+              <option v-if="!selectedGoalId" value="" disabled selected>Set a Goal</option>
+              <option v-for="goal in goalsSelect" :key="goal.id" :value="goal.id">{{ goal.label }}</option>
+            </select>
+            <IconBullseye @click="openGoalSelect" class="ms-2 c-pointer" width="2.0rem" height="2.0rem" />
+          </div>
         </div>
         <div class="modal-footer d-flex align-items-center justify-content-center">
           <button type="button" class="btn btn-primary" @click="$emit('start-planning')">Mulakan Planning Dahulu</button>
@@ -60,7 +67,8 @@
 <script setup lang="ts">
 import { type WelcomePromptProps, type WelcomePromptEmits } from '@/types/components'
 import IconUserCheck from './icons/IconUserCheck.vue'
-import { watch, onMounted } from 'vue'
+import { watch, onMounted, ref } from 'vue'
+import IconBullseye from './icons/IconBullseye.vue'
 
 onMounted(() => {
   // Initialize Bootstrap tooltips
@@ -77,7 +85,18 @@ onMounted(() => {
 })
 
 const props = defineProps<WelcomePromptProps>()
-defineEmits<WelcomePromptEmits>()
+const emit = defineEmits<WelcomePromptEmits>()
+const selectedGoalId = ref("")
+watch(() => props.selectedGoalId, (newVal) => {
+  selectedGoalId.value = newVal
+})
+watch(selectedGoalId, (newVal) => {
+  emit('update-goal',newVal)
+})
+function openGoalSelect() {
+  const goalSelect = document.getElementById('goalSelectWelcome') as HTMLSelectElement
+  goalSelect.showPicker()
+}
 watch(() => props.userEmail, (newEmail) => {
   var myTooltipEl = document.getElementById('loggedInIndicatorOnModal')
   if(newEmail) new window.bootstrap.Tooltip(myTooltipEl,{offset:[0,8]})

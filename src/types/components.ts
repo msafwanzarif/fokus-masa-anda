@@ -1,12 +1,12 @@
 export interface StartPromptProps {
-  title?: string
-  subtitle?: string
-  buttonText?: string
+  goalsSelect: Array<{ id: string; label?: string }>
+  selectedGoalId: string
 }
 
 export interface StartPromptEmits {
   (e: 'settings-click'): void
   (e: 'start-focus'): void
+  (e: 'update-goal', goalId: string): void
 }
 
 export interface WelcomePromptProps {
@@ -17,12 +17,15 @@ export interface WelcomePromptProps {
   }
   userEmail?:string
   lastOnline: number
+  goalsSelect: Array<{ id: string; label?: string }>
+  selectedGoalId: string
 }
 
 export interface WelcomePromptEmits {
   (e: 'settings-click'): void
   (e: 'start-planning'): void
   (e: 'start-focus', startOfDay: boolean): void
+  (e: 'update-goal', goalId: string): void
 }
 
 export interface BreakPromptProps {
@@ -51,12 +54,15 @@ export interface PausePromptProps {
   hours: string
   minutes: string
   seconds: string
+  goalsSelect: Array<{ id: string; label?: string }>
+  selectedGoalId: string
 }
 
 export interface PausePromptEmits {
   (e: 'settings-click'): void
   (e: 'stop-timer'): void
   (e: 'resume-timer'): void
+  (e: 'update-goal', goalId: string): void
 }
 
 export interface FocusPromptProps {
@@ -67,13 +73,16 @@ export interface FocusPromptProps {
   timer: {
     extra_pad: number
   }
-  secondsAfterDue: number
+  secondsAfterDue: number,
+  goalsSelect: Array<{ id: string; label?: string }>
+  selectedGoalId: string
 }
 
 export interface FocusPromptEmits {
   (e: 'settings-click'): void
   (e: 'stop-timer'): void
   (e: 'start-focus'): void
+  (e: 'update-goal', goalId: string): void
 }
 
 export interface MainSettingsProps {
