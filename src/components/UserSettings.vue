@@ -2,7 +2,7 @@
   <SettingModal id="user-settings" title="Tetapan > User">
     <div class="d-flex flex-column justify-content-start w-100">
       <span v-if="userEmail" class="mb-2">Email Pengguna: {{ userEmail }}</span>
-      <button @click="doc.logout()" v-if="userEmail" class="btn btn-outline-danger w-100 fs-3 mb-2 d-flex align-items-center justify-content-center">
+      <button @click="logout()" v-if="userEmail" class="btn btn-outline-danger w-100 fs-3 mb-2 d-flex align-items-center justify-content-center">
         <IconLogout width="2.0rem" height="2.0rem" />
         <span class="ms-2">Logout</span>
       </button>
@@ -35,6 +35,16 @@ async function loginWithGoogle() {
   } catch (error) {
     console.error("Login failed:", error)
     // Handle login failure (e.g., show an error message to the user)
+  }
+}
+
+async function logout() {
+  try {
+    await doc.logout()
+    localStorage.setItem("loggedInAs", "")
+  } catch (error) {
+    console.error("Logout failed:", error)
+    // Handle logout failure (e.g., show an error message to the user)
   }
 }
 </script>
