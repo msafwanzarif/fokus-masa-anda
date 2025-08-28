@@ -17,9 +17,19 @@
         </div>
         <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
           <h2 class="sub-title text-center mb-3">Masa untuk Fokus !</h2>
-          <button v-if="isOvertime" class="btn btn-outline-warning w-75 mb-4">Overtime Rehat: {{ hoursOvertime }}{{ hoursOvertime ? " : " : "" }}{{ minutesOvertime }} : {{
-            secondsOvertime }}</button>
-          <button v-else class="btn btn-outline-light w-75 mb-4 d-flex justify-content-center"><span style="min-width: 2.3rem;font-weight: bold;">{{ timer.extra_pad - secondsAfterDue }}</span> <span>saat sebelum overtime</span></button>
+          <button v-if="isOvertime" class="btn btn-outline-warning w-75 mb-4">Overtime Rehat: {{ hoursOvertime }}{{
+            hoursOvertime ? " : " : "" }}{{ minutesOvertime }} : {{
+              secondsOvertime }}</button>
+          <button v-else class="btn btn-outline-light w-75 mb-4 d-flex justify-content-center"><span
+              style="min-width: 2.3rem;font-weight: bold;">{{ timer.extra_pad - secondsAfterDue }}</span> <span>saat
+              sebelum overtime</span></button>
+          <div class="d-flex w-75 align-items-center justify-content-center">
+            <select v-model="selectedGoalId" id="goalSelect" class="w-100 form-select bg-primary text-center text-white border border-white c-pointer" style="background-image: none;" aria-label="Default select example">
+              <option v-if="!selectedGoalId" value="" disabled selected>Set a Goal</option>
+              <option v-for="goal in goalsSelect" :key="goal.id" :value="goal.id">{{ goal.label }}</option>
+            </select>
+            <IconBullseye @click="openGoalSelect" class="ms-2 c-pointer" width="2.0rem" height="2.0rem" />
+          </div>
         </div>
         <div class="modal-footer d-flex align-items-center justify-content-between">
           <div class="d-flex align-items-center">
@@ -45,7 +55,21 @@
 
 <script setup lang="ts">
 import type { FocusPromptProps, FocusPromptEmits } from '@/types/components'
+import IconBullseye from './icons/IconBullseye.vue'
+import { ref, watch } from 'vue'
 
-defineProps<FocusPromptProps>()
-defineEmits<FocusPromptEmits>()
+const props = defineProps<FocusPromptProps>()
+const emit = defineEmits<FocusPromptEmits>()
+
+const selectedGoalId = ref("")
+watch(() => props.selectedGoalId, (newVal) => {
+  selectedGoalId.value = newVal
+})
+watch(selectedGoalId, (newVal) => {
+  emit('update-goal',newVal)
+})
+function openGoalSelect() {
+  const goalSelect = document.getElementById('goalSelect') as HTMLSelectElement
+  goalSelect.showPicker()
+}
 </script>

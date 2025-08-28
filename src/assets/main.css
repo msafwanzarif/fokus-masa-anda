@@ -5,6 +5,9 @@ h1,h2,span{
   padding: 0;
   margin: 0;
 }
+.bg-focus{
+  background-color: #222;
+}
 .c-pointer{
   cursor:pointer;
 }
