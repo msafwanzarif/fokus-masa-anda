@@ -376,12 +376,12 @@ let unsubscribe: Unsubscribe | null = null
 if (auth.value) unsubscribe = onAuthStateChanged(auth.value, (user) => {
   if (user) {
     // User is signed in
-    console.log("User got");
+    //console.log("User got");
     userEmail.value = user.email || ""
   } else {
     // User is signed out
     userEmail.value = ""
-    console.log("No user signed in");
+    //console.log("No user signed in");
   }
 });
 const isChecked = ref(false)
@@ -394,12 +394,12 @@ watch(() => app.value, (newApp, oldApp) => {
     unsubscribe = onAuthStateChanged(auth.value, (user) => {
       if (user) {
         // User is signed in
-        console.log("User got");
+        //console.log("User got");
         userEmail.value = user.email || ""
       } else {
         // User is signed out
         userEmail.value = ""
-        console.log("No user signed in");
+        //console.log("No user signed in");
       }
     });
   }
