@@ -41,7 +41,7 @@ import IconBullseye from './icons/IconBullseye.vue'
 const props = defineProps<StartPromptProps>()
 
 onMounted(() => {
-  console.log("start",props.goalsSelect)
+  //console.log("start",props.goalsSelect)
 })
 
 const emit = defineEmits<StartPromptEmits>()

@@ -68,6 +68,6 @@ function openGoalSelect() {
   goalSelect.showPicker()
 }
 onMounted(() => {
-  console.log("pause",props.goalsSelect)
+  //console.log("pause",props.goalsSelect)
 })
 </script>

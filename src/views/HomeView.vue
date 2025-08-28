@@ -224,7 +224,7 @@
 </style>
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue'
-import { onAuthStateChanged } from 'firebase/auth'
+import { onAuthStateChanged, type Unsubscribe } from 'firebase/auth'
 import { useHabitTracker, useFirebaseDoc, generateId } from 'szutils.vue'
 import StartPrompt from '../components/StartPrompt.vue'
 import WelcomePrompt from '../components/WelcomePrompt.vue'
@@ -332,7 +332,7 @@ const goalsSelect = computed(() => {
     id: goal,
     label: goalsLabel.value[index]
   })).filter(goal => goal.id != "fokus")
-  if(list.length < 9) list.push({ id: "new-goal", label: "Add a new Goal" })
+  if (list.length < 9) list.push({ id: "new-goal", label: "Add a new Goal" })
   return list
 })
 const goalsMap = computed(() => {
@@ -347,12 +347,12 @@ function updateGoal(goalId: string) {
   selectedGoalId.value = goalId
 }
 watch(selectedGoalId, async (newVal, oldVal) => {
-  if(mode.value == 1 && startedOn.value > 0 && oldVal && oldVal != 'new-goal'){
+  if (mode.value == 1 && startedOn.value > 0 && oldVal && oldVal != 'new-goal') {
     updateHabitTracker(oldVal)
     updateHabitTracker('fokus')
     startedOn.value = moment().unix()
   }
-  if(newVal == 'new-goal'){
+  if (newVal == 'new-goal') {
     let id = await addNewGoal()
     return selectedGoalId.value = id
   }
@@ -369,19 +369,37 @@ const targetClass = computed(() => {
 
 // --- Firebase composable ---
 const doc = useFirebaseDoc({}, 'fokus-settings/anon')
-const { auth, data: docData } = doc
+const { app, auth, data: docData } = doc
 
 const userEmail = ref("")
-watch(() => auth.value, (auth) => {
-  if (auth) {
-    onAuthStateChanged(auth, (user) => {
+let unsubscribe: Unsubscribe | null = null
+if (auth.value) unsubscribe = onAuthStateChanged(auth.value, (user) => {
+  if (user) {
+    // User is signed in
+    //console.log("User got");
+    userEmail.value = user.email || ""
+  } else {
+    // User is signed out
+    userEmail.value = ""
+    //console.log("No user signed in");
+  }
+});
+const isChecked = ref(false)
+watch(() => app.value, (newApp, oldApp) => {
+  if (isChecked && oldApp && newApp) return
+  if (newApp) {
+    if(!auth.value) return
+    isChecked.value = true
+    if (unsubscribe) unsubscribe()
+    unsubscribe = onAuthStateChanged(auth.value, (user) => {
       if (user) {
         // User is signed in
-        //console.log("User:", user);
+        //console.log("User got");
         userEmail.value = user.email || ""
       } else {
         // User is signed out
-        console.log("No user signed in");
+        userEmail.value = ""
+        //console.log("No user signed in");
       }
     });
   }
@@ -568,7 +586,7 @@ watch(paused_on, (newVal) => {
 
 // --- Methods ---
 function setupSync() {
-  if (!doc.isSet.value || !userEmail.value) return tryLoginIfNeeded()
+  if (!doc.isSet.value || !userEmail.value) return
   doc.changeDoc(`fokus-settings/${userEmail.value}`)
   localStorage.setItem(`loggedInAs`, userEmail.value)
   doc.getData().then((data: any) => {
@@ -579,10 +597,6 @@ function setupSync() {
 function enableTooltip() {
   var myTooltipEl = document.getElementById('loggedInIndicator')
   var tooltip = new window.bootstrap.Tooltip(myTooltipEl, { offset: [0, 12] })
-}
-async function tryLoginIfNeeded() {
-  // Firebase login logic (adapted for Composition API)
-  // ...existing code...
 }
 function promptChange(m: number) {
   releaseAfter()
@@ -649,7 +663,7 @@ function resumeTimer() {
   startedOn.value = moment().unix()
   saveToLocal()
   wakeLock.request?.("screen")
-  promptPause()
+  hideModal('pause-prompt')
 }
 function saveToLocal(lastOnline?: number) {
   if (lastOnline === undefined) lastOnline = moment().unix()
@@ -690,7 +704,14 @@ function saveToFirebase(lastOnline?: number) {
   }
   doc.saveData(data)
 }
-function getFromLocal() {
+function getFromLocal(checked = 0) {
+  if (userEmail.value) return
+  let email = localStorage.getItem('loggedInAs')
+  if (email) {
+    if (checked < 5) return setTimeout(() => { getFromLocal(checked++) }, 500)
+    let useLocal = prompt('You are no longer logged in as ' + email + '. Do you want to use local data? Click Cancel to go to user settings.', 'Continue with Local Data')
+    if (!useLocal) return showModal("user-settings")
+  }
   let data = localStorage.getItem('fokus-data')
   if (data) {
     loading.value = true
@@ -739,7 +760,20 @@ function getFromFirebase(data: any) {
     nextReduce.value = nr
     stack.value = st
     paused_on.value = po
+    if(!po){
+      hideModal('pause-prompt')
+      if(d){
+        if(m == 1) hideModal('break-prompt')
+        else hideModal('focus-prompt')
+        hideModal('welcome-prompt')
+        hideModal('startPrompt')
+      }
+    } 
     due.value = d
+    if(!d) {
+      hideModal('focus-prompt')
+      hideModal('break-prompt')
+    }
     if (data.goals) goalsList.value = data.goals
     if (data.goalsLabel) goalsLabel.value = data.goalsLabel
     if (data.started_on) startedOn.value = data.started_on
