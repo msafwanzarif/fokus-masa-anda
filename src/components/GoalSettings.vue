@@ -6,7 +6,7 @@
         <span class="ms-2">{{ goalsLabel[index] }}</span>
       </button>
       <button v-if="goalsList.length < 10" @click="$emit('new-goal')" class="btn btn-outline-light w-100 fs-3 mb-2 d-flex align-items-center justify-content-center">
-        <IconHexagonPlus width="2.0rem" height="2.0rem" />
+        <IconCircleDashedPlus width="2.0rem" height="2.0rem" />
         <span class="ms-2">Tambah</span>
       </button>
     </div>
@@ -25,6 +25,7 @@ import GoalDetailSettings from './GoalDetailSettings.vue'
 import IconBullseye from './icons/IconBullseye.vue'
 import SettingModal from './SettingModal.vue'
 import IconHexagonPlus from './icons/IconHexagonPlus.vue'
+import IconCircleDashedPlus from './icons/IconCircleDashedPlus.vue'
 const props = defineProps<{
   userEmail?: string
   goalsList: Array<string>
