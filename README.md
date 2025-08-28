@@ -4,7 +4,7 @@ Live at: **[fokus.safwanzarif.dev](https://fokus.safwanzarif.dev)**
 
 A minimalist, distraction-free productivity timer app inspired by the Pomodoro technique, with powerful features for modern workflows.
 
-## 🔥 Newest Features
+## 🔥 Newest Feature/s
 - User can add and customize their own goals up to 9
 Now you can track and achieve all your daily goals separately 😁
 
