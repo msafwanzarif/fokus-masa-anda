@@ -3,6 +3,7 @@ declare global {
   interface Window {
     bootstrap: any
     notifyMe: (title?: string, message?: string, icon?: string) => void
+    showModal: (id: string) => void
   }
 }
 

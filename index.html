@@ -11,7 +11,8 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <meta name="theme-color" content="#ffffff">
   <meta property="og:title" content="Fokus ! Manfaatkan Masa Anda">
-  <meta property="og:description" content="Jom jadi Produktif! Gunakan kaedah pomodoro dengan lebih berkesan dan fleksibel.">
+  <meta property="og:description"
+    content="Jom jadi Produktif! Gunakan kaedah pomodoro dengan lebih berkesan dan fleksibel.">
   <meta property="og:image" content="https://i.imgur.com/QSOXDmy.png">
   <title>Fokus ! Manfaatkan Masa Anda</title>
 </head>
@@ -24,10 +25,10 @@
     integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
     crossorigin="anonymous"></script>
   <script>
-    const title = "Success";
-    const msg = "Message";
-    const icon = "https://i.imgur.com/QSOXDmy.png";
-    const song = "notification.mp3";
+    const title = "Success"
+    const msg = "Message"
+    const icon = "https://i.imgur.com/QSOXDmy.png"
+    const song = "notification.mp3"
     function notifyMe(t = title, m = msg, i = icon) {
       if (!("Notification" in window)) {
         alert("This browser does not support Desktop notifications")
@@ -48,10 +49,15 @@
 
     function callNotify(title, msg, icone) {
       let noti = new Notification(title, { body: msg, icon: icone })
-      noti.addEventListener("click",(ev) =>{
+      noti.addEventListener("click", (ev) => {
         window.focus()
       })
       // new Audio(song).play()
+    }
+    function showModal(id) {
+      const myModalEl = document.querySelector(`#${id}`)
+      if (!myModalEl) return
+      window.bootstrap.Modal.getOrCreateInstance(myModalEl).show()
     }
   </script>
 </body>

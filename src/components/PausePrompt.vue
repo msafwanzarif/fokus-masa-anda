@@ -19,13 +19,8 @@
           <h2 class="sub-title text-center mb-3">Paused !</h2>
           <button class="btn btn-outline-warning w-75 mb-4">Masa yang Tinggal: {{ hours }}{{ hours ? " : " : "" }}{{
             minutes }} : {{ seconds }}</button>
-          <div class="d-flex w-75 align-items-center justify-content-center">
-              <select v-model="selectedGoalId" id="goalSelectPaused" class="w-100 form-select bg-dark text-center text-white border border-white c-pointer" style="background-image: none;" aria-label="Default select example">
-                <option v-if="!selectedGoalId" value="" disabled selected>Set a Goal</option>
-                <option v-for="goal in goalsSelect" :key="goal.id" :value="goal.id">{{ goal.label }}</option>
-              </select>
-              <IconBullseye @click="openGoalSelect" class="ms-2 c-pointer" width="2.0rem" height="2.0rem" />
-            </div>
+          <GoalSelect :id="'goalSelectPaused'" containerClass="w-75" selectClass="w-100 bg-dark" :mode="1"
+            :goalsSelect="goalsSelect" v-model="selectedGoalId" />
         </div>
         <div class="modal-footer d-flex align-items-center justify-content-between">
           <div class="d-flex align-items-center">
@@ -52,7 +47,8 @@
 <script setup lang="ts">
 import type { PausePromptProps, PausePromptEmits } from '@/types/components'
 import { onMounted, ref, watch } from 'vue'
-import IconBullseye from './icons/IconBullseye.vue'
+import IconAdjustmentHorizontal from './icons/IconAdjustmentHorizontal.vue'
+import GoalSelect from './GoalSelect.vue'
 
 const props = defineProps<PausePromptProps>()
 const emit = defineEmits<PausePromptEmits>()
@@ -61,12 +57,8 @@ watch(() => props.selectedGoalId, (newVal) => {
   selectedGoalId.value = newVal
 })
 watch(selectedGoalId, (newVal) => {
-  emit('update-goal',newVal)
+  emit('update-goal', newVal)
 })
-function openGoalSelect() {
-  const goalSelect = document.getElementById('goalSelectPaused') as HTMLSelectElement
-  goalSelect.showPicker()
-}
 onMounted(() => {
   //console.log("pause",props.goalsSelect)
 })

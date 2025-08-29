@@ -5,8 +5,8 @@ Live at: **[fokus.safwanzarif.dev](https://fokus.safwanzarif.dev)**
 A minimalist, distraction-free productivity timer app inspired by the Pomodoro technique, with powerful features for modern workflows.
 
 ## 🔥 Newest Feature/s
-- User can add and customize their own goals up to 9
-Now you can track and achieve all your daily goals separately 😁
+- Color coded display of Goals list. See your progress at a glance 👀
+- Live update of goal progress when the timer is running
 
 ## ✨ Features
 
@@ -20,6 +20,8 @@ Now you can track and achieve all your daily goals separately 😁
 - Sync timer data across devices with Google Login
 - Goal module: set and track your productivity goals
 - User can add and customize their own goals up to 9
+- Color coded display of Goals list. See your progress at a glance 👀
+- Live update of goal progress when the timer is running
 
 ## 🔮 Future Plans
 

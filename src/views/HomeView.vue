@@ -127,15 +127,7 @@
               <path d="M13 12l2 0" />
             </svg>
           </div>
-          <div class="d-flex w-100 align-items-center justify-content-center" v-if="mode <= 1">
-            <select v-model="selectedGoalId" id="goalSelectHome"
-              class="w-50 fs-3 form-select bg-focus text-center text-white border border-white c-pointer"
-              style="background-image: none;" aria-label="Default select example">
-              <option v-if="!selectedGoalId" value="" disabled selected class="bg-transparent">Set a Goal</option>
-              <option v-for="goal in goalsSelect" :key="goal.id" :value="goal.id">{{ goal.label }}</option>
-            </select>
-            <!-- <IconBullseye @click="openGoalSelect" class="ms-2 c-pointer" width="2.0rem" height="2.0rem" /> -->
-          </div>
+          <GoalSelect :id="'goalSelectNew'" containerClass="w-100" selectClass="w-50 fs-3 bg-focus" :mode="mode" :goalsSelect="goalsSelect" v-model="selectedGoalId" />
           <div class="d-flex align-items-center justify-content-center mt-5">
             <button @click="mode < 2 ? showClock = !showClock : null"
               class="btn d-flex align-items-center justify-content-center"
@@ -209,7 +201,7 @@
       @change-stack="changeStack" @remove-stack="removeStack" @push-stack="pushStack" />
     <TimerOvertimeSettings :timer="timer" />
     <UserSettings :userEmail="userEmail" />
-    <GoalSettings @new-goal="addNewGoal()" :userEmail="userEmail" :goalsList="goalsList" :goalsLabel="goalsLabel" />
+    <GoalSettings @recordRep="recordRep" :currentMode="mode" :currentTime="current" :currentGoal="selectedGoalId" :startedOn="startedOn" @new-goal="addNewGoal()" :userEmail="userEmail" :goalsList="goalsList" :goalsLabel="goalsLabel" />
   </div>
 </template>
 
@@ -246,6 +238,7 @@ import type {
 import UserSettings from '@/components/UserSettings.vue'
 import GoalSettings from '@/components/GoalSettings.vue'
 import IconUserCheck from '@/components/icons/IconUserCheck.vue'
+import GoalSelect from '@/components/GoalSelect.vue'
 
 let intervalRun: number | undefined
 // --- State ---
@@ -328,11 +321,11 @@ const pageState = ref<PageState>({} as PageState)
 const goalsList = ref(["fokus"])
 const goalsLabel = ref(["Fokus"])
 const goalsSelect = computed(() => {
-  let list = goalsList.value.map((goal, index) => ({
+  let list = [{id:"none", label:"Lain lain"} ,...goalsList.value.map((goal, index) => ({
     id: goal,
     label: goalsLabel.value[index]
-  })).filter(goal => goal.id != "fokus")
-  if (list.length < 9) list.push({ id: "new-goal", label: "Add a new Goal" })
+  })).filter(goal => goal.id != "fokus")]
+  if (list.length < 10) list.push({ id: "new-goal", label: "Tambah Goal Baharu" })
   return list
 })
 const goalsMap = computed(() => {
@@ -343,13 +336,15 @@ const goalsMap = computed(() => {
   return map
 })
 const selectedGoalId = ref("")
+function openGoalSettings(){
+  return showModal(`goal-detail-settings-${selectedGoalId.value}`)
+}
 function updateGoal(goalId: string) {
   selectedGoalId.value = goalId
 }
 watch(selectedGoalId, async (newVal, oldVal) => {
   if (mode.value == 1 && startedOn.value > 0 && oldVal && oldVal != 'new-goal') {
     updateHabitTracker(oldVal)
-    updateHabitTracker('fokus')
     startedOn.value = moment().unix()
   }
   if (newVal == 'new-goal') {
@@ -365,6 +360,16 @@ const targetClass = computed(() => {
   if (today.value.isPassed) return 'text-info c-pointer'
   if (today.value.progress > 0) return 'text-warning c-pointer opacity-50'
   return 'text-white c-pointer'
+})
+const trackers = computed(() => {
+  let toReturn: Record<string, ReturnType<typeof useHabitTracker>> = {
+    fokus: focusTracker,
+  }
+  for( let goalId of goalsList.value) {
+    if (goalId == 'fokus') continue
+    toReturn[goalId] = useHabitTracker(goalId)
+  }
+  return toReturn
 })
 
 // --- Firebase composable ---
@@ -649,7 +654,6 @@ function releaseAfter(time = 0) {
 function pauseTimer() {
   paused_on.value = moment().unix()
   if (mode.value == 1) {
-    updateHabitTracker('fokus')
     updateHabitTracker()
   }
   startedOn.value = 0
@@ -819,7 +823,6 @@ async function stopTimer(lastOnline?: number) {
   let m = mode.value
   due.value = 0
   if (mode.value == 1) {
-    updateHabitTracker('fokus')
     updateHabitTracker()
   }
   await nextTick()
@@ -842,7 +845,6 @@ async function stopTimer(lastOnline?: number) {
   return saveToLocal()
 }
 function fokusSemula() {
-  updateHabitTracker('fokus')
   updateHabitTracker()
   startedOn.value = 0
   promptBreak()
@@ -852,20 +854,30 @@ function startPlanning() {
   hideModal('welcome-prompt')
   runTimer(4, timer.planTime * 60 + timer.planSecond)
 }
-
+async function recordRep(key: string) {
+  // if(mode.value == 1) updateHabitTracker('fokus')
+  if(startedOn.value < 1) return
+  updateHabitTracker(key)
+  await nextTick()
+  startedOn.value = moment().unix()
+}
 function updateHabitTracker(goal?: string) {
-  if (!goal) goal = selectedGoalId.value
+  if (!goal || goal == "fokus") goal = selectedGoalId.value
   let index = goalsList.value.indexOf(goal)
   if (index === -1) return
   if (!startedOn.value) return
-  const tracker = useHabitTracker(goal)
+  const tracker = trackers.value[goal]
+  if(!tracker) console.error("Tracker not found", goal)
   let seconds = moment().unix() - startedOn.value
+  startedOn.value = 0
   //console.log("adding", seconds)
-  tracker.recordRep(seconds, goalsMap.value[goal])
+
+  if(tracker)  tracker.recordRep(seconds, goalsMap.value[goal])
+  if(mode.value == 1) focusTracker.recordRep(seconds, "Fokus")
 }
 function startBreak() {
   let currentRehat = stack.value.shift() || 1
-  updateHabitTracker('fokus')
+  // updateHabitTracker('fokus')
   updateHabitTracker()
   promptBreak()
   let toAdd = 0
@@ -993,7 +1005,13 @@ async function addNewGoal() {
   let id = generateId()
   goalsList.value.push(id)
   goalsLabel.value.push(`New Goal`)
-  const tracker = useHabitTracker(id, 'New Goal')
+  await nextTick()
+  const tracker = trackers.value[id]
+  if(!tracker){
+    console.error("Tracker Failed to Init")
+    return id
+  }
+  tracker.label.value = `New Goal`
   tracker.minDaily.value = 300
   tracker.setDailyGoal(focusInSecond.value)
   await nextTick()
