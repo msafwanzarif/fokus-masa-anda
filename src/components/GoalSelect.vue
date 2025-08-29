@@ -30,7 +30,7 @@ const props = defineProps({
     default: ""
   },
   goalsSelect: {
-    type: Array<{id: string, label: string}>,
+    type: Array<{id: string, label?: string}>,
     required: true
   },
   iconClass: {
