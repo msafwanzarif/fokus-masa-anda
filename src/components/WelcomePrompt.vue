@@ -33,13 +33,8 @@
             <p class="fs-6 fs-md-5">Pada setiap permulaan hari, anda juga disarankan menggunakan sedikit masa untuk 'Plan' dahulu segala tugasan yang anda ingin buat.</p>
             <p class="fs-6 fs-md-5"><i>"Semoga Berjaya 😄"</i> - Safwan Zarif di <a href="mailto:">safzardevs@gmail.com</a></p>
           </div>
-           <div class="d-flex w-75 align-items-center justify-content-center mt-4">
-            <select v-model="selectedGoalId" id="goalSelectWelcome" class="w-100 form-select bg-dark text-center text-white border border-white c-pointer" style="background-image: none;" aria-label="Default select example">
-              <option v-if="!selectedGoalId" value="" disabled selected>Set a Goal</option>
-              <option v-for="goal in goalsSelect" :key="goal.id" :value="goal.id">{{ goal.label }}</option>
-            </select>
-            <IconAdjustmentHorizontal :class="{'invisible': !selectedGoalId || selectedGoalId === 'none'}" @click="openGoalSettings" class="ms-2 c-pointer" width="2.0rem" height="2.0rem" />
-          </div>
+          <GoalSelect :id="'goalSelectWelcome'" containerClass="w-75 mt-4" selectClass="w-100 bg-dark" :mode="1"
+            :goalsSelect="goalsSelect" v-model="selectedGoalId" />
         </div>
         <div class="modal-footer d-flex align-items-center justify-content-center">
           <button type="button" class="btn btn-primary" @click="$emit('start-planning')">Mulakan Planning Dahulu</button>
@@ -69,6 +64,7 @@ import { type WelcomePromptProps, type WelcomePromptEmits } from '@/types/compon
 import IconUserCheck from './icons/IconUserCheck.vue'
 import { watch, onMounted, ref } from 'vue'
 import IconAdjustmentHorizontal from './icons/IconAdjustmentHorizontal.vue'
+import GoalSelect from './GoalSelect.vue'
 
 onMounted(() => {
   // Initialize Bootstrap tooltips
@@ -93,9 +89,6 @@ watch(() => props.selectedGoalId, (newVal) => {
 watch(selectedGoalId, (newVal) => {
   emit('update-goal',newVal)
 })
-function openGoalSettings(){
-  return window.showModal(`goal-detail-settings-${selectedGoalId.value}`)
-}
 watch(() => props.userEmail, (newEmail) => {
   var myTooltipEl = document.getElementById('loggedInIndicatorOnModal')
   if(newEmail) new window.bootstrap.Tooltip(myTooltipEl,{offset:[0,8]})

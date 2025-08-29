@@ -25,7 +25,7 @@
       <div class="">
         <div class="d-flex flex-column justify-content-between h-100 p-3">
           <div class="d-flex justify-content-center d-md-none">
-            <svg @click="showModal('-${selectedGoalId.value}-fokus')" :class="targetClass" v-if="mode < 2"
+            <svg @click="showModal('goal-detail-settings-fokus')" :class="targetClass" v-if="mode < 2"
               xmlns="http://www.w3.org/2000/svg" width="45vmin" height="45vmin" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
               class="icon icon-tabler icons-tabler-outline icon-tabler-target">
@@ -70,7 +70,7 @@
           </div>
           <div class="d-flex align-items-center justify-content-center mb-2">
             <h1 class="main-title me-md-3">{{ pageState.bigText }}</h1>
-            <svg @click="showModal('-${selectedGoalId.value}-fokus')" :class="targetClass" v-if="mode < 2"
+            <svg @click="showModal('goal-detail-settings-fokus')" :class="targetClass" v-if="mode < 2"
               xmlns="http://www.w3.org/2000/svg" width="30vmin" height="30vmin" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
               class="icon icon-tabler icons-tabler-outline icon-tabler-target d-none d-md-block">
@@ -127,15 +127,7 @@
               <path d="M13 12l2 0" />
             </svg>
           </div>
-          <div class="d-flex w-100 align-items-center justify-content-center" v-if="mode <= 1">
-            <select v-model="selectedGoalId" id="goalSelectHome"
-              class="w-50 fs-3 form-select bg-focus text-center text-white border border-white c-pointer"
-              style="background-image: none;" aria-label="Default select example">
-              <option v-if="!selectedGoalId" value="" disabled selected class="bg-transparent">Set a Goal</option>
-              <option v-for="goal in goalsSelect" :key="goal.id" :value="goal.id">{{ goal.label }}</option>
-            </select>
-            <IconAdjustmentHorizontal :class="{'invisible': !selectedGoalId || selectedGoalId === 'none'}" @click="openGoalSettings" class="ms-2 c-pointer" width="2.0rem" height="2.0rem" />
-          </div>
+          <GoalSelect :id="'goalSelectNew'" containerClass="w-100" selectClass="w-50 fs-3 bg-focus" :mode="mode" :goalsSelect="goalsSelect" v-model="selectedGoalId" />
           <div class="d-flex align-items-center justify-content-center mt-5">
             <button @click="mode < 2 ? showClock = !showClock : null"
               class="btn d-flex align-items-center justify-content-center"
@@ -209,7 +201,7 @@
       @change-stack="changeStack" @remove-stack="removeStack" @push-stack="pushStack" />
     <TimerOvertimeSettings :timer="timer" />
     <UserSettings :userEmail="userEmail" />
-    <GoalSettings @new-goal="addNewGoal()" :userEmail="userEmail" :goalsList="goalsList" :goalsLabel="goalsLabel" />
+    <GoalSettings :elapsedTime="elapsedTime" @new-goal="addNewGoal()" :userEmail="userEmail" :goalsList="goalsList" :goalsLabel="goalsLabel" />
   </div>
 </template>
 
@@ -247,6 +239,7 @@ import UserSettings from '@/components/UserSettings.vue'
 import GoalSettings from '@/components/GoalSettings.vue'
 import IconUserCheck from '@/components/icons/IconUserCheck.vue'
 import IconAdjustmentHorizontal from '@/components/icons/IconAdjustmentHorizontal.vue'
+import GoalSelect from '@/components/GoalSelect.vue'
 
 let intervalRun: number | undefined
 // --- State ---
@@ -263,6 +256,7 @@ const stack = ref([1, 1, 1, 2])
 const due = ref(0)
 const current = ref(0)
 const startedOn = ref(0)
+const elapsedTime = computed(() => startedOn.value? moment().unix() - startedOn.value : 0)
 const paused_on = ref(0)
 const last_online = ref(0)
 const timer = reactive<TimerConfig>({
@@ -369,6 +363,16 @@ const targetClass = computed(() => {
   if (today.value.isPassed) return 'text-info c-pointer'
   if (today.value.progress > 0) return 'text-warning c-pointer opacity-50'
   return 'text-white c-pointer'
+})
+const trackers = computed(() => {
+  let toReturn: Record<string, ReturnType<typeof useHabitTracker>> = {
+    fokus: focusTracker,
+  }
+  for( let goalId of goalsList.value) {
+    if (goalId == 'fokus') continue
+    toReturn[goalId] = useHabitTracker(goalId)
+  }
+  return toReturn
 })
 
 // --- Firebase composable ---
@@ -862,7 +866,8 @@ function updateHabitTracker(goal?: string) {
   let index = goalsList.value.indexOf(goal)
   if (index === -1) return
   if (!startedOn.value) return
-  const tracker = useHabitTracker(goal)
+  const tracker = trackers.value[goal]
+  if(!tracker) return console.error("Tracker not found", goal)
   let seconds = moment().unix() - startedOn.value
   //console.log("adding", seconds)
   tracker.recordRep(seconds, goalsMap.value[goal])
@@ -997,11 +1002,17 @@ async function addNewGoal() {
   let id = generateId()
   goalsList.value.push(id)
   goalsLabel.value.push(`New Goal`)
-  const tracker = useHabitTracker(id, 'New Goal')
+  await nextTick()
+  const tracker = trackers.value[id]
+  if(!tracker){
+    console.error("Tracker Failed to Init")
+    return id
+  }
+  tracker.label.value = `New Goal`
   tracker.minDaily.value = 300
   tracker.setDailyGoal(focusInSecond.value)
   await nextTick()
-  showModal(`-${selectedGoalId.value}-${id}`)
+  showModal(`goal-detail-settings-${id}`)
   return id
 }
 </script>

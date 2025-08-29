@@ -1,7 +1,7 @@
 <template>
   <SettingModal id="goals-settings" title="Tetapan > Goals">
     <div class="d-flex flex-column justify-content-start w-100">
-      <button v-for="(goal, index) in goalsList" :key="index" @click="openGoalDetail(index)" class="btn btn-outline-light w-100 fs-3 mb-2 d-flex align-items-center justify-content-center">
+      <button v-for="(goal, index) in goalsList" :key="index" @click="openGoalDetail(goal)" class="btn w-100 fs-3 mb-2 d-flex align-items-center justify-content-center" :class="getButtonClass(goal)">
         <IconBullseye width="2.0rem" height="2.0rem" />
         <span class="ms-2">{{ goalsLabel[index] }}</span>
       </button>
@@ -11,7 +11,7 @@
       </button>
     </div>
     <button data-bs-target="#main-settings" data-bs-toggle="modal" data-bs-dismiss="modal"
-      class="btn btn-outline-warning w-100 fs-3 mb-3" aria-label="Close">Kembali
+      class="btn btn-outline-warning w-100 fs-3 mb-3 mt-4" aria-label="Close">Kembali
     </button>
   </SettingModal>
   <template v-for="(goal, index) in goalsList" :key="index">
@@ -20,27 +20,46 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import GoalDetailSettings from './GoalDetailSettings.vue'
 import IconBullseye from './icons/IconBullseye.vue'
 import SettingModal from './SettingModal.vue'
-import IconHexagonPlus from './icons/IconHexagonPlus.vue'
 import IconCircleDashedPlus from './icons/IconCircleDashedPlus.vue'
+import { useHabitTracker } from 'szutils.vue'
 const props = defineProps<{
   userEmail?: string
   goalsList: Array<string>
   goalsLabel: Array<string>
 }>()
+const trackers = computed(() => {
+  let toReturn: Record<string, ReturnType<typeof useHabitTracker>> = {
+  }
+  for( let goal of props.goalsList) {
+    toReturn[goal] = useHabitTracker(goal)
+  }
+  return toReturn
+})
+function getTextClass(goalKey:string){
+  let tracker = trackers.value[goalKey]
+  if(!tracker) return "text-white"
+  const { today } = tracker
+  if(today.value.isSuccess) return 'text-success'
+  if(today.value.isPassed) return 'text-info'
+  if(today.value.progress > 0) return 'text-warning'
+  return 'text-white'
+}
 
-const selectedGoalLabel = ref<string>("")
-const selectedGoalId = ref<string>("")
-
-function openGoalDetail( index:number ) {
-  if(props.goalsLabel[index] === undefined) return
-  if(props.goalsList[index] === undefined) return
-  selectedGoalLabel.value = props.goalsLabel[index]
-  selectedGoalId.value = props.goalsList[index]
-  const goalDetailModal = new (window as any).bootstrap.Modal(document.getElementById(`goal-detail-settings-${selectedGoalId.value}`))
+function getButtonClass(goalKey:string){
+  let tracker = trackers.value[goalKey]
+  if(!tracker) return "btn-outline-light"
+  const { today } = tracker
+  if(today.value.isSuccess) return 'btn-outline-success'
+  if(today.value.isPassed) return 'btn-outline-info'
+  if(today.value.progress > 0) return 'btn-outline-warning'
+  return 'btn-outline-light'
+}
+function openGoalDetail( key:string ) {
+  const goalDetailModal = new (window as any).bootstrap.Modal(document.getElementById(`goal-detail-settings-${key}`))
   goalDetailModal.show()
 }
 

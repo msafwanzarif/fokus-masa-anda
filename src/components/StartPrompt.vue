@@ -17,13 +17,8 @@
         <div class="modal-body d-flex flex-column justify-content-around align-items-center py-5">
           <h2 class="sub-title text-center mb-3">Let's do this!</h2>
           <p class="text-center fs-5">Mulakan dengan Bismillah 😄</p>
-          <div class="d-flex w-75 align-items-center justify-content-center">
-            <select v-model="selectedGoalId" id="goalSelectStart" class="w-100 form-select bg-dark text-center text-white border border-white c-pointer" style="background-image: none;" aria-label="Default select example">
-              <option v-if="!selectedGoalId" value="" disabled selected>Set a Goal</option>
-              <option v-for="goal in goalsSelect" :key="goal.id" :value="goal.id">{{ goal.label }}</option>
-            </select>
-            <IconAdjustmentHorizontal :class="{'invisible': !selectedGoalId || selectedGoalId === 'none'}" @click="openGoalSettings" class="ms-2 c-pointer" width="2.0rem" height="2.0rem" />
-          </div>
+          <GoalSelect :id="'goalSelectStart'" containerClass="w-75" selectClass="w-100 bg-dark" :mode="1"
+            :goalsSelect="goalsSelect" v-model="selectedGoalId" />
         </div>
         <div class="modal-footer d-flex align-items-center justify-content-center">
           <button @click="onStartFocus" type="button" class="btn btn-success">Let's GO!</button>
@@ -37,6 +32,7 @@
 import type { StartPromptProps, StartPromptEmits } from '@/types'
 import { onMounted, ref, watch } from 'vue'
 import IconAdjustmentHorizontal from './icons/IconAdjustmentHorizontal.vue'
+import GoalSelect from './GoalSelect.vue'
 
 const props = defineProps<StartPromptProps>()
 
@@ -52,10 +48,6 @@ watch(() => props.selectedGoalId, (newVal) => {
 watch(selectedGoalId, (newVal) => {
   emit('update-goal',newVal)
 })
-function openGoalSettings(){
-  return window.showModal(`goal-detail-settings-${selectedGoalId.value}`)
-}
-
 const onSettingsClick = () => {
   emit('settings-click')
 }
