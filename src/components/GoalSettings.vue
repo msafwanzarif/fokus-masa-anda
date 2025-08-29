@@ -5,7 +5,7 @@
         <IconBullseye width="2.0rem" height="2.0rem" />
         <span class="ms-2">{{ goalsLabel[index] }}</span>
       </button>
-      <button v-if="goalsList.length < 10" @click="$emit('new-goal')" class="btn btn-outline-light w-100 fs-3 mb-2 d-flex align-items-center justify-content-center">
+      <button v-if="goalsList.length < 10" @click="emit('new-goal')" class="btn btn-outline-light w-100 fs-3 mb-2 d-flex align-items-center justify-content-center">
         <IconCircleDashedPlus width="2.0rem" height="2.0rem" />
         <span class="ms-2">Tambah</span>
       </button>
@@ -15,12 +15,12 @@
     </button>
   </SettingModal>
   <template v-for="(goal, index) in goalsList" :key="index">
-    <GoalDetailSettings @update-label="updateLabel" :userEmail="userEmail" :goalName="goalsLabel[index]??''" :goalId="goal" />
+    <GoalDetailSettings @recordRep="recordRep" :startedOn="startedOn" :currentTime="currentTime" :currentGoal="currentGoal" :currentMode="currentMode" @update-label="updateLabel" :userEmail="userEmail" :goalName="goalsLabel[index]??''" :goalId="goal" />
   </template>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import GoalDetailSettings from './GoalDetailSettings.vue'
 import IconBullseye from './icons/IconBullseye.vue'
 import SettingModal from './SettingModal.vue'
@@ -30,6 +30,14 @@ const props = defineProps<{
   userEmail?: string
   goalsList: Array<string>
   goalsLabel: Array<string>
+  startedOn: number
+  currentMode: number
+  currentGoal: string
+  currentTime: number
+}>()
+const emit = defineEmits<{
+  (e: 'record-rep', id:string ): void
+  (e: 'new-goal'): void
 }>()
 const trackers = computed(() => {
   let toReturn: Record<string, ReturnType<typeof useHabitTracker>> = {
@@ -39,16 +47,6 @@ const trackers = computed(() => {
   }
   return toReturn
 })
-function getTextClass(goalKey:string){
-  let tracker = trackers.value[goalKey]
-  if(!tracker) return "text-white"
-  const { today } = tracker
-  if(today.value.isSuccess) return 'text-success'
-  if(today.value.isPassed) return 'text-info'
-  if(today.value.progress > 0) return 'text-warning'
-  return 'text-white'
-}
-
 function getButtonClass(goalKey:string){
   let tracker = trackers.value[goalKey]
   if(!tracker) return "btn-outline-light"
@@ -68,5 +66,8 @@ function updateLabel(id: string, label: string) {
   if (index !== -1) {
     props.goalsLabel[index] = label
   }
+}
+function recordRep(key:string){
+  emit('record-rep',key)
 }
 </script>

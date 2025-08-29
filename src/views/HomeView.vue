@@ -201,7 +201,7 @@
       @change-stack="changeStack" @remove-stack="removeStack" @push-stack="pushStack" />
     <TimerOvertimeSettings :timer="timer" />
     <UserSettings :userEmail="userEmail" />
-    <GoalSettings :elapsedTime="elapsedTime" @new-goal="addNewGoal()" :userEmail="userEmail" :goalsList="goalsList" :goalsLabel="goalsLabel" />
+    <GoalSettings @recordRep="recordRep" :currentMode="mode" :currentTime="current" :currentGoal="selectedGoalId" :startedOn="startedOn" @new-goal="addNewGoal()" :userEmail="userEmail" :goalsList="goalsList" :goalsLabel="goalsLabel" />
   </div>
 </template>
 
@@ -238,7 +238,6 @@ import type {
 import UserSettings from '@/components/UserSettings.vue'
 import GoalSettings from '@/components/GoalSettings.vue'
 import IconUserCheck from '@/components/icons/IconUserCheck.vue'
-import IconAdjustmentHorizontal from '@/components/icons/IconAdjustmentHorizontal.vue'
 import GoalSelect from '@/components/GoalSelect.vue'
 
 let intervalRun: number | undefined
@@ -256,7 +255,6 @@ const stack = ref([1, 1, 1, 2])
 const due = ref(0)
 const current = ref(0)
 const startedOn = ref(0)
-const elapsedTime = computed(() => startedOn.value? moment().unix() - startedOn.value : 0)
 const paused_on = ref(0)
 const last_online = ref(0)
 const timer = reactive<TimerConfig>({
@@ -347,7 +345,6 @@ function updateGoal(goalId: string) {
 watch(selectedGoalId, async (newVal, oldVal) => {
   if (mode.value == 1 && startedOn.value > 0 && oldVal && oldVal != 'new-goal') {
     updateHabitTracker(oldVal)
-    updateHabitTracker('fokus')
     startedOn.value = moment().unix()
   }
   if (newVal == 'new-goal') {
@@ -657,7 +654,6 @@ function releaseAfter(time = 0) {
 function pauseTimer() {
   paused_on.value = moment().unix()
   if (mode.value == 1) {
-    updateHabitTracker('fokus')
     updateHabitTracker()
   }
   startedOn.value = 0
@@ -827,7 +823,6 @@ async function stopTimer(lastOnline?: number) {
   let m = mode.value
   due.value = 0
   if (mode.value == 1) {
-    updateHabitTracker('fokus')
     updateHabitTracker()
   }
   await nextTick()
@@ -850,7 +845,6 @@ async function stopTimer(lastOnline?: number) {
   return saveToLocal()
 }
 function fokusSemula() {
-  updateHabitTracker('fokus')
   updateHabitTracker()
   startedOn.value = 0
   promptBreak()
@@ -860,21 +854,30 @@ function startPlanning() {
   hideModal('welcome-prompt')
   runTimer(4, timer.planTime * 60 + timer.planSecond)
 }
-
+async function recordRep(key: string) {
+  // if(mode.value == 1) updateHabitTracker('fokus')
+  if(startedOn.value < 1) return
+  updateHabitTracker(key)
+  await nextTick()
+  startedOn.value = moment().unix()
+}
 function updateHabitTracker(goal?: string) {
-  if (!goal) goal = selectedGoalId.value
+  if (!goal || goal == "fokus") goal = selectedGoalId.value
   let index = goalsList.value.indexOf(goal)
   if (index === -1) return
   if (!startedOn.value) return
   const tracker = trackers.value[goal]
-  if(!tracker) return console.error("Tracker not found", goal)
+  if(!tracker) console.error("Tracker not found", goal)
   let seconds = moment().unix() - startedOn.value
+  startedOn.value = 0
   //console.log("adding", seconds)
-  tracker.recordRep(seconds, goalsMap.value[goal])
+
+  if(tracker)  tracker.recordRep(seconds, goalsMap.value[goal])
+  if(mode.value == 1) focusTracker.recordRep(seconds, "Fokus")
 }
 function startBreak() {
   let currentRehat = stack.value.shift() || 1
-  updateHabitTracker('fokus')
+  // updateHabitTracker('fokus')
   updateHabitTracker()
   promptBreak()
   let toAdd = 0
