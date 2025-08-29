@@ -25,7 +25,7 @@
       <div class="">
         <div class="d-flex flex-column justify-content-between h-100 p-3">
           <div class="d-flex justify-content-center d-md-none">
-            <svg @click="showModal('goal-detail-settings-fokus')" :class="targetClass" v-if="mode < 2"
+            <svg @click="showModal('-${selectedGoalId.value}-fokus')" :class="targetClass" v-if="mode < 2"
               xmlns="http://www.w3.org/2000/svg" width="45vmin" height="45vmin" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
               class="icon icon-tabler icons-tabler-outline icon-tabler-target">
@@ -70,7 +70,7 @@
           </div>
           <div class="d-flex align-items-center justify-content-center mb-2">
             <h1 class="main-title me-md-3">{{ pageState.bigText }}</h1>
-            <svg @click="showModal('goal-detail-settings-fokus')" :class="targetClass" v-if="mode < 2"
+            <svg @click="showModal('-${selectedGoalId.value}-fokus')" :class="targetClass" v-if="mode < 2"
               xmlns="http://www.w3.org/2000/svg" width="30vmin" height="30vmin" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
               class="icon icon-tabler icons-tabler-outline icon-tabler-target d-none d-md-block">
@@ -134,7 +134,7 @@
               <option v-if="!selectedGoalId" value="" disabled selected class="bg-transparent">Set a Goal</option>
               <option v-for="goal in goalsSelect" :key="goal.id" :value="goal.id">{{ goal.label }}</option>
             </select>
-            <!-- <IconBullseye @click="openGoalSelect" class="ms-2 c-pointer" width="2.0rem" height="2.0rem" /> -->
+            <IconAdjustmentHorizontal :class="{'invisible': !selectedGoalId || selectedGoalId === 'none'}" @click="openGoalSettings" class="ms-2 c-pointer" width="2.0rem" height="2.0rem" />
           </div>
           <div class="d-flex align-items-center justify-content-center mt-5">
             <button @click="mode < 2 ? showClock = !showClock : null"
@@ -246,6 +246,7 @@ import type {
 import UserSettings from '@/components/UserSettings.vue'
 import GoalSettings from '@/components/GoalSettings.vue'
 import IconUserCheck from '@/components/icons/IconUserCheck.vue'
+import IconAdjustmentHorizontal from '@/components/icons/IconAdjustmentHorizontal.vue'
 
 let intervalRun: number | undefined
 // --- State ---
@@ -343,6 +344,9 @@ const goalsMap = computed(() => {
   return map
 })
 const selectedGoalId = ref("")
+function openGoalSettings(){
+  return showModal(`goal-detail-settings-${selectedGoalId.value}`)
+}
 function updateGoal(goalId: string) {
   selectedGoalId.value = goalId
 }
@@ -997,7 +1001,7 @@ async function addNewGoal() {
   tracker.minDaily.value = 300
   tracker.setDailyGoal(focusInSecond.value)
   await nextTick()
-  showModal(`goal-detail-settings-${id}`)
+  showModal(`-${selectedGoalId.value}-${id}`)
   return id
 }
 </script>

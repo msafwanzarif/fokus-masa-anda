@@ -38,7 +38,7 @@
               <option v-if="!selectedGoalId" value="" disabled selected>Set a Goal</option>
               <option v-for="goal in goalsSelect" :key="goal.id" :value="goal.id">{{ goal.label }}</option>
             </select>
-            <IconBullseye @click="openGoalSelect" class="ms-2 c-pointer" width="2.0rem" height="2.0rem" />
+            <IconAdjustmentHorizontal :class="{'invisible': !selectedGoalId || selectedGoalId === 'none'}" @click="openGoalSettings" class="ms-2 c-pointer" width="2.0rem" height="2.0rem" />
           </div>
         </div>
         <div class="modal-footer d-flex align-items-center justify-content-center">
@@ -68,7 +68,7 @@
 import { type WelcomePromptProps, type WelcomePromptEmits } from '@/types/components'
 import IconUserCheck from './icons/IconUserCheck.vue'
 import { watch, onMounted, ref } from 'vue'
-import IconBullseye from './icons/IconBullseye.vue'
+import IconAdjustmentHorizontal from './icons/IconAdjustmentHorizontal.vue'
 
 onMounted(() => {
   // Initialize Bootstrap tooltips
@@ -93,9 +93,8 @@ watch(() => props.selectedGoalId, (newVal) => {
 watch(selectedGoalId, (newVal) => {
   emit('update-goal',newVal)
 })
-function openGoalSelect() {
-  const goalSelect = document.getElementById('goalSelectWelcome') as HTMLSelectElement
-  goalSelect.showPicker()
+function openGoalSettings(){
+  return window.showModal(`goal-detail-settings-${selectedGoalId.value}`)
 }
 watch(() => props.userEmail, (newEmail) => {
   var myTooltipEl = document.getElementById('loggedInIndicatorOnModal')

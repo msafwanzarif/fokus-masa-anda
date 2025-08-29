@@ -62,7 +62,7 @@
         <span v-else-if="!passedTarget">Jom kita {{ label }}! Luangkan <b>{{ bahasa }}</b> je <span v-if="progress > 0">lagi</span> 😁</span>
       </DurationDisplayFromSeconds></div>
     </div>
-    <button data-bs-target="#main-settings" data-bs-toggle="modal" data-bs-dismiss="modal"
+    <button data-bs-dismiss="modal"
       class="btn btn-outline-warning w-100 fs-3 mb-3" aria-label="Close">Kembali
     </button>
   </SettingModal>

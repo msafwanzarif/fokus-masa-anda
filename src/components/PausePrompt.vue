@@ -24,7 +24,7 @@
                 <option v-if="!selectedGoalId" value="" disabled selected>Set a Goal</option>
                 <option v-for="goal in goalsSelect" :key="goal.id" :value="goal.id">{{ goal.label }}</option>
               </select>
-              <IconBullseye @click="openGoalSelect" class="ms-2 c-pointer" width="2.0rem" height="2.0rem" />
+              <IconAdjustmentHorizontal :class="{'invisible': !selectedGoalId || selectedGoalId === 'none'}" @click="openGoalSettings" class="ms-2 c-pointer" width="2.0rem" height="2.0rem" />
             </div>
         </div>
         <div class="modal-footer d-flex align-items-center justify-content-between">
@@ -52,7 +52,7 @@
 <script setup lang="ts">
 import type { PausePromptProps, PausePromptEmits } from '@/types/components'
 import { onMounted, ref, watch } from 'vue'
-import IconBullseye from './icons/IconBullseye.vue'
+import IconAdjustmentHorizontal from './icons/IconAdjustmentHorizontal.vue'
 
 const props = defineProps<PausePromptProps>()
 const emit = defineEmits<PausePromptEmits>()
@@ -63,9 +63,8 @@ watch(() => props.selectedGoalId, (newVal) => {
 watch(selectedGoalId, (newVal) => {
   emit('update-goal',newVal)
 })
-function openGoalSelect() {
-  const goalSelect = document.getElementById('goalSelectPaused') as HTMLSelectElement
-  goalSelect.showPicker()
+function openGoalSettings(){
+  return window.showModal(`goal-detail-settings-${selectedGoalId.value}`)
 }
 onMounted(() => {
   //console.log("pause",props.goalsSelect)
