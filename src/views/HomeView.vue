@@ -328,11 +328,11 @@ const pageState = ref<PageState>({} as PageState)
 const goalsList = ref(["fokus"])
 const goalsLabel = ref(["Fokus"])
 const goalsSelect = computed(() => {
-  let list = goalsList.value.map((goal, index) => ({
+  let list = [{id:"none", label:"Lain lain"} ,...goalsList.value.map((goal, index) => ({
     id: goal,
     label: goalsLabel.value[index]
-  })).filter(goal => goal.id != "fokus")
-  if (list.length < 9) list.push({ id: "new-goal", label: "Add a new Goal" })
+  })).filter(goal => goal.id != "fokus")]
+  if (list.length < 10) list.push({ id: "new-goal", label: "Tambah Goal Baharu" })
   return list
 })
 const goalsMap = computed(() => {
