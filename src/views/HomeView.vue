@@ -585,8 +585,12 @@ watch(simpleStack, (newVal) => {
     timer.stack = newStack
   }
 })
-watch(paused_on, (newVal) => {
-  if (newVal) promptPause()
+watch(paused_on, async (newVal) => {
+  if (newVal) showModal('pause-prompt')
+  else {
+    await nextTick()
+    hideModal('pause-prompt')
+  }
 })
 
 // --- Methods ---
@@ -640,12 +644,12 @@ function promptFocus(close = false) {
 function showModal(id: string) {
   const myModalEl = document.querySelector(`#${id}`) as HTMLElement | null
   if (!myModalEl) return
-  (window as any).bootstrap.Modal.getOrCreateInstance(myModalEl).show()
+  window.bootstrap.Modal.getOrCreateInstance(myModalEl).show()
 }
 function hideModal(id: string) {
   const myModalEl = document.querySelector(`#${id}`) as HTMLElement | null
   if (!myModalEl) return
-  (window as any).bootstrap.Modal.getOrCreateInstance(myModalEl).hide()
+  window.bootstrap.Modal.getOrCreateInstance(myModalEl).hide()
 }
 function releaseAfter(time = 0) {
   if (!time) time = timer.extra_pad * 1000
@@ -717,19 +721,17 @@ function getFromLocal(checked = 0) {
     if (!useLocal) return showModal("user-settings")
   }
   let data = localStorage.getItem('fokus-data')
+  let parsed
   if (data) {
+    parsed = JSON.parse(data)
     loading.value = true
-    let parsed = JSON.parse(data)
     const { mode: m, showClock: sc, nextReduce: nr, stack: st, due: d, paused_on: po, last_online: lo, timer: t } = parsed
     mode.value = m
     showClock.value = sc
     nextReduce.value = nr
     stack.value = st
-    paused_on.value = po
-    due.value = d
     if (parsed.goals) goalsList.value = parsed.goals
     if (parsed.goalsLabel) goalsLabel.value = parsed.goalsLabel
-    if (parsed.started_on) startedOn.value = parsed.started_on
     if (parsed.selectedGoalId) selectedGoalId.value = parsed.selectedGoalId
     Object.assign(timer, t)
     last_online.value = lo
@@ -754,57 +756,58 @@ function getFromLocal(checked = 0) {
   let hour = moment().hour()
   let startOfDay = moment().startOf('day').add(hour < 6 ? -18 : 6, 'hours').unix()
   if (last_online.value < startOfDay) return runStartOfDay()
+  paused_on.value = parsed.paused_on
+  due.value = parsed.due
+  if (parsed.started_on) startedOn.value = parsed.started_on
 }
 function getFromFirebase(data: any) {
-  if (data) {
-    loading.value = true
-    const { mode: m, showClock: sc, nextReduce: nr, stack: st, due: d, paused_on: po, last_online: lo, timer: t } = data
-    mode.value = m
-    showClock.value = sc
-    nextReduce.value = nr
-    stack.value = st
-    paused_on.value = po
-    if(!po){
-      hideModal('pause-prompt')
-      if(d){
-        if(m == 1) hideModal('break-prompt')
-        else hideModal('focus-prompt')
-        hideModal('welcome-prompt')
-        hideModal('startPrompt')
-      }
-    } 
-    due.value = d
-    if(!d) {
-      hideModal('focus-prompt')
-      hideModal('break-prompt')
-    }
-    if (data.goals) goalsList.value = data.goals
-    if (data.goalsLabel) goalsLabel.value = data.goalsLabel
-    if (data.started_on) startedOn.value = data.started_on
-    if (data.selectedGoalId) selectedGoalId.value = data.selectedGoalId
-    Object.assign(timer, t)
-    last_online.value = lo
-    if (t.focusSecond === undefined) {
-      timer.focusSecond = 0
-      timer.breakSecond = [0, 0, 0]
-    }
-    if (t.planTime === undefined) {
-      timer.planTime = 15
-      timer.planSecond = 0
-    }
-    if (t.focusTime === undefined) {
-      timer.focusTime = t.focus ? t.focus : 25
-    }
-    let last2Hour = moment().subtract(2, 'hours').unix()
-    if (d && !po && d < last2Hour) stopTimer(lo)
-    setTimeout(() => {
-      loading.value = false
-    }, 500)
+  loading.value = true
+  const { mode: m, showClock: sc, nextReduce: nr, stack: st, due: d, paused_on: po, last_online: lo, timer: t } = data
+  mode.value = m
+  showClock.value = sc
+  nextReduce.value = nr
+  stack.value = st
+  if (data.goals) goalsList.value = data.goals
+  if (data.goalsLabel) goalsLabel.value = data.goalsLabel
+  if (data.selectedGoalId) selectedGoalId.value = data.selectedGoalId
+  Object.assign(timer, t)
+  last_online.value = lo
+  if (t.focusSecond === undefined) {
+    timer.focusSecond = 0
+    timer.breakSecond = [0, 0, 0]
   }
+  if (t.planTime === undefined) {
+    timer.planTime = 15
+    timer.planSecond = 0
+  }
+  if (t.focusTime === undefined) {
+    timer.focusTime = t.focus ? t.focus : 25
+  }
+  let last2Hour = moment().subtract(2, 'hours').unix()
+  if (d && !po && d < last2Hour) stopTimer(lo)
+  setTimeout(() => {
+    loading.value = false
+  }, 500)
   if (!last_online.value) return runStartOfDay()
   let hour = moment().hour()
   let startOfDay = moment().startOf('day').add(hour < 6 ? -18 : 6, 'hours').unix()
   if (last_online.value < startOfDay) return runStartOfDay()
+  paused_on.value = po
+  if(!po){
+    hideModal('pause-prompt')
+    if(d){
+      if(m == 1) hideModal('break-prompt')
+      else hideModal('focus-prompt')
+      hideModal('welcome-prompt')
+      hideModal('startPrompt')
+    }
+  } 
+  due.value = d
+  if(!d) {
+    hideModal('focus-prompt')
+    hideModal('break-prompt')
+  }
+  if (data.started_on) startedOn.value = data.started_on
 }
 function runStartOfDay() {
   welcome.title = 'Selamat Datang'
@@ -831,6 +834,7 @@ async function stopTimer(lastOnline?: number) {
   releaseAfter()
   if (paused_on.value) {
     paused_on.value = 0
+    await nextTick()
     hideModal('pause-prompt')
     if (lastOnline) return saveToLocal(lastOnline)
     return saveToLocal()
