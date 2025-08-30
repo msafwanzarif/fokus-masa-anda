@@ -133,7 +133,7 @@ watch(currentGoal, (goal) => {
   goalInput.value = goal
 }, { immediate: true })
 
-const isActive = computed(() => props.currentGoal === props.goalId || (props.goalId == "fokus" && props.currentMode == 1))
+const isActive = computed(() => props.currentMode == 1 && ((props.currentGoal === props.goalId) || (props.goalId == "fokus")))
 const elapsed = computed(() => props.startedOn > 0 ? props.currentTime - props.startedOn : 0)
 const toAdd = computed(() => isActive.value && elapsed.value > 0 ? props.currentTime - props.startedOn : 0)
 const progress = computed(() => today.value.progress + toAdd.value)
