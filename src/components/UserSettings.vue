@@ -41,7 +41,7 @@ async function loginWithGoogle() {
 async function logout() {
   try {
     await doc.logout()
-    localStorage.setItem("loggedInAs", "")
+    localStorage.removeItem("loggedInAs")
   } catch (error) {
     console.error("Logout failed:", error)
     // Handle logout failure (e.g., show an error message to the user)
