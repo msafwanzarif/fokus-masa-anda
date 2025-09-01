@@ -353,7 +353,7 @@ watch(selectedGoalId, async (newVal, oldVal) => {
   }
 })
 
-const focusTracker = useHabitTracker('fokus')
+const focusTracker = useHabitTracker('fokus',{ skipWatcher:true })
 const { today } = focusTracker
 const targetClass = computed(() => {
   if (today.value.isSuccess) return 'text-success c-pointer'
@@ -367,7 +367,7 @@ const trackers = computed(() => {
   }
   for( let goalId of goalsList.value) {
     if (goalId == 'fokus') continue
-    toReturn[goalId] = useHabitTracker(goalId)
+    toReturn[goalId] = useHabitTracker(goalId,{ skipWatcher:true })
   }
   return toReturn
 })
@@ -593,7 +593,7 @@ watch(paused_on, async (newVal) => {
   }
 })
 
-// --- Methods ---
+const isLoaded = ref(false)
 function setupSync() {
   if (!doc.isSet.value || !userEmail.value) return
   doc.changeDoc(`fokus-settings/${userEmail.value}`)
@@ -601,6 +601,7 @@ function setupSync() {
   doc.getData().then((data: any) => {
     if (data) getFromFirebase(data)
     else saveToFirebase()
+    isLoaded.value = true
   })
 }
 function enableTooltip() {
@@ -622,12 +623,6 @@ function promptChange(m: number) {
 function promptSetting(): void {
   var myModalEl = document.querySelector('#main-settings')
   var modal = window.bootstrap.Modal.getOrCreateInstance(myModalEl)
-  modal.toggle()
-}
-
-function promptPause() {
-  var myModalEl = document.querySelector('#pause-prompt')
-  var modal = (window as any).bootstrap.Modal.getOrCreateInstance(myModalEl)
   modal.toggle()
 }
 function promptBreak() {
@@ -674,6 +669,7 @@ function resumeTimer() {
   hideModal('pause-prompt')
 }
 function saveToLocal(lastOnline?: number) {
+  if(!isLoaded.value) return
   if (lastOnline === undefined) lastOnline = moment().unix()
   last_online.value = lastOnline
   let data = {
@@ -759,6 +755,7 @@ function getFromLocal(checked = 0) {
   paused_on.value = parsed.paused_on
   due.value = parsed.due
   if (parsed.started_on) startedOn.value = parsed.started_on
+  isLoaded.value = true
 }
 function getFromFirebase(data: any) {
   loading.value = true
@@ -818,6 +815,7 @@ function runStartOfDay() {
   welcome.dayLine = moment().format('dddd, D MMMM YYYY')
   welcome.motivationQuote = 'Setiap perjalanan menuju kejayaan pasti ada onak dan duri. Teruskan usaha dan semangat, dan jangan sesekali menyerah. Kerana penghujungnya ada kemanisan yang menanti.'
   showModal('welcome-prompt')
+  isLoaded.value = true
 }
 function resetStack() {
   stack.value = [...timer.stack]
@@ -881,7 +879,6 @@ function updateHabitTracker(goal?: string) {
 }
 function startBreak() {
   let currentRehat = stack.value.shift() || 1
-  // updateHabitTracker('fokus')
   updateHabitTracker()
   promptBreak()
   let toAdd = 0
@@ -983,27 +980,6 @@ onMounted(() => {
   }
   setTicking()
 })
-
-
-function isIdTokenValid(idToken: string) {
-  if (!idToken) return false;
-  const parts = idToken.split('.');
-  if (parts.length < 2 || !parts[1]) return false;
-  const payload = JSON.parse(atob(parts[1]));
-  const now = Math.floor(Date.now() / 1000);
-  return payload.exp > now;
-}
-
-async function refreshIdToken(refreshToken: string) {
-  const apiKey = import.meta.env.VITE_FIREBASE_API_KEY; // from Firebase project config
-  const res = await fetch(`https://securetoken.googleapis.com/v1/token?key=${apiKey}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `grant_type=refresh_token&refresh_token=${refreshToken}`
-  });
-  const data = await res.json();
-  return data; // contains id_token, refresh_token, expires_in, etc.
-}
 
 async function addNewGoal() {
   let id = generateId()

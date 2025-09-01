@@ -69,10 +69,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch, ref, onMounted } from 'vue'
+import { computed, watch, ref, onMounted, nextTick } from 'vue'
 import SettingModal from './SettingModal.vue'
 import { useFirebaseDoc, useHabitTracker, DurationDisplayFromSeconds } from 'szutils.vue'
 import { useDebouncedRef } from '@/composables/useDebouncedRef'
+import type { HabitTrackerJSON } from 'node_modules/szutils.vue/dist/composables/useHabitTracker/types'
 const props = defineProps<{
   userEmail?: string
   goalName: string,
@@ -89,19 +90,30 @@ const emit = defineEmits<{
 
 const goalUniqueId = computed(() => isConnected.value ? `${props.userEmail}-fokus-goal-${props.goalId}` : `fokus-goal-${props.goalId}`)
 const isConnected = computed(() => !!props.userEmail)
+const isLoaded = ref(false)
+const shouldSync = computed(() => isConnected.value && isLoaded.value)
 function onUpdate(data: any) {
   //console.log("Data got", data)
   //updateGoal()
 }
 
 let docPath = "fokus-settings/anon"
-if (isConnected.value) docPath = `fokus-settings/${props.userEmail}/goals/${props.goalId}`
 const doc = useFirebaseDoc({ onUpdate }, docPath)
 
-const tracker = useHabitTracker(props.goalId, props.goalName, isConnected, doc)
-watch(isConnected, () => {
-  if (isConnected.value) doc.changeDoc(`fokus-settings/${props.userEmail}/goals/${props.goalId}`)
-})
+const tracker = useHabitTracker(props.goalId, { initialLabel:props.goalName, syncWithFirebase:shouldSync, firebaseDoc: doc})
+watch(isConnected, async (connected) => {
+  if (connected){
+    doc.changeDoc(`fokus-settings/${props.userEmail}/goals/${props.goalId}`)
+    await nextTick()
+    let data = await doc.getData()
+    if(data) tracker.loadFromJSON(data as HabitTrackerJSON)
+    isLoaded.value = true
+  }
+  else {
+    isLoaded.value = false
+    getFromLocal()
+  }
+},{ immediate:true })
 
 const { label, minDaily, today } = tracker
 
@@ -146,22 +158,35 @@ const targetProgressPercentage = computed(() => (passedTarget.value? 100 : (goal
 
 watch(passedMinimum, (newVal) => {
   if (newVal && toAdd.value > 0) {
-    emit('record-rep', props.goalId)
+    if(isLoaded.value) emit('record-rep', props.goalId)
   }
 })
 watch(passedTarget, (newVal) => {
   if (newVal && toAdd.value > 0) {
-    emit('record-rep', props.goalId)
+    if(isLoaded.value) emit('record-rep', props.goalId)
   }
 })
 
 onMounted(() => {
+  //getFromLocal()
+})
+
+function getFromLocal(checked = 0){
+  if (isConnected.value) return
+  console.log("getting from local")
+  let email = localStorage.getItem('loggedInAs')
+  if (email) {
+    if (checked < 5) return setTimeout(() => { getFromLocal(checked++) }, 500)
+    let useLocal = prompt('You are no longer logged in as ' + email + '. Do you want to use local data? Click Cancel to go to user settings.', 'Continue with Local Data')
+    if (!useLocal) return window.showModal("user-settings")
+  }
   let isInLocalStorage = localStorage.getItem(goalUniqueId.value)
   if (isInLocalStorage) {
     let parsed = JSON.parse(isInLocalStorage)
     tracker.loadFromJSON(parsed)
   }
-})
+  isLoaded.value = true
+}
 
 watch(() => tracker.toJSON(), (newData) => {
   localStorage.setItem(goalUniqueId.value, JSON.stringify(tracker.toJSON(true)))

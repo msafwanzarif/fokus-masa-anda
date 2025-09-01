@@ -81,7 +81,7 @@ const trackers = computed(() => {
   }
   for( let goal of props.goalsSelect) {
     if (goal.id == 'none' || goal.id == 'new-goal') continue
-    toReturn[goal.id] = useHabitTracker(goal.id)
+    toReturn[goal.id] = useHabitTracker(goal.id,{ skipWatcher:true })
   }
   return toReturn
 })
