@@ -59,6 +59,11 @@
       if (!myModalEl) return
       window.bootstrap.Modal.getOrCreateInstance(myModalEl).show()
     }
+    function hideModal(id) {
+      const myModalEl = document.querySelector(`#${id}`)
+      if (!myModalEl) return
+      window.bootstrap.Modal.getOrCreateInstance(myModalEl).hide()
+    }
   </script>
 </body>
 
