@@ -2,7 +2,7 @@
   <SettingModal :id="`goal-detail-settings-${goalId}`" :title="`Tetapan > Goals > ${goalName}`">
     <div class="d-flex flex-column justify-content-start w-100">
       <div class="row mb-2">
-        <button class="btn btn-outline-light fs-4 col-4 d-flex align-items-center justify-content-center" disabled>
+        <button class="btn btn-outline-light fs-4 col-5 d-flex align-items-center justify-content-center" disabled>
           <span class="ms-2">Label</span>
         </button>
         <div class="col m-0 p-0">
@@ -10,27 +10,24 @@
         </div>
       </div>
       <div class="row mb-2">
-        <button class="btn btn-outline-light fs-4 col-8 d-flex align-items-center justify-content-center" disabled>
-          <span class="ms-2">Minimum (Saat)</span>
+        <button class="btn btn-outline-light fs-4 col-5 d-flex align-items-center justify-content-center" disabled>
+          <span class="ms-2">Minimum {{ goalName }} </span>
         </button>
-        <div class="col m-0 p-0">
-          <input type="number" v-model="minDailyState" class="form-control bg-dark text-white fs-4 border border-light"
-            min="1">
-          <div class="fs-6 ms-2">* {{ minDailyState }} saat = <DurationDisplayFromSeconds :seconds="minDailyState"
+        <button class="btn btn-outline-light fs-4 col d-flex align-items-center justify-content-between" @click="setMinimum()">
+          <DurationDisplayFromSeconds :seconds="minDailyState"
               v-slot="{ bahasa }">{{ bahasa }}</DurationDisplayFromSeconds>
-          </div>
-        </div>
+          <IconClockEdit width="2.0rem" height="2.0rem" class="ms-2" />
+        </button>
       </div>
       <div class="row mb-2">
-        <button class="btn btn-outline-light fs-4 col-8 d-flex align-items-center justify-content-center" disabled>
-          <span class="ms-2">Target (Saat)</span>
+        <button class="btn btn-outline-light fs-4 col-5 d-flex align-items-center justify-content-center" disabled>
+          <span class="ms-2">Target {{ goalName }} </span>
         </button>
-        <div class="col m-0 p-0">
-          <input type="number" v-model="goalInput" class="form-control bg-dark text-white fs-4 border border-light"
-            min="1">
-          <span class="fs-6 ms-2 mb-0">* {{ goalInput }} saat = <DurationDisplayFromSeconds :seconds="goalInput"
-              v-slot="{ bahasa }">{{ bahasa }}</DurationDisplayFromSeconds></span>
-        </div>
+        <button class="btn btn-outline-light fs-4 col d-flex align-items-center justify-content-between" @click="setTarget()">
+          <DurationDisplayFromSeconds :seconds="goalInput"
+              v-slot="{ bahasa }">{{ bahasa }}</DurationDisplayFromSeconds>
+          <IconClockEdit width="2.0rem" height="2.0rem" class="ms-2" />
+        </button>
       </div>
       <!-- <DurationDisplayFromSeconds :seconds="today.progress" v-slot="{ bahasa }">{{ bahasa }}</DurationDisplayFromSeconds> -->
       <hr>
@@ -66,6 +63,7 @@
       class="btn btn-outline-warning w-100 fs-3 mb-3" aria-label="Close"> Kembali
     </button>
   </SettingModal>
+  <DurationPicker ref="goalDurationPicker" :id="`goal-duration-picker-${goalId}`" :label="durationLabel" :onSelect="onSelectDuration" :minDuration="minDuration" :maxDuration="maxDuration" />
 </template>
 
 <script setup lang="ts">
@@ -74,6 +72,9 @@ import SettingModal from './SettingModal.vue'
 import { useFirebaseDoc, useHabitTracker, DurationDisplayFromSeconds } from 'szutils.vue'
 import { useDebouncedRef } from '@/composables/useDebouncedRef'
 import type { HabitTrackerJSON } from 'node_modules/szutils.vue/dist/composables/useHabitTracker/types'
+import DurationPicker from './DurationPicker.vue'
+import IconTarget from './icons/IconTarget.vue'
+import IconClockEdit from './icons/IconClockEdit.vue'
 const props = defineProps<{
   userEmail?: string
   goalName: string,
@@ -191,4 +192,26 @@ function getFromLocal(checked = 0){
 watch(() => tracker.toJSON(), (newData) => {
   localStorage.setItem(goalUniqueId.value, JSON.stringify(tracker.toJSON(true)))
 }, { deep: true })
+
+const goalDurationPicker = ref<InstanceType<typeof DurationPicker> | null>(null)
+const minDuration = ref(5) // 5 seconds
+const maxDuration = ref(15 * 60 * 60) // 15 hours
+const durationLabel = ref("")
+const onSelectDuration = ref((n: number) => {})
+
+function setMinimum(){
+  durationLabel.value = `Minimum ${label.value} dalam sehari`
+  onSelectDuration.value = (n: number) => {
+    minDailyState.value = n
+  }
+  goalDurationPicker.value?.resetAndTrigger(minDailyState.value)
+}
+
+function setTarget(){
+  durationLabel.value = `Target ${label.value} dalam sehari`
+  onSelectDuration.value = (n: number) => {
+    goalInput.value = n
+  }
+  goalDurationPicker.value?.resetAndTrigger(goalInput.value)
+}
 </script>
