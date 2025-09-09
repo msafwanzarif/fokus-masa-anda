@@ -11,7 +11,7 @@
       </div>
       <div class="row mb-2">
         <button class="btn btn-outline-light fs-4 col-5 d-flex align-items-center justify-content-center" disabled>
-          <span class="ms-2">Minimum {{ goalName }} </span>
+          <span class="ms-2">Minimum</span>
         </button>
         <button class="btn btn-outline-light fs-4 col d-flex align-items-center justify-content-between" @click="setMinimum()">
           <DurationDisplayFromSeconds :seconds="minDailyState"
@@ -21,7 +21,7 @@
       </div>
       <div class="row mb-2">
         <button class="btn btn-outline-light fs-4 col-5 d-flex align-items-center justify-content-center" disabled>
-          <span class="ms-2">Target {{ goalName }} </span>
+          <span class="ms-2">Target </span>
         </button>
         <button class="btn btn-outline-light fs-4 col d-flex align-items-center justify-content-between" @click="setTarget()">
           <DurationDisplayFromSeconds :seconds="goalInput"
@@ -73,8 +73,8 @@ import { useFirebaseDoc, useHabitTracker, DurationDisplayFromSeconds } from 'szu
 import { useDebouncedRef } from '@/composables/useDebouncedRef'
 import type { HabitTrackerJSON } from 'node_modules/szutils.vue/dist/composables/useHabitTracker/types'
 import DurationPicker from './DurationPicker.vue'
-import IconTarget from './icons/IconTarget.vue'
 import IconClockEdit from './icons/IconClockEdit.vue'
+import { useGlobalLoading } from '@/composables/useGlobalLoading'
 const props = defineProps<{
   userEmail?: string
   goalName: string,
@@ -92,6 +92,8 @@ const emit = defineEmits<{
 const goalUniqueId = computed(() => isConnected.value ? `${props.userEmail}-fokus-goal-${props.goalId}` : `fokus-goal-${props.goalId}`)
 const isConnected = computed(() => !!props.userEmail)
 const isLoaded = ref(false)
+const isLoading = computed(() => !isLoaded.value)
+useGlobalLoading(isLoading)
 const shouldSync = computed(() => isConnected.value && isLoaded.value)
 function onUpdate(data: any) {
   //console.log("Data got", data)

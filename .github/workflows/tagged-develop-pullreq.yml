@@ -1,0 +1,36 @@
+name: Auto Branch Sync
+
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  contents: write  # Required to push to branches
+
+jobs:
+  sync-dev-pwa:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for all branches
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Update dev/pwa branch from develop (keeping dev/pwa changes on conflict)
+        run: |
+          echo "Switching to dev/pwa branch..."
+          git checkout dev/pwa
+          
+          echo "Merging develop into dev/pwa with strategy favoring dev/pwa on conflicts..."
+          git merge origin/develop -X ours --no-edit
+          
+          echo "Pushing updated dev/pwa branch..."
+          git push origin dev/pwa
