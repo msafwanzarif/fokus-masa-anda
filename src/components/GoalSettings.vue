@@ -43,7 +43,7 @@ const trackers = computed(() => {
   let toReturn: Record<string, ReturnType<typeof useHabitTracker>> = {
   }
   for( let goal of props.goalsList) {
-    toReturn[goal] = useHabitTracker(goal)
+    toReturn[goal] = useHabitTracker(goal,{ skipWatcher:true })
   }
   return toReturn
 })
