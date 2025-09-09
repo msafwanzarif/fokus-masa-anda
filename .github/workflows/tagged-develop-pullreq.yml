@@ -9,7 +9,7 @@ permissions:
   contents: write  # Required to push to branches
 
 jobs:
-  sync-dev-pwa:
+  sync-branches:
     runs-on: ubuntu-latest
     
     steps:
@@ -34,3 +34,14 @@ jobs:
           
           echo "Pushing updated dev/pwa branch..."
           git push origin dev/pwa
+      
+      - name: Update master branch from develop (keeping master changes on conflict)
+        run: |
+          echo "Switching to master branch..."
+          git checkout master
+          
+          echo "Merging develop into master with strategy favoring master on conflicts..."
+          git merge origin/develop -X ours --no-edit
+          
+          echo "Pushing updated master branch..."
+          git push origin master
