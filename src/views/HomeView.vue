@@ -202,6 +202,10 @@
     <TimerOvertimeSettings :timer="timer" />
     <UserSettings :userEmail="userEmail" />
     <GoalSettings @recordRep="recordRep" :currentMode="mode" :currentTime="current" :currentGoal="selectedGoalId" :startedOn="startedOn" @new-goal="addNewGoal()" :userEmail="userEmail" :goalsList="goalsList" :goalsLabel="goalsLabel" />
+    <LoadingModal :show="globalIsLoading">
+      <!-- <p>{{ percentLoaded }} %</p> -->
+      <p>Loading ... Kejap ye 😃</p>
+    </LoadingModal>
   </div>
 </template>
 
@@ -239,6 +243,8 @@ import UserSettings from '@/components/UserSettings.vue'
 import GoalSettings from '@/components/GoalSettings.vue'
 import IconUserCheck from '@/components/icons/IconUserCheck.vue'
 import GoalSelect from '@/components/GoalSelect.vue'
+import LoadingModal from '@/components/LoadingModal.vue'
+import { useGlobalLoading } from '@/composables/useGlobalLoading'
 
 let intervalRun: number | undefined
 // --- State ---
@@ -594,6 +600,9 @@ watch(paused_on, async (newVal) => {
 })
 
 const isLoaded = ref(false)
+const isLoading = computed(() => loading.value || !isLoaded.value)
+const { isLoading: globalIsLoading, percentLoaded } = useGlobalLoading(isLoading,5)
+
 function setupSync() {
   if (!doc.isSet.value || !userEmail.value) return
   doc.changeDoc(`fokus-settings/${userEmail.value}`)
