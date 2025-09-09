@@ -25,8 +25,8 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          source: develop
-          target: dev/pwa
+          base: develop
+          branch: dev/pwa
           title: 'Merge develop (${{ github.ref_name }}) into dev/pwa'
           body: 'Automated PR to merge develop at tag ${{ github.ref_name }} into dev/pwa.'
           draft: false
@@ -35,8 +35,8 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          source: develop
-          target: master
+          base: develop
+          branch: master
           title: 'Merge develop (${{ github.ref_name }}) into master'
           body: 'Automated PR to merge develop at tag ${{ github.ref_name }} into master.'
           draft: false
