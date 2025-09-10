@@ -93,7 +93,6 @@ const goalUniqueId = computed(() => isConnected.value ? `${props.userEmail}-foku
 const isConnected = computed(() => !!props.userEmail)
 const isLoaded = ref(false)
 const isLoading = computed(() => !isLoaded.value)
-useGlobalLoading(isLoading)
 const shouldSync = computed(() => isConnected.value && isLoaded.value)
 function onUpdate(data: any) {
   //console.log("Data got", data)
@@ -172,6 +171,7 @@ watch(passedTarget, (newVal) => {
 
 onMounted(() => {
   //getFromLocal()
+  useGlobalLoading(isLoading)
 })
 
 function getFromLocal(checked = 0){
