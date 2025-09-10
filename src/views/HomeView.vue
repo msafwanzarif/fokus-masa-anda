@@ -602,7 +602,6 @@ watch(simpleStack, (newVal) => {
 watch(paused_on, async (newVal) => {
   if (newVal) showModal('pause-prompt')
   else {
-    await nextTick()
     hideModal('pause-prompt')
   }
 })
@@ -668,22 +667,28 @@ function releaseAfter(time = 0) {
   setTimeout(() => { wakeLock.release?.() }, time)
 }
 function pauseTimer() {
+  showModal('pause-prompt')
   paused_on.value = moment().unix()
-  if (mode.value == 1) {
-    updateHabitTracker()
-  }
-  startedOn.value = 0
-  saveToLocal()
-  releaseAfter()
+  //await nextTick()
+  setTimeout(() => {
+    if (mode.value == 1) {
+      updateHabitTracker()
+    }
+    startedOn.value = 0
+    saveToLocal()
+    releaseAfter()
+  },500)
 }
 function resumeTimer() {
   let lag = current.value - paused_on.value
   due.value = due.value + lag
   paused_on.value = 0
   startedOn.value = moment().unix()
-  saveToLocal()
-  wakeLock.request?.("screen")
   hideModal('pause-prompt')
+  setTimeout(() => {
+    saveToLocal()
+    wakeLock.request?.("screen")
+  },500)
 }
 function saveToLocal(lastOnline?: number) {
   if(!isLoaded.value) return
@@ -896,8 +901,10 @@ function updateHabitTracker(goal?: string) {
 }
 function startBreak() {
   let currentRehat = stack.value.shift() || 1
-  updateHabitTracker()
   promptBreak()
+  setTimeout(() => {
+    updateHabitTracker()
+  }, 500)
   let toAdd = 0
   if (timer.focus_extra_mode && timer.extra_pad < secondsAfterDue.value) {
     if (timer.focus_extra_mode == 1) {
