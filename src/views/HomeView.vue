@@ -1,9 +1,9 @@
 <template>
   <!-- <div class="position-absolute" style="z-index: 9999;">{{ last_online }}<button class="btn btn-primary" @click="test">Test 1</button><button class="btn btn-primary" @click="test2">Test 2</button></div> -->
   <div class="container-fluid w-100 h-100" :class="pageState.bg">
-    <div class="d-flex flex-column justify-content-between h-100">
+    <div class="d-flex flex-column justify-content-between h-100 top-pad">
       <div class="">
-        <div class="d-flex justify-content-between align-items-center px-md-5 mt-2 mt-md-5">
+        <div class="d-flex justify-content-between align-items-center px-md-5">
           <svg @click="promptSetting" xmlns="http://www.w3.org/2000/svg" width="10vmin" height="10vmin"
             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
             stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-settings c-pointer">
@@ -22,8 +22,8 @@
           </div>
         </div>
       </div>
-      <div class="">
-        <div class="d-flex flex-column justify-content-between h-100 p-3">
+      <div class="flex-grow-1">
+        <div class="d-flex flex-column justify-content-center h-100 p-3">
           <div class="d-flex justify-content-center d-md-none">
             <svg @click="showModal('goal-detail-settings-fokus')" :class="targetClass" v-if="mode < 2"
               xmlns="http://www.w3.org/2000/svg" width="45vmin" height="45vmin" viewBox="0 0 24 24" fill="none"
@@ -127,8 +127,8 @@
               <path d="M13 12l2 0" />
             </svg>
           </div>
-          <GoalSelect :id="'goalSelectNew'" containerClass="w-100" selectClass="w-50 fs-3 bg-focus" :mode="mode" :goalsSelect="goalsSelect" v-model="selectedGoalId" />
-          <div class="d-flex align-items-center justify-content-center mt-5">
+          <GoalSelect :id="'goalSelectNew'" containerClass="w-100" selectClass="w-50 goal-text bg-focus" :mode="mode" :goalsSelect="goalsSelect" v-model="selectedGoalId" />
+          <div class="d-flex align-items-center justify-content-center time-box">
             <button @click="mode < 2 ? showClock = !showClock : null"
               class="btn d-flex align-items-center justify-content-center"
               :class="pageState.timeClass, pageState.countDownClass">
@@ -213,9 +213,17 @@
 .main-title {
   font-size: 20vmin;
 }
-
+.time-box{
+  margin-top: 3.5vmin;
+}
+.focus-time {
+  font-size: 6.5vmin;
+}
 .rest-time {
   font-size: 11.5vmin;
+}
+.top-pad {
+  padding-top: 5vmin;
 }
 </style>
 <script setup lang="ts">
@@ -290,14 +298,14 @@ const states = [
   {
     bg: 'bg-focus',
     bigText: 'Fokus',
-    timeClass: 'fs-1',
+    timeClass: 'focus-time',
     buttonClass: 'btn-outline-info',
     countDownClass: 'btn-outline-info w-75 me-2',
   },
   {
     bg: 'bg-focus',
     bigText: 'Fokus',
-    timeClass: 'fs-1',
+    timeClass: 'focus-time',
     buttonClass: 'btn-outline-info',
     countDownClass: 'btn-outline-info w-75 me-2',
   },

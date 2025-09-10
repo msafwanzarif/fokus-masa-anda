@@ -91,4 +91,7 @@ function openGoalSettings(){
 </script>
 
 <style scoped>
+.goal-text{
+  font-size: 3vmin;
+}
 </style>
