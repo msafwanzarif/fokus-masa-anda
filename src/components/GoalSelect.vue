@@ -4,7 +4,12 @@
       class="form-select text-center border c-pointer"
       style="background-image: none;" aria-label="Default select example">
       <option v-if="!modelValue" value="" disabled selected>Set a Goal</option>
-      <option v-for="goal in goalsSelect" :key="goal.id" :value="goal.id" :class="getTextClass(goal.id)">{{ goal.label }}</option>
+      <!-- <optgroup label="Aktif"> -->
+        <option v-for="goal in activeGoals" :key="goal.id" :value="goal.id" :class="getTextClass(goal.id)">{{ goal.label }}</option>
+      <!-- </optgroup> -->
+      <!-- <optgroup label="Tidak Aktif"> -->
+        <option v-for="goal in inactiveGoals" :key="goal.id" :value="goal.id" :class="getTextClass(goal.id)">{{ goal.label }}</option>
+      <!-- </optgroup> -->
     </select>
     <IconAdjustmentHorizontal :class="{ 'invisible': !modelValue || modelValue === 'none', [iconClass]: true }"
       @click="openGoalSettings" class="ms-2 c-pointer" width="2.0rem" height="2.0rem" />
@@ -71,6 +76,7 @@ function getTextClass(id:string){
   let tracker = trackers.value[id]
   if(!tracker) return `text-white`
   const { today } = tracker
+  if(today.value.isBreak || today.value.isOff) return 'text-secondary'
   if(today.value.isSuccess) return 'text-success'
   if(today.value.isPassed) return 'text-info'
   if(today.value.progress > 0) return 'text-warning'
@@ -85,6 +91,24 @@ const trackers = computed(() => {
   }
   return toReturn
 })
+const activeGoals = computed(() =>{
+  return props.goalsSelect.filter(g => {
+    let tracker = trackers.value[g.id]
+    if (tracker) {
+      return !(tracker.today.value.isOff || tracker.today.value.isBreak)
+    }
+    return true
+  })
+})
+const inactiveGoals = computed(() =>{
+  return props.goalsSelect.filter(g => {
+    let tracker = trackers.value[g.id]
+    if (tracker) {
+      return tracker.today.value.isOff || tracker.today.value.isBreak
+    }
+    return false
+  })
+})
 function openGoalSettings(){
   return window.showModal(`goal-detail-settings-${props.modelValue}`)
 }
@@ -92,6 +116,15 @@ function openGoalSettings(){
 
 <style scoped>
 .goal-text{
-  font-size: 3vmin;
+  font-size: 5vmin;
+}
+.goal-selector-width{
+  width : 70% !important
+}
+@media screen and (min-width: 768px) {
+  .goal-selector-width{
+    width : 50% !important
+  }
+  
 }
 </style>

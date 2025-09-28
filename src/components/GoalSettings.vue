@@ -5,7 +5,7 @@
         <IconBullseye width="2.0rem" height="2.0rem" />
         <span class="ms-2">{{ goalsLabel[index] }}</span>
       </button>
-      <button v-if="goalsList.length < 10" @click="emit('new-goal')" class="btn btn-outline-light w-100 fs-3 mb-2 d-flex align-items-center justify-content-center">
+      <button v-if="goalsList.length < MAX_GOAL_LENGTH" @click="emit('new-goal')" class="btn btn-outline-light w-100 fs-3 mb-2 d-flex align-items-center justify-content-center">
         <IconCircleDashedPlus width="2.0rem" height="2.0rem" />
         <span class="ms-2">Tambah</span>
       </button>
@@ -26,6 +26,7 @@ import IconBullseye from './icons/IconBullseye.vue'
 import SettingModal from './SettingModal.vue'
 import IconCircleDashedPlus from './icons/IconCircleDashedPlus.vue'
 import { useHabitTracker } from 'szutils.vue'
+import { MAX_GOAL_LENGTH } from '@/assets/config.ts'
 const props = defineProps<{
   userEmail?: string
   goalsList: Array<string>

@@ -29,35 +29,49 @@
           <IconClockEdit width="2.0rem" height="2.0rem" class="ms-2" />
         </button>
       </div>
+      <div class="row mb-2">
+        <div class="border border-light rounded fs-4 col-12" disabled>
+          <div class="ms-2 mb-2 text-start">Jadual Mingguan</div>
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <button @click="toggleOffDay(day)" class="btn flex-grow-1 mx-1" v-for="day in 7" :class="offDayRecord.includes(day)?'btn-outline-light opacity-25':'btn-outline-info'"><span class="d-none d-lg-block">{{ WEEKDAY_LABELS[day] }}</span><span class="d-block d-lg-none">{{ WEEKDAY_LABELS[day]?.slice(0, 1) }}</span></button>
+          </div>
+        </div>
+      </div>
       <!-- <DurationDisplayFromSeconds :seconds="today.progress" v-slot="{ bahasa }">{{ bahasa }}</DurationDisplayFromSeconds> -->
-      <hr>
-      <div class="fs-4 mb-2">Progress Hari Ini</div>
-      <div class="progress mt-2" style="height: 2rem;">
-        <div class="progress-bar bg-info" :class="{'progress-bar-striped': passedMinimum}" role="progressbar" :style="{ width: `${minProgressPercentage}%` }" aria-valuenow="25" aria-valuemin="0"
-          aria-valuemax="100"></div>
-      </div>
-      <div class="d-flex align-items-center justify-content-between w-100">
-        <div class="fs-6"><DurationDisplayFromSeconds :seconds="progress" v-slot="{ bahasa }">{{ bahasa }}</DurationDisplayFromSeconds></div>
-        <div class="fs-6"><DurationDisplayFromSeconds :seconds="minDaily" v-slot="{ bahasa }">{{ bahasa }}</DurationDisplayFromSeconds></div>
-      </div>
-      <template v-if="passedMinimum">
+      <template v-if="today.isOff || today.isBreak">
+        <hr>
+        <div class="fs-4">Hari ini tak perlu {{ goalName }} 😉</div>
+      </template>
+      <template v-if="progress > 0 || !(today.isOff || today.isBreak)">
+        <hr>
+        <div class="fs-4 mb-2">Progress Hari Ini</div>
         <div class="progress mt-2" style="height: 2rem;">
-          <div class="progress-bar bg-success" :class="{'progress-bar-striped': passedTarget}" role="progressbar" :style="{ width: `${targetProgressPercentage}%` }" aria-valuenow="25" aria-valuemin="0"
+          <div class="progress-bar bg-info" :class="{'progress-bar-striped': passedMinimum}" role="progressbar" :style="{ width: `${minProgressPercentage}%` }" aria-valuenow="25" aria-valuemin="0"
             aria-valuemax="100"></div>
         </div>
         <div class="d-flex align-items-center justify-content-between w-100">
           <div class="fs-6"><DurationDisplayFromSeconds :seconds="progress" v-slot="{ bahasa }">{{ bahasa }}</DurationDisplayFromSeconds></div>
-          <div class="fs-6"><DurationDisplayFromSeconds :seconds="goalInput" v-slot="{ bahasa }">{{ bahasa }}</DurationDisplayFromSeconds></div>
+          <div class="fs-6"><DurationDisplayFromSeconds :seconds="minDaily" v-slot="{ bahasa }">{{ bahasa }}</DurationDisplayFromSeconds></div>
         </div>
-      </template>
-      <div class="fs-4 mt-2"><DurationDisplayFromSeconds :seconds="passedMinimum?toTarget : toMinimum" v-slot="{ bahasa }">
-        <span v-if="passedTarget">Berjaya capai target! Anda memang terbaik!! 🎉🎉 </span>
-        <template v-else-if="passedMinimum">
-          <div>Tahniah! anda {{ label }} hari ini 👏</div>
-          <span> Teruskan <b>{{ bahasa }} </b> je lagi untuk capai Target!!! 💪🔥</span>
+        <template v-if="passedMinimum">
+          <div class="progress mt-2" style="height: 2rem;">
+            <div class="progress-bar bg-success" :class="{'progress-bar-striped': passedTarget}" role="progressbar" :style="{ width: `${targetProgressPercentage}%` }" aria-valuenow="25" aria-valuemin="0"
+              aria-valuemax="100"></div>
+          </div>
+          <div class="d-flex align-items-center justify-content-between w-100">
+            <div class="fs-6"><DurationDisplayFromSeconds :seconds="progress" v-slot="{ bahasa }">{{ bahasa }}</DurationDisplayFromSeconds></div>
+            <div class="fs-6"><DurationDisplayFromSeconds :seconds="goalInput" v-slot="{ bahasa }">{{ bahasa }}</DurationDisplayFromSeconds></div>
+          </div>
         </template>
-        <span v-else-if="!passedTarget">Jom kita {{ label }}! Luangkan <b>{{ bahasa }}</b> je <span v-if="progress > 0">lagi</span> 😁</span>
-      </DurationDisplayFromSeconds></div>
+        <div class="fs-4 mt-2"><DurationDisplayFromSeconds :seconds="passedMinimum?toTarget : toMinimum" v-slot="{ bahasa }">
+          <span v-if="passedTarget">Berjaya capai target! Anda memang terbaik!! 🎉🎉 </span>
+          <template v-else-if="passedMinimum">
+            <div>Tahniah! anda {{ label }} hari ini 👏</div>
+            <span> Teruskan <b>{{ bahasa }} </b> je lagi untuk capai Target!!! 💪🔥</span>
+          </template>
+          <span v-else-if="!passedTarget">Jom kita {{ label }}! Luangkan <b>{{ bahasa }}</b> je <span v-if="progress > 0">lagi</span> 😁</span>
+        </DurationDisplayFromSeconds></div>
+      </template>
     </div>
     <button data-bs-dismiss="modal"
       class="btn btn-outline-warning w-100 fs-3 mb-3" aria-label="Close"> Kembali
@@ -69,12 +83,13 @@
 <script setup lang="ts">
 import { computed, watch, ref, onMounted, nextTick } from 'vue'
 import SettingModal from './SettingModal.vue'
-import { useFirebaseDoc, useHabitTracker, DurationDisplayFromSeconds } from 'szutils.vue'
+import { useFirebaseDoc, useHabitTracker, DurationDisplayFromSeconds,getDateKey } from 'szutils.vue'
 import { useDebouncedRef } from '@/composables/useDebouncedRef'
 import type { HabitTrackerJSON } from 'node_modules/szutils.vue/dist/composables/useHabitTracker/types'
 import DurationPicker from './DurationPicker.vue'
 import IconClockEdit from './icons/IconClockEdit.vue'
 import { useGlobalLoading } from '@/composables/useGlobalLoading'
+import { WEEKDAY_LABELS } from '@/assets/config.ts'
 const props = defineProps<{
   userEmail?: string
   goalName: string,
@@ -117,7 +132,19 @@ watch(isConnected, async (connected) => {
   }
 },{ immediate:true })
 
-const { label, minDaily, today } = tracker
+const { label, minDaily, today, offDayRanges } = tracker
+const todayKey = getDateKey()
+const offDayRecord = ref<number[]>([])
+
+watch(offDayRanges, (newVal) => {
+  let found = newVal.find(range => range.startDate <= todayKey)
+  if(found) offDayRecord.value = found.days
+  else offDayRecord.value = []
+},{ deep:true })
+
+function toggleOffDay(day:number){
+  tracker.toggleOffDay(day)
+}
 
 const { state:labelState, debounced:debouncedLabel } = useDebouncedRef(label.value, 1000)
 watch(debouncedLabel, (newLabel) => {
