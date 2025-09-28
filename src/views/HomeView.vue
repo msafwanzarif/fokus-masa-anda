@@ -127,7 +127,7 @@
               <path d="M13 12l2 0" />
             </svg>
           </div>
-          <GoalSelect :id="'goalSelectNew'" containerClass="w-100" selectClass="w-50 goal-text bg-focus" :mode="mode" :goalsSelect="goalsSelect" v-model="selectedGoalId" />
+          <GoalSelect :id="'goalSelectNew'" containerClass="w-100" selectClass="goal-selector-width goal-text bg-focus" :mode="mode" :goalsSelect="goalsSelect" v-model="selectedGoalId" />
           <div class="d-flex align-items-center justify-content-center time-box">
             <button @click="mode < 2 ? showClock = !showClock : null"
               class="btn d-flex align-items-center justify-content-center"
@@ -253,6 +253,7 @@ import IconUserCheck from '@/components/icons/IconUserCheck.vue'
 import GoalSelect from '@/components/GoalSelect.vue'
 import LoadingModal from '@/components/LoadingModal.vue'
 import { useGlobalLoading } from '@/composables/useGlobalLoading'
+import { MAX_GOAL_LENGTH } from '@/assets/config'
 
 let intervalRun: number | undefined
 // --- State ---
@@ -339,7 +340,7 @@ const goalsSelect = computed(() => {
     id: goal,
     label: goalsLabel.value[index]
   })).filter(goal => goal.id != "fokus")]
-  if (list.length < 10) list.push({ id: "new-goal", label: "Tambah Goal Baharu" })
+  if (list.length < MAX_GOAL_LENGTH) list.push({ id: "new-goal", label: "Tambah Goal Baharu" })
   return list
 })
 const goalsMap = computed(() => {
