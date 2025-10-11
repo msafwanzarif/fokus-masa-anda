@@ -900,11 +900,25 @@ function updateHabitTracker(goal?: string) {
   if(tracker)  tracker.recordRep(seconds, goalsMap.value[goal])
   if(mode.value == 1) focusTracker.recordRep(seconds, "Fokus")
 }
+function updateHabitTrackerAsync(seconds:number,goal?: string) {
+  if (!goal || goal == "fokus") goal = selectedGoalId.value
+  let index = goalsList.value.indexOf(goal)
+  if (index === -1) return
+  const tracker = trackers.value[goal]
+  if(!tracker) console.error("Tracker not found", goal)
+  //let seconds = moment().unix() - startedOn.value
+  //startedOn.value = 0
+  //console.log("adding", seconds)
+
+  if(tracker)  tracker.recordRep(seconds, goalsMap.value[goal])
+  if(mode.value == 1) focusTracker.recordRep(seconds, "Fokus")
+}
 function startBreak() {
   let currentRehat = stack.value.shift() || 1
   promptBreak()
+  let seconds = moment().unix() - startedOn.value
   setTimeout(() => {
-    updateHabitTracker()
+    updateHabitTrackerAsync(seconds)
   }, 500)
   let toAdd = 0
   if (timer.focus_extra_mode && timer.extra_pad < secondsAfterDue.value) {
