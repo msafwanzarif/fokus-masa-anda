@@ -888,11 +888,12 @@ async function recordRep(key: string) {
 }
 function updateHabitTracker(goal?: string) {
   if (!goal || goal == "fokus") goal = selectedGoalId.value
+  console.log("Updating tracker for", goal)
   let index = goalsList.value.indexOf(goal)
-  if (index === -1) return
+  if (index === -1 && goal!= "none") return
   if (!startedOn.value) return
   const tracker = trackers.value[goal]
-  if(!tracker) console.error("Tracker not found", goal)
+  if(!tracker && goal!= "none") console.error("Tracker not found", goal)
   let seconds = moment().unix() - startedOn.value
   startedOn.value = 0
   //console.log("adding", seconds)
@@ -902,10 +903,11 @@ function updateHabitTracker(goal?: string) {
 }
 function updateHabitTrackerAsync(seconds:number,goal?: string) {
   if (!goal || goal == "fokus") goal = selectedGoalId.value
+  console.log("Updating tracker for Async", goal)
   let index = goalsList.value.indexOf(goal)
-  if (index === -1) return
+  if (index === -1 && goal!= "none") return
   const tracker = trackers.value[goal]
-  if(!tracker) console.error("Tracker not found", goal)
+  if(!tracker && goal!= "none") console.error("Tracker not found", goal)
   //let seconds = moment().unix() - startedOn.value
   //startedOn.value = 0
   //console.log("adding", seconds)
