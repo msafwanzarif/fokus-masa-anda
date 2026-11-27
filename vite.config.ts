@@ -22,18 +22,34 @@ export default defineConfig({
           short_name: 'Fokus',
           start_url: '.',
           display: 'standalone',
-          background_color: '#ffffff',
+          background_color: '#222222',  // splash screen, matches the app background
           theme_color: '#42b883',
           icons: [
+            // transparent: desktop installs, notifications
             {
               src: '/web-app-manifest-192x192.png',
               sizes: '192x192',
-              type: 'image/png'
+              type: 'image/png',
+              purpose: 'any'
             },
             {
               src: '/web-app-manifest-512x512.png',
               sizes: '512x512',
-              type: 'image/png'
+              type: 'image/png',
+              purpose: 'any'
+            },
+            // dark background, padded: Android launcher shapes
+            {
+              src: '/maskable-192x192.png',
+              sizes: '192x192',
+              type: 'image/png',
+              purpose: 'maskable'
+            },
+            {
+              src: '/maskable-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable'
             }
           ],
           "screenshots": [
