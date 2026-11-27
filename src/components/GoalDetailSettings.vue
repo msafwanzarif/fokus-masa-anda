@@ -81,11 +81,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch, ref, onMounted, nextTick } from 'vue'
+import { computed, watch, ref, onMounted, onUnmounted, nextTick } from 'vue'
 import SettingModal from './SettingModal.vue'
 import { useFirebaseDoc, useHabitTracker, DurationDisplayFromSeconds,getDateKey } from 'szutils.vue'
 import { useDebouncedRef } from '@/composables/useDebouncedRef'
-import type { HabitTrackerJSON } from 'node_modules/szutils.vue/dist/composables/useHabitTracker/types'
+import type { HabitTrackerJSON } from 'szutils.vue'
 import DurationPicker from './DurationPicker.vue'
 import IconClockEdit from './icons/IconClockEdit.vue'
 import { useGlobalLoading } from '@/composables/useGlobalLoading'
@@ -178,7 +178,8 @@ const isActive = computed(() => props.currentMode == 1 && ((props.currentGoal ==
 const elapsed = computed(() => props.startedOn > 0 ? props.currentTime - props.startedOn : 0)
 const toAdd = computed(() => isActive.value && elapsed.value > 0 ? props.currentTime - props.startedOn : 0)
 const progress = computed(() => today.value.progress + toAdd.value)
-const passedMinimum = computed(() => progress.value > minDaily.value)
+// same rule as szutils.vue: at least one rep and at least the minimum
+const passedMinimum = computed(() => progress.value > 0 && progress.value >= minDaily.value)
 const toMinimum = computed(() => Math.max(0, minDaily.value - progress.value))
 const passedTarget = computed(() => progress.value >= goalInput.value)
 const toTarget = computed(() => Math.max(0, goalInput.value - progress.value))
@@ -206,9 +207,11 @@ function getFromLocal(checked = 0){
   console.log("getting from local")
   let email = localStorage.getItem('loggedInAs')
   if (email) {
-    if (checked < 5) return setTimeout(() => { getFromLocal(checked++) }, 500)
-    let useLocal = prompt('You are no longer logged in as ' + email + '. Do you want to use local data? Click Cancel to go to user settings.', 'Continue with Local Data')
-    if (!useLocal) return window.showModal("user-settings")
+    // Wait until Firebase has restored (or ruled out) the session; give up after 10s.
+    // (Was checked++, which passed the old value and so retried forever.)
+    if (!doc.authReady.value && checked < 20) return setTimeout(() => { getFromLocal(checked + 1) }, 500)
+    if (isConnected.value) return
+    // HomeView asks the user once whether to continue with local data; each goal doesn't
   }
   let isInLocalStorage = localStorage.getItem(goalUniqueId.value)
   if (isInLocalStorage) {
@@ -218,9 +221,27 @@ function getFromLocal(checked = 0){
   isLoaded.value = true
 }
 
-watch(() => tracker.toJSON(), (newData) => {
+// Keep a local copy. tracker.currentVersion changes on every edit and load, so it's a
+// cheap trigger (a deep toJSON() watcher re-serialised the whole history on each change).
+// Saves are batched and flushed when the page is hidden or the component goes away.
+let localSaveTimer: ReturnType<typeof setTimeout> | undefined
+function saveTrackerToLocal() {
+  clearTimeout(localSaveTimer)
+  localSaveTimer = undefined
   localStorage.setItem(goalUniqueId.value, JSON.stringify(tracker.toJSON(true)))
-}, { deep: true })
+}
+function flushTrackerToLocal() {
+  if (localSaveTimer !== undefined) saveTrackerToLocal()
+}
+watch(tracker.currentVersion, () => {
+  clearTimeout(localSaveTimer)
+  localSaveTimer = setTimeout(saveTrackerToLocal, 500)
+})
+window.addEventListener('pagehide', flushTrackerToLocal)
+onUnmounted(() => {
+  window.removeEventListener('pagehide', flushTrackerToLocal)
+  flushTrackerToLocal()
+})
 
 const goalDurationPicker = ref<InstanceType<typeof DurationPicker> | null>(null)
 const minDuration = ref(5) // 5 seconds

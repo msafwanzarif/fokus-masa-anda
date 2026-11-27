@@ -670,12 +670,13 @@ function releaseAfter(time = 0) {
 function pauseTimer() {
   showModal('pause-prompt')
   paused_on.value = moment().unix()
-  //await nextTick()
+  // Capture now: if this ran inside the timeout, resuming within 500 ms would have its fresh
+  // startedOn wiped (and that focus time lost)
+  const wasFocus = mode.value == 1
+  const goal = selectedGoalId.value
+  const seconds = takeElapsed()
   setTimeout(() => {
-    if (mode.value == 1) {
-      updateHabitTracker()
-    }
-    startedOn.value = 0
+    if (wasFocus) recordFocusTime(seconds, goal, true)
     saveToLocal()
     releaseAfter()
   },500)
@@ -735,7 +736,11 @@ function getFromLocal(checked = 0) {
   if (userEmail.value) return
   let email = localStorage.getItem('loggedInAs')
   if (email) {
-    if (checked < 5) return setTimeout(() => { getFromLocal(checked++) }, 500)
+    // Wait until Firebase has restored (or ruled out) the session before saying the user
+    // is logged out; give up after 10s. (Was checked++, which passed the old value and
+    // so retried forever.)
+    if (!doc.authReady.value && checked < 20) return setTimeout(() => { getFromLocal(checked + 1) }, 500)
+    if (userEmail.value) return
     let useLocal = prompt('You are no longer logged in as ' + email + '. Do you want to use local data? Click Cancel to go to user settings.', 'Continue with Local Data')
     if (!useLocal) return showModal("user-settings")
   }
@@ -886,41 +891,41 @@ async function recordRep(key: string) {
   await nextTick()
   startedOn.value = moment().unix()
 }
-function updateHabitTracker(goal?: string) {
-  if (!goal || goal == "fokus") goal = selectedGoalId.value
-  console.log("Updating tracker for", goal)
-  let index = goalsList.value.indexOf(goal)
-  if (index === -1 && goal!= "none") return
-  if (!startedOn.value) return
-  const tracker = trackers.value[goal]
-  if(!tracker && goal!= "none") console.error("Tracker not found", goal)
-  let seconds = moment().unix() - startedOn.value
+// Takes the time since startedOn (and clears it) right now, so the caller can record it later
+function takeElapsed() {
+  if (!startedOn.value) return 0
+  const seconds = moment().unix() - startedOn.value
   startedOn.value = 0
-  //console.log("adding", seconds)
-
-  if(tracker)  tracker.recordRep(seconds, goalsMap.value[goal])
-  if(mode.value == 1) focusTracker.recordRep(seconds, "Fokus")
+  return seconds
 }
-function updateHabitTrackerAsync(seconds:number,goal?: string) {
+function updateHabitTracker(goal?: string) {
+  const wasFocus = mode.value == 1
   if (!goal || goal == "fokus") goal = selectedGoalId.value
-  console.log("Updating tracker for Async", goal)
+  recordFocusTime(takeElapsed(), goal, wasFocus)
+}
+// Records time on a goal, plus the overall 'fokus' tracker if it was focus time.
+// Callers capture seconds, goal and mode when the user acts: a delayed call that read
+// mode.value itself would see the break mode runTimer has already set, and skip 'fokus'.
+function recordFocusTime(seconds: number, goal: string, wasFocus: boolean) {
+  console.log("Updating tracker for", goal)
+  if (seconds <= 0) return
   let index = goalsList.value.indexOf(goal)
   if (index === -1 && goal!= "none") return
   const tracker = trackers.value[goal]
   if(!tracker && goal!= "none") console.error("Tracker not found", goal)
-  //let seconds = moment().unix() - startedOn.value
-  //startedOn.value = 0
-  //console.log("adding", seconds)
 
   if(tracker)  tracker.recordRep(seconds, goalsMap.value[goal])
-  if(mode.value == 1) focusTracker.recordRep(seconds, "Fokus")
+  if(wasFocus) focusTracker.recordRep(seconds, "Fokus")
 }
 function startBreak() {
   let currentRehat = stack.value.shift() || 1
   promptBreak()
-  let seconds = moment().unix() - startedOn.value
+  const wasFocus = mode.value == 1
+  const goal = selectedGoalId.value
+  const seconds = takeElapsed()
+  // recording is deferred so the modal can close smoothly first
   setTimeout(() => {
-    updateHabitTrackerAsync(seconds)
+    recordFocusTime(seconds, goal, wasFocus)
   }, 500)
   let toAdd = 0
   if (timer.focus_extra_mode && timer.extra_pad < secondsAfterDue.value) {
