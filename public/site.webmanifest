@@ -1,6 +1,6 @@
 {
-  "name": "MyWebSite",
-  "short_name": "MySite",
+  "name": "Fokus ! Manfaatkan Masa Anda",
+  "short_name": "Fokus",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
