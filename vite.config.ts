@@ -13,6 +13,10 @@ export default defineConfig({
   }),
     VitePWA({
         registerType: 'autoUpdate',  // updates SW in background
+        workbox: {
+          // notification click handling (public/notification-sw.js)
+          importScripts: ['notification-sw.js'],
+        },
         manifest: {
           name: 'Fokus ! Manfaatkan Masa Anda',
           short_name: 'Fokus',
