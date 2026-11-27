@@ -28,18 +28,20 @@
   <script>
     const title = "Success"
     const msg = "Message"
-    const icon = "https://i.imgur.com/QSOXDmy.png"
+    // local copy so it still shows offline
+    const icon = "/web-app-manifest-192x192.png"
     const song = "notification.mp3"
     function notifyMe(t = title, m = msg, i = icon) {
       if (!("Notification" in window)) {
         alert("This browser does not support Desktop notifications")
+        return
       }
       if (Notification.permission === "granted") {
         callNotify(t, m, i)
         return
       }
       if (Notification.permission !== "denied") {
-        Notification.requestPermission((permission) => {
+        Notification.requestPermission().then((permission) => {
           if (permission === "granted") {
             callNotify(t, m, i)
           }
@@ -48,11 +50,44 @@
       }
     }
 
-    function callNotify(title, msg, icone) {
-      let noti = new Notification(title, { body: msg, icon: icone })
-      noti.addEventListener("click", (ev) => {
-        window.focus()
-      })
+    // Ask early, from a tap (starting the timer): Android ignores or hides prompts that
+    // aren't triggered by the user, and the timer-end notification never is.
+    function requestNotifyPermission() {
+      if (!("Notification" in window) || Notification.permission !== "default") return
+      Notification.requestPermission().catch(() => {})
+    }
+
+    async function callNotify(title, msg, icone) {
+      const options = {
+        body: msg,
+        icon: icone,
+        tag: "fokus-timer",   // a new alert replaces the previous one
+        renotify: true,       // ...but still sounds/vibrates
+        vibrate: [200, 100, 200],
+      }
+      // Android only shows notifications sent through the service worker
+      // (new Notification() throws there); these also appear on the lock screen.
+      if ("serviceWorker" in navigator) {
+        try {
+          const reg = await navigator.serviceWorker.getRegistration()
+          if (reg && reg.active) {
+            await reg.showNotification(title, options)
+            return
+          }
+        } catch (e) {
+          console.warn("Service worker notification failed, falling back", e)
+        }
+      }
+      // Desktop without a service worker yet (e.g. dev server, first load)
+      try {
+        const noti = new Notification(title, options)
+        noti.addEventListener("click", () => {
+          window.focus()
+          noti.close()
+        })
+      } catch (e) {
+        console.warn("Notifications unavailable", e)
+      }
       // new Audio(song).play()
     }
     function showModal(id) {

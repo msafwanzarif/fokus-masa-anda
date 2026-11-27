@@ -30,7 +30,18 @@ jobs:
           git checkout dev/pwa
           
           echo "Merging develop into dev/pwa with strategy favoring dev/pwa on conflicts..."
-          git merge origin/develop -X ours --no-edit
+          if ! git merge origin/develop -X ours --no-edit; then
+            # -X ours can't settle modify/delete conflicts (e.g. package-lock.json, which
+            # dev/pwa deletes); resolve those the same way: keep dev/pwa's side
+            git diff --name-only --diff-filter=U | while read -r f; do
+              if git cat-file -e "HEAD:$f" 2>/dev/null; then
+                git checkout --ours -- "$f" && git add -- "$f"
+              else
+                git rm -q -- "$f"
+              fi
+            done
+            git commit --no-edit
+          fi
           
           echo "Pushing updated dev/pwa branch..."
           git push origin dev/pwa
