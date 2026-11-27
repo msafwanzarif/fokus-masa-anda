@@ -967,6 +967,8 @@ function startTimer() {
   runTimer(1, focusInSecond.value)
 }
 function runTimer(m: number, interval: number, toAdd = 0) {
+  // runTimer only runs from a button tap, which is when Android allows the permission prompt
+  window.requestNotifyPermission?.()
   mode.value = m
   let seconds = interval
   let reduceMode = m - 1
