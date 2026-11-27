@@ -15,7 +15,8 @@
     </button>
   </SettingModal>
   <template v-for="(goal, index) in goalsList" :key="index">
-    <GoalDetailSettings @recordRep="recordRep" :startedOn="startedOn" :currentTime="currentTime" :currentGoal="currentGoal" :currentMode="currentMode" @update-label="updateLabel" :userEmail="userEmail" :goalName="goalsLabel[index]??''" :goalId="goal" />
+    <!-- only the goal being timed gets the ticking clock, so the others don't re-render every second -->
+    <GoalDetailSettings @recordRep="recordRep" :startedOn="startedOn" :currentTime="isActive(goal) ? currentTime : 0" :currentGoal="currentGoal" :currentMode="currentMode" @update-label="updateLabel" :userEmail="userEmail" :goalName="goalsLabel[index]??''" :goalId="goal" />
   </template>
 </template>
 
@@ -48,6 +49,10 @@ const trackers = computed(() => {
   }
   return toReturn
 })
+// same rule as GoalDetailSettings' isActive
+function isActive(goal: string) {
+  return props.currentMode == 1 && (props.currentGoal === goal || goal === 'fokus')
+}
 function getButtonClass(goalKey:string){
   let tracker = trackers.value[goalKey]
   if(!tracker) return "btn-outline-light"

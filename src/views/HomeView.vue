@@ -735,7 +735,11 @@ function getFromLocal(checked = 0) {
   if (userEmail.value) return
   let email = localStorage.getItem('loggedInAs')
   if (email) {
-    if (checked < 5) return setTimeout(() => { getFromLocal(checked++) }, 500)
+    // Wait until Firebase has restored (or ruled out) the session before saying the user
+    // is logged out; give up after 10s. (Was checked++, which passed the old value and
+    // so retried forever.)
+    if (!doc.authReady.value && checked < 20) return setTimeout(() => { getFromLocal(checked + 1) }, 500)
+    if (userEmail.value) return
     let useLocal = prompt('You are no longer logged in as ' + email + '. Do you want to use local data? Click Cancel to go to user settings.', 'Continue with Local Data')
     if (!useLocal) return showModal("user-settings")
   }
